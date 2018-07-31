@@ -9,7 +9,8 @@ import java.util.Date;
 
 /**
  * 时间片段管理
- * Created by oldmanpushcart@gmail.com on 15/10/3.
+ *
+ * @author Created by oldmanpushcart@gmail.com on 15/10/3.
  */
 public interface TimeFragmentManager {
 

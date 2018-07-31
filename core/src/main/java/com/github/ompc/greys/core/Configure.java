@@ -72,7 +72,9 @@ public class Configure {
         this.greysCore = greysCore;
     }
 
-    // 对象的编码解码器
+    /**
+     * 对象的编码解码器
+     */
     private final static FeatureCodec codec = new FeatureCodec(';', '=');
 
     /**
@@ -83,7 +85,7 @@ public class Configure {
     @Override
     public String toString() {
 
-        final Map<String, String> map = new HashMap<String, String>();
+        final Map<String, String> map = new HashMap<>();
         for (Field field : getFields(Configure.class)) {
 
             // 过滤掉静态类

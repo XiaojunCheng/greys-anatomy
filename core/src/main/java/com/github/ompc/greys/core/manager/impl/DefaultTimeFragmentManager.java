@@ -14,22 +14,26 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 默认时间碎片实现
- * Created by oldmanpushcart@gmail.com on 15/10/3.
+ *
+ * @author Created by oldmanpushcart@gmail.com on 15/10/3.
  */
 public class DefaultTimeFragmentManager implements TimeFragmentManager {
 
-    // 时间碎片序列生成器
+    /**
+     * 时间碎片序列生成器
+     */
     private final AtomicInteger TIME_FRAGMENT_SEQUENCER
             = new AtomicInteger(1000);
 
     private final AtomicInteger PROCESS_SEQUENCER
             = new AtomicInteger(1000);
 
-    // 时间碎片存储
-    private final Map<Integer, TimeFragment> timeFragmentStore
-            = new LinkedHashMap<Integer, TimeFragment>();
+    /**
+     * 时间碎片存储
+     */
+    private final Map<Integer, TimeFragment> timeFragmentStore = new LinkedHashMap<>();
 
-    /*
+    /**
      * 生成下一条序列
      */
     private int nextSequence() {
@@ -61,7 +65,7 @@ public class DefaultTimeFragmentManager implements TimeFragmentManager {
         return new ArrayList<TimeFragment>(timeFragmentStore.values());
     }
 
-    /*
+    /**
      * 搜索匹配
      */
     private boolean is(final TimeFragment timeFragment, final String express) {
@@ -79,7 +83,7 @@ public class DefaultTimeFragmentManager implements TimeFragmentManager {
 
     @Override
     public ArrayList<TimeFragment> search(final String express) {
-        final ArrayList<TimeFragment> timeFragments = new ArrayList<TimeFragment>();
+        final ArrayList<TimeFragment> timeFragments = new ArrayList<>();
         for (TimeFragment timeFragment : timeFragmentStore.values()) {
             if (is(timeFragment, express)) {
                 timeFragments.add(timeFragment);

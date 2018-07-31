@@ -146,7 +146,7 @@ public class GaServer {
 
     }
 
-    /*
+    /**
      * 初始化各种manager
      */
     private void initForManager(final Instrumentation inst) {
@@ -314,7 +314,7 @@ public class GaServer {
                 logger.info("client={}@session[{}] was closed.", socketChannel, session.getSessionId());
                 // closeSocketChannel(key, socketChannel);
                 session.destroy();
-                if(session.isLocked()) {
+                if (session.isLocked()) {
                     session.unLock();
                 }
                 return;

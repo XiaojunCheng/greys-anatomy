@@ -104,24 +104,32 @@ class AsmTryCatchBlock {
  * <h2>线程帧栈与执行帧栈</h2>
  * 编织者在执行通知的时候有两个重要的栈:线程帧栈(threadFrameStack),执行帧栈(frameStack)
  * <p/>
- * Created by oldmanpushcart@gmail.com on 15/5/17.
+ *
+ * @author Created by oldmanpushcart@gmail.com on 15/5/17.
  */
 public class AdviceWeaver extends ClassVisitor implements Opcodes {
 
     private final static Logger logger = LogUtil.getLogger();
 
-    // 线程帧栈堆栈大小
+    /**
+     * 线程帧栈堆栈大小
+     */
     private final static int FRAME_STACK_SIZE = 7;
 
-    // 通知监听器集合
-    private final static Map<Integer/*ADVICE_ID*/, AdviceListener> advices
-            = new ConcurrentHashMap<Integer, AdviceListener>();
+    /**
+     * 通知监听器集合 adviceId->adviceListener
+     */
+    private final static Map<Integer, AdviceListener> advices = new ConcurrentHashMap<>();
 
-    // 线程帧封装
+    /**
+     * 线程帧封装
+     */
     private static final Map<Thread, GaStack<GaStack<Object>>> threadBoundContexts
-            = new ConcurrentHashMap<Thread, GaStack<GaStack<Object>>>();
+            = new ConcurrentHashMap<>();
 
-    // 防止自己递归调用
+    /**
+     * 防止自己递归调用
+     */
     private static final ThreadLocal<Boolean> isSelfCallRef = new ThreadLocal<Boolean>() {
 
         @Override
@@ -162,7 +170,7 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
 
         try {
             // 构建执行帧栈,保护当前的执行现场
-            final GaStack<Object> frameStack = new ThreadUnsafeFixGaStack<Object>(FRAME_STACK_SIZE);
+            final GaStack<Object> frameStack = new ThreadUnsafeFixGaStack<>(FRAME_STACK_SIZE);
             frameStack.push(loader);
             frameStack.push(className);
             frameStack.push(methodName);

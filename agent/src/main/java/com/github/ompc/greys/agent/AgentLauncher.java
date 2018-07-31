@@ -5,11 +5,14 @@ import java.util.jar.JarFile;
 
 /**
  * 代理启动类
- * Created by oldmanpushcart@gmail.com on 15/5/19.
+ *
+ * @author Created by oldmanpushcart@gmail.com on 15/5/19.
  */
 public class AgentLauncher {
 
-    // 全局持有classloader用于隔离greys实现
+    /**
+     * 全局持有classloader用于隔离greys实现
+     */
     private static volatile ClassLoader greysClassLoader;
 
     public static void premain(String args, Instrumentation inst) {
@@ -19,7 +22,6 @@ public class AgentLauncher {
     public static void agentmain(String args, Instrumentation inst) {
         main(args, inst);
     }
-
 
     /**
      * 重置greys的classloader<br/>
@@ -36,10 +38,7 @@ public class AgentLauncher {
         // 如果已经被启动则返回之前启动的classloader
         if (null != greysClassLoader) {
             classLoader = greysClassLoader;
-        }
-
-        // 如果未启动则重新加载
-        else {
+        } else {// 如果未启动则重新加载
             classLoader = new AgentClassLoader(agentJar);
 
             // 获取各种Hook

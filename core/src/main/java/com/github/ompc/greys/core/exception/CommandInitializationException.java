@@ -2,6 +2,7 @@ package com.github.ompc.greys.core.exception;
 
 /**
  * 命令初始化出错
+ * @author
  */
 public class CommandInitializationException extends CommandException {
 

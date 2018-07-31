@@ -42,7 +42,8 @@ import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 
 /**
  * 对类进行通知增强
- * Created by oldmanpushcart@gmail.com on 15/5/17.
+ *
+ * @author Created by oldmanpushcart@gmail.com on 15/5/17.
  */
 public class Enhancer implements ClassFileTransformer {
 
@@ -55,9 +56,10 @@ public class Enhancer implements ClassFileTransformer {
 
     private static final ReflectManager reflectManager = ReflectManager.Factory.getInstance();
 
-    // 类-字节码缓存
-    private final static Map<Class<?>/*Class*/, byte[]/*bytes of Class*/> classBytesCache
-            = new WeakHashMap<Class<?>, byte[]>();
+    /**
+     * 类-字节码缓存 class->bytes of class
+     */
+    private final static Map<Class<?>, byte[]> classBytesCache = new WeakHashMap<>();
 
     /**
      * @param adviceId   通知编号
@@ -76,7 +78,7 @@ public class Enhancer implements ClassFileTransformer {
     }
 
 
-    /*
+    /**
      * 从GreysClassLoader中加载Spy
      */
     private Class<?> loadSpyClassFromGreysClassLoader(final ClassLoader greysClassLoader, final String spyClassName) {
@@ -88,7 +90,7 @@ public class Enhancer implements ClassFileTransformer {
         }
     }
 
-    /*
+    /**
      * 派遣间谍混入对方的classLoader中
      */
     private void spy(final ClassLoader targetClassLoader)
@@ -269,7 +271,7 @@ public class Enhancer implements ClassFileTransformer {
         return null;
     }
 
-    /*
+    /**
      * dump class to file
      */
     private static void dumpClassIfNecessary(String className, byte[] data, EnhancerAffect affect) {
@@ -311,7 +313,7 @@ public class Enhancer implements ClassFileTransformer {
                 || isGreysClass(clazz);
     }
 
-    /*
+    /**
      * 是否过滤Greys加载的类
      */
     private static boolean isSelf(Class<?> clazz) {
@@ -319,7 +321,7 @@ public class Enhancer implements ClassFileTransformer {
                 && isEquals(clazz.getClassLoader(), Enhancer.class.getClassLoader());
     }
 
-    /*
+    /**
      * 是否过滤unsafe类
      */
     private static boolean isUnsafeClass(Class<?> clazz) {
@@ -327,7 +329,7 @@ public class Enhancer implements ClassFileTransformer {
                 && clazz.getClassLoader() == null;
     }
 
-    /*
+    /**
      * 是否过滤目前暂不支持的类
      */
     private static boolean isUnsupportedClass(Class<?> clazz) {
@@ -510,32 +512,24 @@ public class Enhancer implements ClassFileTransformer {
             return affect;
         }
 
-        final ClassFileTransformer getClassByteArrayFileTransformer = new ClassFileTransformer() {
-            @Override
-            public byte[] transform(
-                    ClassLoader loader,
-                    String className,
-                    Class<?> classBeingRedefined,
-                    ProtectionDomain protectionDomain,
-                    byte[] classfileBuffer) throws IllegalClassFormatException {
+        final ClassFileTransformer getClassByteArrayFileTransformer = (loader, className, classBeingRedefined, protectionDomain, classfileBuffer) -> {
 
-                if (classes.contains(classBeingRedefined)) {
-                    affect.getClassInfos().add(new AsmAffect.ClassInfo(
-                            classBeingRedefined,
-                            loader,
-                            classfileBuffer,
-                            protectionDomain
-                    ));
-                    affect.rCnt(1);
-                }
-
-                if (classBytesCache.containsKey(classBeingRedefined)) {
-                    return classBytesCache.get(classBeingRedefined);
-                } else {
-                    return null;
-                }
-
+            if (classes.contains(classBeingRedefined)) {
+                affect.getClassInfos().add(new AsmAffect.ClassInfo(
+                        classBeingRedefined,
+                        loader,
+                        classfileBuffer,
+                        protectionDomain
+                ));
+                affect.rCnt(1);
             }
+
+            if (classBytesCache.containsKey(classBeingRedefined)) {
+                return classBytesCache.get(classBeingRedefined);
+            } else {
+                return null;
+            }
+
         };
 
         try {

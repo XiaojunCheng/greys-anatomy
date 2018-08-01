@@ -4,7 +4,9 @@ import java.io.IOException;
 
 /**
  * 命令处理器
- * Created by oldmanpushcart@gmail.com on 15/5/3.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/5/3
  */
 public interface CommandHandler {
 

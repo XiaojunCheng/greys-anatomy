@@ -43,7 +43,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * 命令处理器
- * Created by oldmanpushcart@gmail.com on 15/5/2.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/5/2
  */
 public class DefaultCommandHandler implements CommandHandler {
 
@@ -61,7 +63,6 @@ public class DefaultCommandHandler implements CommandHandler {
     public void executeCommand(final String line, final Session session) throws IOException {
 
         final SocketChannel socketChannel = session.getSocketChannel();
-
         // 只有输入了有效字符才进行命令解析
         // 否则仅仅重绘提示符
         if (isBlank(line)) {
@@ -139,8 +140,7 @@ public class DefaultCommandHandler implements CommandHandler {
 
     }
 
-
-    /*
+    /**
      * 执行命令
      */
     private void execute(final Session session, final Command command) throws GaExecuteException, IOException {
@@ -154,7 +154,7 @@ public class DefaultCommandHandler implements CommandHandler {
             @Override
             public Printer print(boolean isF, String message) {
 
-                if(isFinishRef.get()) {
+                if (isFinishRef.get()) {
                     return this;
                 }
 
@@ -318,7 +318,7 @@ public class DefaultCommandHandler implements CommandHandler {
 
     }
 
-    /*
+    /**
      * 绘制提示符
      */
     private void reDrawPrompt(Session session, SocketChannel socketChannel, Charset charset, String prompt) throws IOException {
@@ -327,7 +327,7 @@ public class DefaultCommandHandler implements CommandHandler {
         }
     }
 
-    /*
+    /**
      * 输出到网络
      */
     private void write(SocketChannel socketChannel, String message, Charset charset) throws IOException {

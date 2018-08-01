@@ -333,7 +333,7 @@ public class TimeTunnelCommand implements Command {
                 && expend > 0;
     }
 
-    /*
+    /**
      * do search timeFragmentMap
      */
     private RowAction doSearch() {

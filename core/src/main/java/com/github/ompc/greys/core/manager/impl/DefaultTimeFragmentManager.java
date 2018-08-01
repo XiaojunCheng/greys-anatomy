@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * 默认时间碎片实现
@@ -62,7 +63,7 @@ public class DefaultTimeFragmentManager implements TimeFragmentManager {
 
     @Override
     public ArrayList<TimeFragment> list() {
-        return new ArrayList<TimeFragment>(timeFragmentStore.values());
+        return new ArrayList<>(timeFragmentStore.values());
     }
 
     /**
@@ -83,13 +84,7 @@ public class DefaultTimeFragmentManager implements TimeFragmentManager {
 
     @Override
     public ArrayList<TimeFragment> search(final String express) {
-        final ArrayList<TimeFragment> timeFragments = new ArrayList<>();
-        for (TimeFragment timeFragment : timeFragmentStore.values()) {
-            if (is(timeFragment, express)) {
-                timeFragments.add(timeFragment);
-            }
-        }
-        return timeFragments;
+        return timeFragmentStore.values().stream().filter(timeFragment -> is(timeFragment, express)).collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override

@@ -8,20 +8,20 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Greys日志
- * Created by oldmanpushcart@gmail.com on 15/3/8.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/3/8
  */
 public class LogUtil {
 
     private static final Logger logger;
 
     static {
-
         final LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         final JoranConfigurator configurator = new JoranConfigurator();
         configurator.setContext(loggerContext);
         loggerContext.reset();
         try {
-
             configurator.doConfigure(LogUtil.class.getResourceAsStream("/com/github/ompc/greys/core/res/greys-logback.xml"));
         } catch (JoranException e) {
             throw new RuntimeException("load logback config failed, you need restart greys", e);

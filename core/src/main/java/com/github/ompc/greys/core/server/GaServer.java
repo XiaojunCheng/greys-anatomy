@@ -1,6 +1,5 @@
 package com.github.ompc.greys.core.server;
 
-import com.github.ompc.greys.core.ClassDataSource;
 import com.github.ompc.greys.core.Configure;
 import com.github.ompc.greys.core.manager.ReflectManager;
 import com.github.ompc.greys.core.manager.TimeFragmentManager;
@@ -16,11 +15,9 @@ import java.nio.channels.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.github.ompc.greys.core.server.LineDecodeState.READ_CHAR;
@@ -31,76 +28,10 @@ import static java.nio.channels.SelectionKey.OP_READ;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
 /**
- * GaServer操作的附件
- * Created by oldmanpushcart@gmail.com on 15/5/3.
- */
-class GaAttachment {
-
-    private final int bufferSize;
-    private final Session session;
-
-    private LineDecodeState lineDecodeState;
-    private ByteBuffer lineByteBuffer;
-
-
-    GaAttachment(int bufferSize, Session session) {
-        this.lineByteBuffer = ByteBuffer.allocate(bufferSize);
-        this.bufferSize = bufferSize;
-        this.lineDecodeState = READ_CHAR;
-        this.session = session;
-    }
-
-    public LineDecodeState getLineDecodeState() {
-        return lineDecodeState;
-    }
-
-
-    public void setLineDecodeState(LineDecodeState lineDecodeState) {
-        this.lineDecodeState = lineDecodeState;
-    }
-
-    public void put(byte data) {
-        if (lineByteBuffer.hasRemaining()) {
-            lineByteBuffer.put(data);
-        } else {
-            final ByteBuffer newLineByteBuffer = ByteBuffer.allocate(lineByteBuffer.capacity() + bufferSize);
-            lineByteBuffer.flip();
-            newLineByteBuffer.put(lineByteBuffer);
-            newLineByteBuffer.put(data);
-            this.lineByteBuffer = newLineByteBuffer;
-        }
-    }
-
-    public String clearAndGetLine(Charset charset) {
-        lineByteBuffer.flip();
-        final byte[] dataArray = new byte[lineByteBuffer.limit()];
-        lineByteBuffer.get(dataArray);
-        final String line = new String(dataArray, charset);
-        lineByteBuffer.clear();
-        return line;
-    }
-
-    public Session getSession() {
-        return session;
-    }
-
-}
-
-/**
- * 行解码
- */
-enum LineDecodeState {
-
-    // 读字符
-    READ_CHAR,
-
-    // 读换行
-    READ_EOL
-}
-
-/**
  * Greys 服务端<br/>
- * Created by oldmanpushcart@gmail.com on 15/5/2.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/5/2
  */
 public class GaServer {
 
@@ -119,20 +50,16 @@ public class GaServer {
     private final CommandHandler commandHandler;
     private final int javaPid;
     private final Thread jvmShutdownHooker = new Thread("ga-shutdown-hooker") {
-
         @Override
         public void run() {
             GaServer.this._destroy();
         }
     };
 
-    private final ExecutorService executorService = Executors.newCachedThreadPool(new ThreadFactory() {
-        @Override
-        public Thread newThread(Runnable r) {
-            final Thread t = new Thread(r, "ga-command-execute-daemon");
-            t.setDaemon(true);
-            return t;
-        }
+    private final ExecutorService executorService = Executors.newCachedThreadPool(r -> {
+        final Thread t = new Thread(r, "ga-command-execute-daemon");
+        t.setDaemon(true);
+        return t;
     });
 
     private GaServer(int javaPid, Instrumentation inst) {
@@ -151,14 +78,11 @@ public class GaServer {
      */
     private void initForManager(final Instrumentation inst) {
         TimeFragmentManager.Factory.getInstance();
-        ReflectManager.Factory.initInstance(new ClassDataSource() {
-            @Override
-            public Collection<Class<?>> allLoadedClasses() {
-                final Class<?>[] classArray = inst.getAllLoadedClasses();
-                return null == classArray
-                        ? new ArrayList<Class<?>>()
-                        : Arrays.asList(classArray);
-            }
+        ReflectManager.Factory.initInstance(() -> {
+            final Class<?>[] classArray = inst.getAllLoadedClasses();
+            return null == classArray
+                    ? new ArrayList<>()
+                    : Arrays.asList(classArray);
         });
     }
 
@@ -170,7 +94,6 @@ public class GaServer {
     public boolean isBind() {
         return isBindRef.get();
     }
-
 
     private ServerSocketChannel serverSocketChannel = null;
     private Selector selector = null;
@@ -187,7 +110,6 @@ public class GaServer {
         }
 
         try {
-
             serverSocketChannel = ServerSocketChannel.open();
             selector = Selector.open();
 
@@ -211,7 +133,7 @@ public class GaServer {
 
     }
 
-    /*
+    /**
      * 获取绑定网络地址信息<br/>
      * 这里做个小修正,如果targetIp为127.0.0.1(本地环回口)，则需要绑定所有网卡
      * 否则外部无法访问，只能通过127.0.0.1来进行了
@@ -223,7 +145,6 @@ public class GaServer {
             return new InetSocketAddress(targetIp, targetPort);
         }
     }
-
 
     private void activeSelectorDaemon(final Selector selector, final Configure configure) {
 
@@ -351,31 +272,28 @@ public class GaServer {
                     case READ_EOL: {
                         final String line = attachment.clearAndGetLine(session.getCharset());
 
-                        executorService.execute(new Runnable() {
-                            @Override
-                            public void run() {
+                        executorService.execute(() -> {
 
-                                // 会话只有未锁定的时候才能响应命令
-                                if (session.tryLock()) {
-                                    try {
+                            // 会话只有未锁定的时候才能响应命令
+                            if (session.tryLock()) {
+                                try {
 
-                                        // 命令执行
-                                        commandHandler.executeCommand(line, session);
+                                    // 命令执行
+                                    commandHandler.executeCommand(line, session);
 
-                                        // 命令结束之后需要传输EOT告诉client命令传输已经完结，可以展示提示符
-                                        socketChannel.write(ByteBuffer.wrap(new byte[]{EOT}));
+                                    // 命令结束之后需要传输EOT告诉client命令传输已经完结，可以展示提示符
+                                    socketChannel.write(ByteBuffer.wrap(new byte[]{EOT}));
 
-                                    } catch (IOException e) {
-                                        logger.info("network communicate failed, session[{}] will be close.",
-                                                session.getSessionId());
-                                        session.destroy();
-                                    } finally {
-                                        session.unLock();
-                                    }
-                                } else {
-                                    logger.info("session[{}] was locked, ignore this command.",
+                                } catch (IOException e) {
+                                    logger.info("network communicate failed, session[{}] will be close.",
                                             session.getSessionId());
+                                    session.destroy();
+                                } finally {
+                                    session.unLock();
                                 }
+                            } else {
+                                logger.info("session[{}] was locked, ignore this command.",
+                                        session.getSessionId());
                             }
                         });
 
@@ -464,4 +382,72 @@ public class GaServer {
         return gaServer;
     }
 
+}
+
+/**
+ * GaServer操作的附件
+ * Created by oldmanpushcart@gmail.com on 15/5/3.
+ */
+class GaAttachment {
+
+    private final int bufferSize;
+    private final Session session;
+
+    private LineDecodeState lineDecodeState;
+    private ByteBuffer lineByteBuffer;
+
+
+    GaAttachment(int bufferSize, Session session) {
+        this.lineByteBuffer = ByteBuffer.allocate(bufferSize);
+        this.bufferSize = bufferSize;
+        this.lineDecodeState = READ_CHAR;
+        this.session = session;
+    }
+
+    public LineDecodeState getLineDecodeState() {
+        return lineDecodeState;
+    }
+
+
+    public void setLineDecodeState(LineDecodeState lineDecodeState) {
+        this.lineDecodeState = lineDecodeState;
+    }
+
+    public void put(byte data) {
+        if (lineByteBuffer.hasRemaining()) {
+            lineByteBuffer.put(data);
+        } else {
+            final ByteBuffer newLineByteBuffer = ByteBuffer.allocate(lineByteBuffer.capacity() + bufferSize);
+            lineByteBuffer.flip();
+            newLineByteBuffer.put(lineByteBuffer);
+            newLineByteBuffer.put(data);
+            this.lineByteBuffer = newLineByteBuffer;
+        }
+    }
+
+    public String clearAndGetLine(Charset charset) {
+        lineByteBuffer.flip();
+        final byte[] dataArray = new byte[lineByteBuffer.limit()];
+        lineByteBuffer.get(dataArray);
+        final String line = new String(dataArray, charset);
+        lineByteBuffer.clear();
+        return line;
+    }
+
+    public Session getSession() {
+        return session;
+    }
+
+}
+
+/**
+ * 行解码
+ */
+enum LineDecodeState {
+
+    // 读字符
+    READ_CHAR,
+
+    // 读换行
+    READ_EOL
 }

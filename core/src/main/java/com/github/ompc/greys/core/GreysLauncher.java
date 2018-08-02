@@ -37,7 +37,7 @@ public class GreysLauncher {
 
     }
 
-    /*
+    /**
      * 解析Configure
      */
     private Configure analyzeConfigure(String[] args) {
@@ -64,7 +64,7 @@ public class GreysLauncher {
         return configure;
     }
 
-    /*
+    /**
      * 加载Agent
      */
     private void attachAgent(Configure configure) throws Exception {
@@ -87,7 +87,8 @@ public class GreysLauncher {
 
         Object vmObj = null;
         try {
-            if (null == attachVmdObj) { // 使用 attach(String pid) 这种方式
+            // 使用 attach(String pid) 这种方式
+            if (null == attachVmdObj) {
                 vmObj = vmClass.getMethod("attach", String.class).invoke(null, "" + configure.getJavaPid());
             } else {
                 vmObj = vmClass.getMethod("attach", vmdClass).invoke(null, attachVmdObj);

@@ -20,7 +20,7 @@ import static com.github.ompc.greys.core.util.GaStringUtils.tranClassName;
  * 通过反射拿到对应的Class/Method类，而不是原始的ClassName/MethodNam
  * 当然性能开销要比普通监听器高许多
  *
- * @author
+ * @author oldmanpushcart@gmail.com
  */
 public abstract class ReflectAdviceListenerAdapter extends AdviceListenerAdapter {
 

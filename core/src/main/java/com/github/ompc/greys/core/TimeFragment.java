@@ -4,26 +4,35 @@ import java.util.Date;
 
 /**
  * 时间片段
- * Created by oldmanpushcart@gmail.com on 15/10/4.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/10/4
  */
 public final class TimeFragment {
 
-    // 时间片段ID
+    /**
+     * 时间片段ID
+     */
     public final int id;
-
-    // 过程ID
+    /**
+     * 过程ID
+     */
     public final int processId;
-
-    // 通知数据
+    /**
+     * 通知数据
+     */
     public final Advice advice;
-
-    // 记录时间戳
+    /**
+     * 记录时间戳
+     */
     public final Date gmtCreate;
-
-    // 片段耗时
+    /**
+     * 片段耗时
+     */
     public final long cost;
-
-    // 片段堆栈
+    /**
+     * 片段堆栈
+     */
     public final String stack;
 
     /**

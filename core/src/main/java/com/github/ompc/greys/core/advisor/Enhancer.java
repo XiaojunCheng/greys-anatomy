@@ -43,7 +43,8 @@ import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 /**
  * 对类进行通知增强
  *
- * @author Created by oldmanpushcart@gmail.com on 15/5/17.
+ * @author oldmanpushcart@gmail.com
+ * @date 15/5/17
  */
 public class Enhancer implements ClassFileTransformer {
 
@@ -372,7 +373,7 @@ public class Enhancer implements ClassFileTransformer {
                 if (enhanceMap.containsKey(targetClass)) {
                     groupMatcher = enhanceMap.get(targetClass);
                 } else {
-                    groupMatcher = new GroupMatcher.Or<AsmMethod>();
+                    groupMatcher = new GroupMatcher.Or<>();
                     enhanceMap.put(targetClass, groupMatcher);
                 }
 

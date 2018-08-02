@@ -4,13 +4,21 @@ import com.github.ompc.greys.core.exception.UnCaughtException;
 
 /**
  * 懒加载
- * Created by vlinux on 16/6/1.
+ *
+ * @author vlinux
+ * @date 16/6/1
  */
 public abstract class LazyGet<T> {
 
     private volatile boolean isInit = false;
     private volatile T object;
 
+    /**
+     * 初始值
+     *
+     * @return
+     * @throws Throwable
+     */
     abstract protected T initialValue() throws Throwable;
 
     public T get() {

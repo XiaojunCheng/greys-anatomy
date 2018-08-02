@@ -3,7 +3,8 @@ package com.github.ompc.greys.core.advisor;
 /**
  * 通知监听器<br/>
  *
- * @author Created by oldmanpushcart@gmail.com on 15/5/17.
+ * @author oldmanpushcart@gmail.com
+ * @date 15/5/17
  */
 public interface AdviceListener {
 

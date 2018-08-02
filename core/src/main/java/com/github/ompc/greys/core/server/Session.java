@@ -19,18 +19,22 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * 服务端会话
- * Created by oldmanpushcart@gmail.com on 15/5/2.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/5/2
  */
 public class Session {
 
     private final Logger logger = LogUtil.getLogger();
 
-    // 会话锁ID序列
+    /**
+     * 会话锁ID序列
+     */
     private final static AtomicInteger lockTxSeq = new AtomicInteger();
-
-    // 空锁
+    /**
+     * 空锁
+     */
     private final static int LOCK_TX_EMPTY = -1;
-
 
     private final int javaPid;
     private final int sessionId;
@@ -38,23 +42,30 @@ public class Session {
     private final SocketChannel socketChannel;
     private Charset charset;
 
-    // 是否会话静默,静默的会话不输出提示符,LOGO,同时也会影响一些命令的输出
+    /**
+     * 是否会话静默,静默的会话不输出提示符,LOGO,同时也会影响一些命令的输出
+     */
     private boolean silent = true;
-
-    // 提示符
+    /**
+     * 提示符
+     */
     private String prompt = DEFAULT_PROMPT;
-
-    // 会话最后一次交互时间(触摸时间)
+    /**
+     * 会话最后一次交互时间(触摸时间)
+     */
     private volatile long gmtLastTouch;
-
-    // 是否被销毁
+    /**
+     * 是否被销毁
+     */
     private volatile boolean isDestroy = false;
-
-    // 会话锁ID
+    /**
+     * 会话锁ID
+     */
     private final AtomicInteger lockTx = new AtomicInteger(LOCK_TX_EMPTY);
-
-    // 会话输出阻塞队列
-    private final BlockingQueue<String> writeQueue = new LinkedBlockingQueue<String>(GlobalOptions.sessionWriteQueueCapacity);
+    /**
+     * 会话输出阻塞队列
+     */
+    private final BlockingQueue<String> writeQueue = new LinkedBlockingQueue<>(GlobalOptions.sessionWriteQueueCapacity);
 
     /**
      * 构建Session

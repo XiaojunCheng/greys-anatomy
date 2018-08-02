@@ -7,14 +7,13 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayDeque;
 import java.util.IdentityHashMap;
 
-
-
 /**
  * 计算一个对象的大小
- * Created by vlinux on 15/12/10.
+ *
+ * @author vlinux
+ * @date 15/12/10
  */
 public class SizeOf {
-
 
     public enum HeapType {
 
@@ -32,7 +31,6 @@ public class SizeOf {
 
     private final Instrumentation inst;
     private final long size;
-
 
     public SizeOf(final Instrumentation inst, final Object object, final HeapType heapType) {
 
@@ -70,7 +68,6 @@ public class SizeOf {
         return inst.getObjectSize(target);
     }
 
-
     /**
      * 计算深引用
      *
@@ -105,7 +102,9 @@ public class SizeOf {
                 }
                 continue;
             }
-            while (nodeClass != null) {       // traverse up until we hit Object
+
+            //traverse up until we hit Object
+            while (nodeClass != null) {
                 for (Field field : nodeClass.getDeclaredFields()) {
                     if (Modifier.isStatic(field.getModifiers())) {
                         continue;
@@ -188,6 +187,6 @@ public class SizeOf {
     public String toString() {
         if (size < 1024) return size + " B";
         int z = (63 - Long.numberOfLeadingZeros(size)) / 10;
-        return String.format("%.1f %sB", (double)size / (1L << (z*10)), " KMGTPE".charAt(z));
+        return String.format("%.1f %sB", (double) size / (1L << (z * 10)), " KMGTPE".charAt(z));
     }
 }

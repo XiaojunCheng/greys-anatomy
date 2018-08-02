@@ -4,8 +4,8 @@ import com.github.ompc.greys.core.Advice;
 import com.github.ompc.greys.core.TimeFragment;
 import com.github.ompc.greys.core.manager.impl.DefaultTimeFragmentManager;
 
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 时间片段管理
@@ -39,7 +39,7 @@ public interface TimeFragmentManager {
      *
      * @return 时间碎片列表
      */
-    ArrayList<TimeFragment> list();
+    List<TimeFragment> list();
 
     /**
      * 搜索碎片内容
@@ -47,7 +47,7 @@ public interface TimeFragmentManager {
      * @param express 搜索表达式
      * @return 搜索时间碎片集合
      */
-    ArrayList<TimeFragment> search(String express);
+    List<TimeFragment> search(String express);
 
     /**
      * 根据ID获取时间碎片

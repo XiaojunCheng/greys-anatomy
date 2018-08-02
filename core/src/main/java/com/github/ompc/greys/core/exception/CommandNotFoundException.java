@@ -3,7 +3,7 @@ package com.github.ompc.greys.core.exception;
 /**
  * 命令不存在
  *
- * @author
+ * @author oldmanpushcart@gmail.com
  */
 public class CommandNotFoundException extends CommandException {
 

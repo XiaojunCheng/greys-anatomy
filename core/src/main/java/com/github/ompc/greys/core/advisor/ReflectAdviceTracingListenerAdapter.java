@@ -6,7 +6,8 @@ import com.github.ompc.greys.core.util.collection.ThreadUnsafeGaStack;
 /**
  * 反射版的方法通知调用通知适配器
  *
- * @author Created by oldmanpushcart@gmail.com on 15/7/24.
+ * @author oldmanpushcart@gmail.com
+ * @date 15/7/24
  */
 public abstract class ReflectAdviceTracingListenerAdapter extends ReflectAdviceListenerAdapter
         implements AdviceTracingListener {

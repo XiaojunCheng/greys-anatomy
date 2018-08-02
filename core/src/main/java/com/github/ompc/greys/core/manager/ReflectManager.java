@@ -9,7 +9,9 @@ import java.util.Collection;
 
 /**
  * 反射操作管理类
- * Created by oldmanpushcart@gmail.com on 15/11/1.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/11/1
  */
 public interface ReflectManager {
 
@@ -30,7 +32,7 @@ public interface ReflectManager {
     Collection<Class<?>> searchSubClass(Class<?> targetClass);
 
     /**
-     * 搜索类极其子类
+     * 搜索类及其子类
      *
      * @param classMatcher 类匹配
      * @return 返回匹配的类集合

@@ -14,22 +14,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 默认会话管理器实现
- * Created by oldmanpushcart@gmail.com on 15/5/2.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/5/2
  */
 public class DefaultSessionManager implements SessionManager {
 
     private final Logger logger = LogUtil.getLogger();
-
-    // 5分钟
+    /**
+     * 5分钟
+     */
     private static final long DURATION_5_MINUTE = 5L * 60 * 1000;
-
-    // 会话超时时间
+    /**
+     * 会话超时时间
+     */
     private static final long DEFAULT_SESSION_DURATION = DURATION_5_MINUTE;
-
-    // 会话管理Map
+    /**
+     * 会话管理Map
+     */
     private final ConcurrentHashMap<Integer, Session> sessionMap = new ConcurrentHashMap<Integer, Session>();
-
-    // 会话ID序列生成器
+    /**
+     * 会话ID序列生成器
+     */
     private final AtomicInteger sessionIndexSequence = new AtomicInteger(0);
 
     private final AtomicBoolean isDestroyRef = new AtomicBoolean(false);
@@ -119,14 +125,9 @@ public class DefaultSessionManager implements SessionManager {
     @Override
     public void clean() {
         // shutdown all the session
-        for (Session session : sessionMap.values()) {
-            session.destroy();
-        }
-
+        sessionMap.values().forEach(Session::destroy);
         sessionMap.clear();
-
         logger.info("session manager clean completed.");
-
     }
 
     @Override
@@ -136,14 +137,10 @@ public class DefaultSessionManager implements SessionManager {
 
     @Override
     public void destroy() {
-
         if (!isDestroyRef.compareAndSet(false, true)) {
             throw new IllegalStateException("already destroy");
         }
-
         clean();
-
         logger.info("session manager destroy completed.");
-
     }
 }

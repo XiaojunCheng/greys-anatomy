@@ -7,7 +7,7 @@ import com.github.ompc.greys.core.util.LazyGet;
 /**
  * 通知点
  *
- * @author
+ * @author oldmanpushcart@gmail.com
  */
 public final class Advice {
 
@@ -75,6 +75,7 @@ public final class Advice {
 
     /**
      * 获取阿里巴巴中间件鹰眼ID
+     *
      * @param loader
      * @return
      */
@@ -102,8 +103,10 @@ public final class Advice {
                 methodRef,
                 target,
                 params,
-                null, //returnObj
-                null, //throwExp
+                //returnObj
+                null,
+                //throwExp
+                null,
                 ACCESS_BEFORE
         );
     }
@@ -125,7 +128,8 @@ public final class Advice {
                 target,
                 params,
                 returnObj,
-                null, //throwExp
+                //throwExp
+                null,
                 ACCESS_AFTER_RETUNING
         );
     }
@@ -146,7 +150,8 @@ public final class Advice {
                 methodRef,
                 target,
                 params,
-                null, //returnObj
+                //returnObj
+                null,
                 throwExp,
                 ACCESS_AFTER_THROWING
         );

@@ -10,7 +10,6 @@ public class CommandException extends Exception {
 
     private final String command;
 
-
     public CommandException(String command) {
         this.command = command;
     }

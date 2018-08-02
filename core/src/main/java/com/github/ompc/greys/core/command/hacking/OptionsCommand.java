@@ -85,7 +85,7 @@ public class OptionsCommand implements Command {
     private RowAction doShow() {
         return (session, inst, printer) -> {
             final RowAffect affect = new RowAffect();
-            final Collection<Field> fields = findOptions(new TrueMatcher<String>());
+            final Collection<Field> fields = findOptions(new TrueMatcher<>());
             printer.print(drawShowTable(fields)).finish();
             affect.rCnt(fields.size());
             return affect;
@@ -152,7 +152,7 @@ public class OptionsCommand implements Command {
         return (session, inst, printer) -> {
 
             final RowAffect affect = new RowAffect();
-            final Collection<Field> fields = findOptions(new EqualsMatcher<String>(optionName));
+            final Collection<Field> fields = findOptions(new EqualsMatcher<>(optionName));
 
             // name not exists
             if (fields.isEmpty()) {
@@ -183,7 +183,7 @@ public class OptionsCommand implements Command {
                 } else if (isIn(type, short.class, Short.class)) {
                     writeStaticField(field, afterValue = Short.valueOf(optionValue));
                 } else {
-                    printer.println(format("Options[%s] type[%s] desupported.", optionName, type.getSimpleName())).finish();
+                    printer.println(format("Options[%s] type[%s] unsupported.", optionName, type.getSimpleName())).finish();
                     return affect;
                 }
 

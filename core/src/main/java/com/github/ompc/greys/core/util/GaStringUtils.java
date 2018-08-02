@@ -50,7 +50,7 @@ public class GaStringUtils {
      */
     public static String[] splitForArgument(String argumentString) {
 
-        final ArrayList<String> stringList = new ArrayList<String>();
+        final ArrayList<String> stringList = new ArrayList<>();
 
         if (StringUtils.isNotBlank(argumentString)) {
 

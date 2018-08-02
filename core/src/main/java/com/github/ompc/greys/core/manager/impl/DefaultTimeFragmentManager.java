@@ -6,29 +6,23 @@ import com.github.ompc.greys.core.exception.ExpressException;
 import com.github.ompc.greys.core.manager.TimeFragmentManager;
 import com.github.ompc.greys.core.util.Express;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
  * 默认时间碎片实现
  *
- * @author Created by oldmanpushcart@gmail.com on 15/10/3.
+ * @author oldmanpushcart@gmail.com
+ * @date 15/10/3
  */
 public class DefaultTimeFragmentManager implements TimeFragmentManager {
 
     /**
      * 时间碎片序列生成器
      */
-    private final AtomicInteger TIME_FRAGMENT_SEQUENCER
-            = new AtomicInteger(1000);
-
-    private final AtomicInteger PROCESS_SEQUENCER
-            = new AtomicInteger(1000);
-
+    private final AtomicInteger TIME_FRAGMENT_SEQUENCER = new AtomicInteger(1000);
+    private final AtomicInteger PROCESS_SEQUENCER = new AtomicInteger(1000);
     /**
      * 时间碎片存储
      */
@@ -62,7 +56,7 @@ public class DefaultTimeFragmentManager implements TimeFragmentManager {
     }
 
     @Override
-    public ArrayList<TimeFragment> list() {
+    public List<TimeFragment> list() {
         return new ArrayList<>(timeFragmentStore.values());
     }
 
@@ -83,8 +77,8 @@ public class DefaultTimeFragmentManager implements TimeFragmentManager {
     }
 
     @Override
-    public ArrayList<TimeFragment> search(final String express) {
-        return timeFragmentStore.values().stream().filter(timeFragment -> is(timeFragment, express)).collect(Collectors.toCollection(ArrayList::new));
+    public List<TimeFragment> search(final String express) {
+        return timeFragmentStore.values().stream().filter(timeFragment -> is(timeFragment, express)).collect(Collectors.toList());
     }
 
     @Override

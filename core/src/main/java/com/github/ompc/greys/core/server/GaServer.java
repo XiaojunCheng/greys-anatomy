@@ -68,9 +68,7 @@ public class GaServer {
         this.commandHandler = new DefaultCommandHandler(this, inst);
 
         initForManager(inst);
-
         Runtime.getRuntime().addShutdownHook(jvmShutdownHooker);
-
     }
 
     /**
@@ -229,7 +227,6 @@ public class GaServer {
         final SocketChannel socketChannel = (SocketChannel) key.channel();
         final Session session = attachment.getSession();
         try {
-
             // 若读到EOF，则说明SocketChannel已经关闭
             if (EOF == socketChannel.read(byteBuffer)) {
                 logger.info("client={}@session[{}] was closed.", socketChannel, session.getSessionId());
@@ -304,7 +301,6 @@ public class GaServer {
             }//while for line decode
 
             byteBuffer.clear();
-
         }
 
         // 处理
@@ -354,7 +350,6 @@ public class GaServer {
         }
 
         executorService.shutdown();
-
         logger.info("ga-server destroy completed.");
     }
 
@@ -368,6 +363,7 @@ public class GaServer {
     /**
      * 单例
      *
+     * @param javaPid java进程ID
      * @param instrumentation JVM增强
      * @return GaServer单例
      */
@@ -386,7 +382,6 @@ public class GaServer {
 
 /**
  * GaServer操作的附件
- * Created by oldmanpushcart@gmail.com on 15/5/3.
  */
 class GaAttachment {
 
@@ -395,7 +390,6 @@ class GaAttachment {
 
     private LineDecodeState lineDecodeState;
     private ByteBuffer lineByteBuffer;
-
 
     GaAttachment(int bufferSize, Session session) {
         this.lineByteBuffer = ByteBuffer.allocate(bufferSize);
@@ -444,10 +438,8 @@ class GaAttachment {
  * 行解码
  */
 enum LineDecodeState {
-
     // 读字符
     READ_CHAR,
-
     // 读换行
     READ_EOL
 }

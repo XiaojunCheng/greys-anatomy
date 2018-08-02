@@ -5,24 +5,29 @@ import org.objectweb.asm.commons.AdviceAdapter;
 
 /**
  * ASM代码锁<br/>
- * Created by oldmanpushcart@gmail.com on 15/5/28.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/5/28
  */
 public class AsmCodeLock implements CodeLock, Opcodes {
 
     private final AdviceAdapter aa;
-
-    // 锁标记
+    /**
+     * 锁标记
+     */
     private boolean isLook;
-
-    // 代码块开始特征数组
+    /**
+     * 代码块开始特征数组
+     */
     private final int[] beginCodeArray;
-
-    // 代码块结束特征数组
+    /**
+     * 代码块结束特征数组
+     */
     private final int[] endCodeArray;
-
-    // 代码匹配索引
+    /**
+     * 代码匹配索引
+     */
     private int index = 0;
-
 
     /**
      * 用ASM构建代码锁
@@ -39,7 +44,6 @@ public class AsmCodeLock implements CodeLock, Opcodes {
                 || beginCodeArray.length != endCodeArray.length) {
             throw new IllegalArgumentException();
         }
-
         this.aa = aa;
         this.beginCodeArray = beginCodeArray;
         this.endCodeArray = endCodeArray;
@@ -69,14 +73,13 @@ public class AsmCodeLock implements CodeLock, Opcodes {
 
     }
 
-    /*
+    /**
      * 重置索引<br/>
      * 一般在代码序列判断失败时，则会对索引进行重置，冲头开始匹配特征序列
      */
     private void reset() {
         index = 0;
     }
-
 
     private void asm(int opcode) {
         aa.visitInsn(opcode);
@@ -91,7 +94,7 @@ public class AsmCodeLock implements CodeLock, Opcodes {
         }
     }
 
-    /*
+    /**
      * 解锁序列
      */
     private void unLock() {

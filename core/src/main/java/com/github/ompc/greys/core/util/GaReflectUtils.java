@@ -7,7 +7,10 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * 反射工具类 Created by oldmanpushcart@gmail.com on 15/5/18.
+ * 反射工具类
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/5/18
  */
 public class GaReflectUtils {
 
@@ -58,7 +61,7 @@ public class GaReflectUtils {
      * @return 类下所有属性
      */
     public static Set<Field> getFields(Class<?> clazz) {
-        final Set<Field> fields = new LinkedHashSet<Field>();
+        final Set<Field> fields = new LinkedHashSet<>();
         final Class<?> parentClazz = clazz.getSuperclass();
         Collections.addAll(fields, clazz.getDeclaredFields());
         if (null != parentClazz) {

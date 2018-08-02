@@ -2,7 +2,6 @@ package com.github.ompc.greys.core;
 
 import com.github.ompc.greys.core.command.Commands;
 import jline.console.ConsoleReader;
-import jline.console.completer.Completer;
 import jline.console.history.FileHistory;
 import jline.console.history.History;
 import jline.console.history.MemoryHistory;
@@ -13,7 +12,6 @@ import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -28,20 +26,26 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Greys控制台
- * Created by oldmanpushcart@gmail.com on 15/5/30.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/5/30
  */
 public class GreysConsole {
 
     private static final byte EOT = 0x04;
     private static final byte EOF = -1;
 
-    // 5分钟
+    /**
+     * 5分钟
+     */
     private static final int _1MIN = 60 * 1000;
-
-    // 工作目录
+    /**
+     * 工作目录
+     */
     private static final String WORKING_DIR = getProperty("user.home");
-
-    // 历史命令存储文件
+    /**
+     * 历史命令存储文件
+     */
     private static final String HISTORY_FILENAME = ".greys_history";
 
     private final ConsoleReader console;
@@ -84,40 +88,38 @@ public class GreysConsole {
 
     }
 
-    // jLine的自动补全
+    /**
+     * jLine的自动补全
+     */
     private void initCompleter() {
-        final SortedSet<String> commands = new TreeSet<String>();
+        final SortedSet<String> commands = new TreeSet<>();
         commands.addAll(Commands.getInstance().listCommands().keySet());
 
-        console.addCompleter(new Completer() {
-            @Override
-            public int complete(String buffer, int cursor, List<CharSequence> candidates) {
-                // buffer could be null
-                checkNotNull(candidates);
+        console.addCompleter((buffer, cursor, candidates) -> {
+            // buffer could be null
+            checkNotNull(candidates);
 
-                if (buffer == null) {
-                    candidates.addAll(commands);
-                } else {
-                    String prefix = buffer;
-                    if (buffer.length() > cursor) {
-                        prefix = buffer.substring(0, cursor);
-                    }
-                    for (String match : commands.tailSet(prefix)) {
-                        if (!match.startsWith(prefix)) {
-                            break;
-                        }
-
-                        candidates.add(match);
-                    }
+            if (buffer == null) {
+                candidates.addAll(commands);
+            } else {
+                String prefix = buffer;
+                if (buffer.length() > cursor) {
+                    prefix = buffer.substring(0, cursor);
                 }
+                for (String match : commands.tailSet(prefix)) {
+                    if (!match.startsWith(prefix)) {
+                        break;
+                    }
 
-                if (candidates.size() == 1) {
-                    candidates.set(0, candidates.get(0) + " ");
+                    candidates.add(match);
                 }
-
-                return candidates.isEmpty() ? -1 : 0;
             }
 
+            if (candidates.size() == 1) {
+                candidates.set(0, candidates.get(0) + " ");
+            }
+
+            return candidates.isEmpty() ? -1 : 0;
         });
     }
 

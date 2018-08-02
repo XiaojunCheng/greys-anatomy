@@ -22,16 +22,14 @@ import com.github.ompc.greys.core.util.matcher.PatternMatcher;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.ompc.greys.core.Advice.newForAfterRetuning;
 import static com.github.ompc.greys.core.Advice.newForAfterThrowing;
 import static com.github.ompc.greys.core.util.Express.ExpressFactory.newExpress;
-import static com.github.ompc.greys.core.util.GaStringUtils.getStack;
-import static com.github.ompc.greys.core.util.GaStringUtils.getThreadInfo;
-import static com.github.ompc.greys.core.util.GaStringUtils.newString;
+import static com.github.ompc.greys.core.util.GaStringUtils.*;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.*;
 
@@ -312,7 +310,7 @@ public class TimeTunnelCommand implements Command {
         return new RowAction() {
             @Override
             public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
-                final ArrayList<TimeFragment> timeFragments = timeFragmentManager.list();
+                final List<TimeFragment> timeFragments = timeFragmentManager.list();
                 printer.print(drawTimeTunnelTable(timeFragments)).finish();
                 return new RowAffect(timeFragments.size());
             }
@@ -338,42 +336,39 @@ public class TimeTunnelCommand implements Command {
      */
     private RowAction doSearch() {
 
-        return new RowAction() {
-            @Override
-            public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
+        return (session, inst, printer) -> {
 
-                // 匹配的时间片段
-                final ArrayList<TimeFragment> matchingTimeFragments = timeFragmentManager.search(searchExpress);
+            // 匹配的时间片段
+            final List<TimeFragment> matchingTimeFragments = timeFragmentManager.search(searchExpress);
 
-                // 执行watchExpress
-                if (hasWatchExpress()) {
+            // 执行watchExpress
+            if (hasWatchExpress()) {
 
-                    final TTable tTable = new TTable(new TTable.ColumnDefine[]{
-                            new TTable.ColumnDefine(TTable.Align.RIGHT),
-                            new TTable.ColumnDefine(TTable.Align.LEFT)
-                    })
-                            .padding(1)
-                            .addRow("INDEX", "SEARCH-RESULT");
+                final TTable tTable = new TTable(new TTable.ColumnDefine[]{
+                        new TTable.ColumnDefine(TTable.Align.RIGHT),
+                        new TTable.ColumnDefine(TTable.Align.LEFT)
+                })
+                        .padding(1)
+                        .addRow("INDEX", "SEARCH-RESULT");
 
-                    for (TimeFragment timeFragment : matchingTimeFragments) {
-                        final Object value = newExpress(timeFragment.advice).get(watchExpress);
-                        tTable.addRow(
-                                timeFragment.id,
-                                isNeedExpend()
-                                        ? new TObject(value, expend).rendering()
-                                        : value
-                        );
+                for (TimeFragment timeFragment : matchingTimeFragments) {
+                    final Object value = newExpress(timeFragment.advice).get(watchExpress);
+                    tTable.addRow(
+                            timeFragment.id,
+                            isNeedExpend()
+                                    ? new TObject(value, expend).rendering()
+                                    : value
+                    );
 
-                    }
-
-                    printer.print(tTable.rendering()).finish();
-                } // 单纯的列表格
-                else {
-                    printer.print(drawTimeTunnelTable(matchingTimeFragments)).finish();
                 }
 
-                return new RowAffect(matchingTimeFragments.size());
+                printer.print(tTable.rendering()).finish();
+            } // 单纯的列表格
+            else {
+                printer.print(drawTimeTunnelTable(matchingTimeFragments)).finish();
             }
+
+            return new RowAffect(matchingTimeFragments.size());
         };
 
     }
@@ -544,10 +539,10 @@ public class TimeTunnelCommand implements Command {
 
     }
 
-    /*
+    /**
      * 绘制TimeTunnel表格
      */
-    private String drawTimeTunnelTable(final ArrayList<TimeFragment> timeFragments) {
+    private String drawTimeTunnelTable(final List<TimeFragment> timeFragments) {
         final TTimeFragmentTable view = new TTimeFragmentTable(true);
         for (TimeFragment timeFragment : timeFragments) {
             view.add(timeFragment);
@@ -556,25 +551,22 @@ public class TimeTunnelCommand implements Command {
     }
 
 
-    /*
+    /**
      * 展示指定记录
      */
     private RowAction doShow() {
 
-        return new RowAction() {
-            @Override
-            public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
+        return (session, inst, printer) -> {
 
-                final TimeFragment timeFragment = timeFragmentManager.get(index);
-                if (null == timeFragment) {
-                    printer.println(format("Time fragment[%d] does not exist.", index)).finish();
-                    return new RowAffect();
-                }
-
-                printer.print(new TTimeFragmentDetail(inst, timeFragment, expend).rendering()).finish();
-                return new RowAffect(1);
-
+            final TimeFragment timeFragment = timeFragmentManager.get(index);
+            if (null == timeFragment) {
+                printer.println(format("Time fragment[%d] does not exist.", index)).finish();
+                return new RowAffect();
             }
+
+            printer.print(new TTimeFragmentDetail(inst, timeFragment, expend).rendering()).finish();
+            return new RowAffect(1);
+
         };
 
     }
@@ -605,11 +597,8 @@ public class TimeTunnelCommand implements Command {
         } else if (hasSearchExpress()) {
             action = doSearch();
         } else {
-            action = new SilentAction() {
-                @Override
-                public void action(Session session, Instrumentation inst, Printer printer) throws Throwable {
-                    throw new UnsupportedOperationException("not support operation.");
-                }
+            action = (SilentAction) (session, inst, printer) -> {
+                throw new UnsupportedOperationException("not support operation.");
             };
         }
 

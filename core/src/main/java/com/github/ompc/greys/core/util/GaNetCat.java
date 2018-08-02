@@ -11,7 +11,9 @@ import java.net.Socket;
 /**
  * GaNetCat封装<br/>
  * 这个代码不要看,不要看,不要看...不是我写的...
- * Created by vlinux on 16/2/4.
+ *
+ * @author vlinux
+ * @date 16/2/4
  */
 public class GaNetCat {
 

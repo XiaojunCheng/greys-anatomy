@@ -7,7 +7,9 @@ import java.lang.annotation.Target;
 
 /**
  * 全局开关
- * Created by oldmanpushcart@gmail.com on 15/6/4.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/6/4
  */
 public class GlobalOptions {
 

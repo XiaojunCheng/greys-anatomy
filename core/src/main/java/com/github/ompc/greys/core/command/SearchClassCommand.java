@@ -4,13 +4,11 @@ import com.github.ompc.greys.core.command.annotation.Cmd;
 import com.github.ompc.greys.core.command.annotation.IndexArg;
 import com.github.ompc.greys.core.command.annotation.NamedArg;
 import com.github.ompc.greys.core.manager.ReflectManager;
-import com.github.ompc.greys.core.server.Session;
 import com.github.ompc.greys.core.textui.ext.TClassInfo;
 import com.github.ompc.greys.core.util.affect.RowAffect;
 import com.github.ompc.greys.core.util.matcher.ClassMatcher;
 import com.github.ompc.greys.core.util.matcher.PatternMatcher;
 
-import java.lang.instrument.Instrumentation;
 import java.util.Collection;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -43,36 +41,31 @@ public class SearchClassCommand implements Command {
 
     @Override
     public Action getAction() {
-        return new RowAction() {
+        return (AffectAction) (session, inst, printer) -> {
 
-            @Override
-            public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
+            final ClassMatcher classMatcher = new ClassMatcher(new PatternMatcher(isRegEx, classPattern));
+            final Collection<Class<?>> matchedClassSet = reflectManager.searchClassWithSubClass(classMatcher);
 
-                final ClassMatcher classMatcher = new ClassMatcher(new PatternMatcher(isRegEx, classPattern));
-                final Collection<Class<?>> matchedClassSet = reflectManager.searchClassWithSubClass(classMatcher);
+            // 展示类详情
+            if (isDetail) {
 
-                // 展示类详情
-                if (isDetail) {
-
-                    for (Class<?> clazz : matchedClassSet) {
-                        printer.println(new TClassInfo(clazz, isField).rendering());
-                    }
-
+                for (Class<?> clazz : matchedClassSet) {
+                    printer.println(new TClassInfo(clazz, isField).rendering());
                 }
 
-                // 展示类该要列表
-                else {
-
-                    for (Class<?> clazz : matchedClassSet) {
-                        printer.println(clazz.getName());
-                    }
-
-                }
-
-                printer.print(EMPTY).finish();
-                return new RowAffect(matchedClassSet.size());
             }
 
+            // 展示类该要列表
+            else {
+
+                for (Class<?> clazz : matchedClassSet) {
+                    printer.println(clazz.getName());
+                }
+
+            }
+
+            printer.print(EMPTY).finish();
+            return new RowAffect(matchedClassSet.size());
         };
     }
 

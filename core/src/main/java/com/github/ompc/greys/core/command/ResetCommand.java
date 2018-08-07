@@ -24,7 +24,7 @@ public class ResetCommand implements Command {
     @Override
     public Action getAction() {
 
-        return (RowAction) (session, inst, printer) -> {
+        return (AffectAction) (session, inst, printer) -> {
 
             final EnhancerAffect enhancerAffect = Enhancer.reset(inst);
             printer.print(EMPTY).finish();

@@ -213,12 +213,12 @@ public class TimeTunnelCommand implements Command {
     /*
      * do the TimeTunnel command
      */
-    private GetEnhancerAction doTimeTunnel() {
+    private ClassEnhancerAction doTimeTunnel() {
 
-        return new GetEnhancerAction() {
+        return new ClassEnhancerAction() {
             @Override
-            public GetEnhancer action(Session session, Instrumentation inst, final Printer printer) throws Throwable {
-                return new GetEnhancer() {
+            public ClassEnhancer action(Session session, Instrumentation inst, final Printer printer) throws Throwable {
+                return new ClassEnhancer() {
 
                     private final AtomicInteger timesRef = new AtomicInteger();
 
@@ -305,9 +305,9 @@ public class TimeTunnelCommand implements Command {
     /*
      * do list timeFragmentMap
      */
-    private RowAction doList() {
+    private AffectAction doList() {
 
-        return new RowAction() {
+        return new AffectAction() {
             @Override
             public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
                 final List<TimeFragment> timeFragments = timeFragmentManager.list();
@@ -334,7 +334,7 @@ public class TimeTunnelCommand implements Command {
     /**
      * do search timeFragmentMap
      */
-    private RowAction doSearch() {
+    private AffectAction doSearch() {
 
         return (session, inst, printer) -> {
 
@@ -376,8 +376,8 @@ public class TimeTunnelCommand implements Command {
     /*
      * 清除所有的记录
      */
-    private RowAction doDeleteAll() {
-        return new RowAction() {
+    private AffectAction doDeleteAll() {
+        return new AffectAction() {
 
             @Override
             public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
@@ -392,9 +392,9 @@ public class TimeTunnelCommand implements Command {
     /*
      * 查看记录信息
      */
-    private RowAction doWatch() {
+    private AffectAction doWatch() {
 
-        return new RowAction() {
+        return new AffectAction() {
             @Override
             public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
 
@@ -421,8 +421,8 @@ public class TimeTunnelCommand implements Command {
     /*
      * 重放指定记录
      */
-    private RowAction doPlay() {
-        return new RowAction() {
+    private AffectAction doPlay() {
+        return new AffectAction() {
             @Override
             public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
 
@@ -523,14 +523,14 @@ public class TimeTunnelCommand implements Command {
     /*
      * 删除指定记录
      */
-    private RowAction doDelete() {
+    private AffectAction doDelete() {
 
-        return new RowAction() {
+        return new AffectAction() {
             @Override
             public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
                 final RowAffect affect = new RowAffect();
                 if (timeFragmentManager.delete(index) != null) {
-                    affect.rCnt(1);
+                    affect.rowCount(1);
                 }
                 printer.println(format("Time fragment[%d] successfully deleted.", index)).finish();
                 return affect;
@@ -554,7 +554,7 @@ public class TimeTunnelCommand implements Command {
     /**
      * 展示指定记录
      */
-    private RowAction doShow() {
+    private AffectAction doShow() {
 
         return (session, inst, printer) -> {
 

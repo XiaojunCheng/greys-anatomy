@@ -1,7 +1,5 @@
 package com.github.ompc.greys.core.util.affect;
 
-import static java.lang.System.currentTimeMillis;
-
 /**
  * 影响反馈
  *
@@ -10,7 +8,7 @@ import static java.lang.System.currentTimeMillis;
  */
 public class Affect {
 
-    private final long start = currentTimeMillis();
+    private final long start = System.currentTimeMillis();
 
     /**
      * 影响耗时(ms)
@@ -18,7 +16,7 @@ public class Affect {
      * @return 获取耗时(ms)
      */
     public long cost() {
-        return currentTimeMillis() - start;
+        return System.currentTimeMillis() - start;
     }
 
     @Override

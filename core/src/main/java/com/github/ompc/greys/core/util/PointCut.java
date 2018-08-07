@@ -1,6 +1,7 @@
 package com.github.ompc.greys.core.util;
 
 import com.github.ompc.greys.core.util.matcher.Matcher;
+import lombok.Getter;
 
 /**
  * 切入点
@@ -8,6 +9,7 @@ import com.github.ompc.greys.core.util.matcher.Matcher;
  * @author oldmanpushcart@gmail.com
  * @date 15/10/24
  */
+@Getter
 public class PointCut {
 
     /**
@@ -44,17 +46,5 @@ public class PointCut {
         this.classMatcher = classMatcher;
         this.gaMethodMatcher = gaMethodMatcher;
         this.isIncludeSubClass = isIncludeSubClass;
-    }
-
-    public Matcher<Class<?>> getClassMatcher() {
-        return classMatcher;
-    }
-
-    public Matcher<GaMethod> getGaMethodMatcher() {
-        return gaMethodMatcher;
-    }
-
-    public boolean isIncludeSubClass() {
-        return isIncludeSubClass;
     }
 }

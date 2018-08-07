@@ -522,7 +522,7 @@ public class Enhancer implements ClassFileTransformer {
                         classfileBuffer,
                         protectionDomain
                 ));
-                affect.rCnt(1);
+                affect.rowCount(1);
             }
 
             if (classBytesCache.containsKey(classBeingRedefined)) {

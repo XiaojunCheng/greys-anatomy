@@ -9,44 +9,48 @@ import java.lang.instrument.Instrumentation;
 
 /**
  * 命令
- * Created by oldmanpushcart@gmail.com on 15/5/18.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/5/18
  */
 public interface Command {
 
     /**
      * 信息发送者
-     *
-     * @author oldmanpushcart@gmail.com
      */
     interface Printer {
 
         /**
          * 发送信息
          *
-         * @param isF     是否结束打印
-         * @param message 发送信息内容
+         * @param isFinished 是否结束打印
+         * @param message    发送信息内容
+         * @return
          */
-        Printer print(boolean isF, String message);
+        Printer print(boolean isFinished, String message);
 
         /**
          * 发送信息
          *
          * @param message 发送信息内容
+         * @return
          */
         Printer print(String message);
 
         /**
          * 换行发送信息
          *
-         * @param isF     是否结束打印
-         * @param message 发送信息内容
+         * @param isFinished 是否结束打印
+         * @param message    发送信息内容
+         * @return
          */
-        Printer println(boolean isF, String message);
+        Printer println(boolean isFinished, String message);
 
         /**
          * 换行发送信息
          *
          * @param message 发送信息内容
+         * @return
          */
         Printer println(String message);
 
@@ -54,16 +58,16 @@ public interface Command {
          * 结束打印
          */
         void finish();
-
     }
 
     /**
      * 类增强
      */
-    interface GetEnhancer {
+    interface ClassEnhancer {
 
         /**
          * 获取增强功能点
+         *
          * @return
          */
         PointCut getPointCut();
@@ -74,34 +78,29 @@ public interface Command {
          * @return 返回监听器
          */
         AdviceListener getAdviceListener();
-
     }
-
 
     /**
      * 命令动作
      */
     interface Action {
-
-
     }
-
 
     /**
      * 类增强动作
      */
-    interface GetEnhancerAction extends Action {
+    interface ClassEnhancerAction extends Action {
 
         /**
          * 执行动作
          *
          * @param session 会话
          * @param inst    inst
-         * @param printer  信息发送者
+         * @param printer 信息发送者
          * @return 类增强
          * @throws Throwable 动作执行出错
          */
-        GetEnhancer action(Session session, Instrumentation inst, Printer printer) throws Throwable;
+        ClassEnhancer action(Session session, Instrumentation inst, Printer printer) throws Throwable;
 
     }
 
@@ -115,25 +114,24 @@ public interface Command {
          *
          * @param session 会话
          * @param inst    inst
-         * @param printer  信息发送者
+         * @param printer 信息发送者
          * @throws Throwable 动作执行出错
          */
         void action(Session session, Instrumentation inst, Printer printer) throws Throwable;
 
     }
 
-
     /**
      * 影响动作
      */
-    interface RowAction extends Action {
+    interface AffectAction extends Action {
 
         /**
-         * 安静的执行动作
+         * 影响的执行动作
          *
          * @param session 会话
          * @param inst    inst
-         * @param printer  信息发送者
+         * @param printer 信息发送者
          * @return 影响范围
          * @throws Throwable 动作执行出错
          */

@@ -52,7 +52,7 @@ public class SearchMethodCommand implements Command {
     @Override
     public Action getAction() {
 
-        return new RowAction() {
+        return new AffectAction() {
 
             @Override
             public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
@@ -119,7 +119,7 @@ public class SearchMethodCommand implements Command {
             } else {
                 view.addRow(classLadderView.rendering(), gaMethod.getName());
             }
-            affect.rCnt(1);
+            affect.rowCount(1);
 
         }
 

@@ -6,7 +6,7 @@ import com.github.ompc.greys.core.advisor.Enhancer;
 import com.github.ompc.greys.core.advisor.InvokeTraceable;
 import com.github.ompc.greys.core.command.Command;
 import com.github.ompc.greys.core.command.Command.Action;
-import com.github.ompc.greys.core.command.Command.GetEnhancerAction;
+import com.github.ompc.greys.core.command.Command.ClassEnhancerAction;
 import com.github.ompc.greys.core.command.Command.Printer;
 import com.github.ompc.greys.core.command.Commands;
 import com.github.ompc.greys.core.command.QuitCommand;
@@ -152,7 +152,7 @@ public class DefaultCommandHandler implements CommandHandler {
         final Printer printer = new Printer() {
 
             @Override
-            public Printer print(boolean isF, String message) {
+            public Printer print(boolean isFinished, String message) {
 
                 if (isFinishRef.get()) {
                     return this;
@@ -165,7 +165,7 @@ public class DefaultCommandHandler implements CommandHandler {
                     }
                 }
 
-                if (isF) {
+                if (isFinished) {
                     finish();
                 }
 
@@ -174,8 +174,8 @@ public class DefaultCommandHandler implements CommandHandler {
             }
 
             @Override
-            public Printer println(boolean isF, String message) {
-                return print(isF, message + "\n");
+            public Printer println(boolean isFinished, String message) {
+                return print(isFinished, message + "\n");
             }
 
             @Override
@@ -197,7 +197,6 @@ public class DefaultCommandHandler implements CommandHandler {
 
 
         try {
-
             // 影响反馈
             final Affect affect;
             final Action action = command.getAction();
@@ -209,19 +208,19 @@ public class DefaultCommandHandler implements CommandHandler {
             }
 
             // 需要反馈行影响范围的动作
-            else if (action instanceof Command.RowAction) {
+            else if (action instanceof Command.AffectAction) {
                 affect = new RowAffect();
-                final RowAffect rowAffect = ((Command.RowAction) action).action(session, inst, printer);
-                ((RowAffect) affect).rCnt(rowAffect.rCnt());
+                final RowAffect rowAffect = ((Command.AffectAction) action).action(session, inst, printer);
+                ((RowAffect) affect).rowCount(rowAffect.rowCount());
             }
 
             // 需要做类增强的动作
-            else if (action instanceof GetEnhancerAction) {
+            else if (action instanceof ClassEnhancerAction) {
 
                 affect = new EnhancerAffect();
 
                 // 执行命令动作 & 获取增强器
-                final Command.GetEnhancer getEnhancer = ((GetEnhancerAction) action).action(session, inst, printer);
+                final Command.ClassEnhancer getEnhancer = ((ClassEnhancerAction) action).action(session, inst, printer);
                 final int lock = session.getLock();
                 final AdviceListener listener = getEnhancer.getAdviceListener();
                 final EnhancerAffect enhancerAffect = Enhancer.enhance(

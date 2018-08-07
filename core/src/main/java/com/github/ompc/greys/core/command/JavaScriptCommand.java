@@ -194,9 +194,9 @@ public class JavaScriptCommand implements ScriptSupportCommand, Command {
             };
         }
 
-        return new GetEnhancerAction() {
+        return new ClassEnhancerAction() {
             @Override
-            public GetEnhancer action(Session session, Instrumentation inst, final Printer printer) throws Throwable {
+            public ClassEnhancer action(Session session, Instrumentation inst, final Printer printer) throws Throwable {
 
                 final Output output = new Output() {
 
@@ -219,7 +219,7 @@ public class JavaScriptCommand implements ScriptSupportCommand, Command {
                     }
                 };
 
-                return new GetEnhancer() {
+                return new ClassEnhancer() {
 
                     @Override
                     public PointCut getPointCut() {

@@ -164,7 +164,7 @@ public class AsmCommand implements Command {
 
     @Override
     public Action getAction() {
-        return new RowAction() {
+        return new AffectAction() {
 
             @Override
             public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
@@ -227,7 +227,7 @@ public class AsmCommand implements Command {
                         };
                         cr.accept(trace, ClassReader.SKIP_DEBUG);
                         outputSB.append(title).append("\n").append(writer.toString()).append("\n");
-                        affect.rCnt(1);
+                        affect.rowCount(1);
                     } finally {
                         IOUtils.closeQuietly(writer);
                         IOUtils.closeQuietly(is);

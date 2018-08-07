@@ -27,7 +27,7 @@ public class ResourceCommand implements Command {
 
     @Override
     public Command.Action getAction() {
-        return new Command.RowAction() {
+        return new AffectAction() {
 
             // 列出所有已经被加载的ClassLoader
             private Set<ClassLoader> listLoadedClassLoader(Instrumentation inst) {

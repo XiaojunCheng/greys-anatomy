@@ -56,7 +56,7 @@ public class ThreadTopCommand implements Command {
 
     @Override
     public Action getAction() {
-        return new RowAction() {
+        return new AffectAction() {
             @Override
             public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
 

@@ -142,11 +142,11 @@ public class MonitorCommand implements Command {
     @Override
     public Action getAction() {
 
-        return new GetEnhancerAction() {
+        return new ClassEnhancerAction() {
 
             @Override
-            public GetEnhancer action(final Session session, Instrumentation inst, final Printer printer) throws Throwable {
-                return new GetEnhancer() {
+            public ClassEnhancer action(final Session session, Instrumentation inst, final Printer printer) throws Throwable {
+                return new ClassEnhancer() {
 
                     @Override
                     public PointCut getPointCut() {

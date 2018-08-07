@@ -10,23 +10,23 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class RowAffect extends Affect {
 
-    private final AtomicInteger rCnt = new AtomicInteger();
+    private final AtomicInteger rowCount = new AtomicInteger();
 
     public RowAffect() {
     }
 
-    public RowAffect(int rCnt) {
-        this.rCnt(rCnt);
+    public RowAffect(int rowCount) {
+        this.rowCount(rowCount);
     }
 
     /**
      * 影响行数统计
      *
-     * @param mc 行影响计数
+     * @param addRowCount 新增行影响计数
      * @return 当前影响行个数
      */
-    public int rCnt(int mc) {
-        return rCnt.addAndGet(mc);
+    public int rowCount(int addRowCount) {
+        return rowCount.addAndGet(addRowCount);
     }
 
     /**
@@ -34,14 +34,14 @@ public class RowAffect extends Affect {
      *
      * @return 影响行个数
      */
-    public int rCnt() {
-        return rCnt.get();
+    public int rowCount() {
+        return rowCount.get();
     }
 
     @Override
     public String toString() {
         return String.format("Affect(row-cnt:%d) cost in %s ms.",
-                rCnt(),
+                rowCount(),
                 cost());
     }
 }

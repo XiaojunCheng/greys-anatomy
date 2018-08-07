@@ -126,11 +126,11 @@ public class WatchCommand implements Command {
             isBefore = true;
         }
 
-        return new GetEnhancerAction() {
+        return new ClassEnhancerAction() {
 
             @Override
-            public GetEnhancer action(Session session, Instrumentation inst, final Printer printer) throws Throwable {
-                return new GetEnhancer() {
+            public ClassEnhancer action(Session session, Instrumentation inst, final Printer printer) throws Throwable {
+                return new ClassEnhancer() {
 
                     private final AtomicInteger timesRef = new AtomicInteger();
 

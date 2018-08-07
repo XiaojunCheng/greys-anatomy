@@ -2,7 +2,9 @@ package com.github.ompc.greys.core.util.matcher;
 
 /**
  * 匹配器
- * Created by oldmanpushcart@gmail.com on 15/5/17.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/5/17
  */
 public interface Matcher<T> {
 

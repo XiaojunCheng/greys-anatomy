@@ -139,11 +139,11 @@ public class PathTraceCommand implements Command {
         final Matcher pathTracingMatcher = newPathTracingMatcher();
 
 
-        return new GetEnhancerAction() {
+        return new ClassEnhancerAction() {
 
             @Override
-            public GetEnhancer action(Session session, Instrumentation inst, final Printer printer) throws Throwable {
-                return new GetEnhancer() {
+            public ClassEnhancer action(Session session, Instrumentation inst, final Printer printer) throws Throwable {
+                return new ClassEnhancer() {
 
                     @Override
                     public PointCut getPointCut() {

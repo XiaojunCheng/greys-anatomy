@@ -82,22 +82,22 @@ public class OptionsCommand implements Command {
                 && isBlank(optionValue);
     }
 
-    private RowAction doShow() {
+    private AffectAction doShow() {
         return (session, inst, printer) -> {
             final RowAffect affect = new RowAffect();
             final Collection<Field> fields = findOptions(new TrueMatcher<>());
             printer.print(drawShowTable(fields)).finish();
-            affect.rCnt(fields.size());
+            affect.rowCount(fields.size());
             return affect;
         };
     }
 
-    private RowAction doShowName() {
+    private AffectAction doShowName() {
         return (session, inst, printer) -> {
             final RowAffect affect = new RowAffect();
             final Collection<Field> fields = findOptions(new EqualsMatcher<>(optionName));
             printer.print(drawShowTable(fields)).finish();
-            affect.rCnt(fields.size());
+            affect.rowCount(fields.size());
             return affect;
         };
     }
@@ -148,7 +148,7 @@ public class OptionsCommand implements Command {
     }
 
 
-    private RowAction doChangeNameValue() {
+    private AffectAction doChangeNameValue() {
         return (session, inst, printer) -> {
 
             final RowAffect affect = new RowAffect();
@@ -187,7 +187,7 @@ public class OptionsCommand implements Command {
                     return affect;
                 }
 
-                affect.rCnt(1);
+                affect.rowCount(1);
             } catch (Throwable t) {
                 printer.println(format("Cannot cast option value[%s] to type[%s].", optionValue, type.getSimpleName())).finish();
                 return affect;

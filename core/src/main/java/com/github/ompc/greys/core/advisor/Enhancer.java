@@ -254,7 +254,7 @@ public class Enhancer implements ClassFileTransformer {
             dumpClassIfNecessary(className, enhanceClassByteArray, affect);
 
             // 成功计数
-            affect.cCnt(1);
+            affect.countCount(1);
 
             // 排遣间谍
             try {
@@ -488,7 +488,7 @@ public class Enhancer implements ClassFileTransformer {
 
         } finally {
             inst.removeTransformer(resetClassFileTransformer);
-            affect.cCnt(classBytesCache.size());
+            affect.countCount(classBytesCache.size());
             classBytesCache.clear();
         }
 

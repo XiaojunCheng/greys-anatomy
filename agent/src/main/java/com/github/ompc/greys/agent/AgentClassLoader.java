@@ -7,7 +7,8 @@ import java.net.URLClassLoader;
 /**
  * Agent ClassLoader
  *
- * @author Created by vlinux on 2016/11/7.
+ * @author vlinux
+ * @date 2016/11/7
  */
 public class AgentClassLoader extends URLClassLoader {
 

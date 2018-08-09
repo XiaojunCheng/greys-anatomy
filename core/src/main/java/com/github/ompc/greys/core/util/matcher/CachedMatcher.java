@@ -4,7 +4,9 @@ import java.util.Map;
 
 /**
  * 带缓存的匹配
- * Created by oldmanpushcart@gmail.com on 15/12/12.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/12/12
  */
 public class CachedMatcher<T> implements Matcher<T> {
 

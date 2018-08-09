@@ -28,7 +28,7 @@ public class ResetCommand implements Command {
 
             final EnhancerAffect enhancerAffect = Enhancer.reset(inst);
             printer.print(EMPTY).finish();
-            return new RowAffect(enhancerAffect.cCnt());
+            return new RowAffect(enhancerAffect.countCount());
         };
     }
 

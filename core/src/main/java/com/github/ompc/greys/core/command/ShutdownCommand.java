@@ -89,7 +89,7 @@ public class ShutdownCommand implements Command {
                 cleanSpy();
 
                 printer.println("Greys Server is shut down.").finish();
-                return new RowAffect(enhancerAffect.cCnt());
+                return new RowAffect(enhancerAffect.countCount());
             }
 
         };

@@ -17,8 +17,8 @@ import static java.lang.String.format;
  */
 public final class EnhancerAffect extends Affect {
 
-    private final AtomicInteger cCnt = new AtomicInteger();
-    private final AtomicInteger mCnt = new AtomicInteger();
+    private final AtomicInteger classCount = new AtomicInteger();
+    private final AtomicInteger methodCount = new AtomicInteger();
 
     /**
      * dumpClass的文件存放集合
@@ -29,8 +29,8 @@ public final class EnhancerAffect extends Affect {
     }
 
     public EnhancerAffect(int cCnt, int mCnt) {
-        this.cCnt(cCnt);
-        this.mCnt(mCnt);
+        this.countCount(cCnt);
+        this.methodCount(mCnt);
     }
 
     /**
@@ -39,8 +39,8 @@ public final class EnhancerAffect extends Affect {
      * @param cc 类影响计数
      * @return 当前影响类个数
      */
-    public int cCnt(int cc) {
-        return cCnt.addAndGet(cc);
+    public int countCount(int cc) {
+        return classCount.addAndGet(cc);
     }
 
     /**
@@ -49,8 +49,8 @@ public final class EnhancerAffect extends Affect {
      * @param mc 方法影响计数
      * @return 当前影响方法个数
      */
-    public int mCnt(int mc) {
-        return mCnt.addAndGet(mc);
+    public int methodCount(int mc) {
+        return methodCount.addAndGet(mc);
     }
 
     /**
@@ -58,8 +58,8 @@ public final class EnhancerAffect extends Affect {
      *
      * @return 影响类个数
      */
-    public int cCnt() {
-        return cCnt.get();
+    public int countCount() {
+        return classCount.get();
     }
 
     /**
@@ -67,8 +67,8 @@ public final class EnhancerAffect extends Affect {
      *
      * @return 影响方法个数
      */
-    public int mCnt() {
-        return mCnt.get();
+    public int methodCount() {
+        return methodCount.get();
     }
 
     /**
@@ -91,8 +91,8 @@ public final class EnhancerAffect extends Affect {
             }
         }
         infoSB.append(format("Affect(class-cnt:%d , method-cnt:%d) cost in %s ms.",
-                cCnt(),
-                mCnt(),
+                countCount(),
+                methodCount(),
                 cost()));
         return infoSB.toString();
     }

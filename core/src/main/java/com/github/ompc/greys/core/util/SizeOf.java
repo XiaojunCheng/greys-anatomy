@@ -76,9 +76,9 @@ public class SizeOf {
      */
     private long getRetainedSize(final Object target) {
         long result = getShallowSize(target);
-        final IdentityHashMap<Object, Void> references = new IdentityHashMap<Object, Void>();
+        final IdentityHashMap<Object, Void> references = new IdentityHashMap<>();
         references.put(target, null);
-        final ArrayDeque<Object> unprocessed = new ArrayDeque<Object>();
+        final ArrayDeque<Object> unprocessed = new ArrayDeque<>();
         unprocessed.addFirst(target);
         do {
             Object node = unprocessed.removeFirst();

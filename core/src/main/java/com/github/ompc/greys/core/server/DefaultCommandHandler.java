@@ -239,8 +239,8 @@ public class DefaultCommandHandler implements CommandHandler {
                         printer.println(ABORT_MSG);
                     }
 
-                    ((EnhancerAffect) affect).cCnt(enhancerAffect.cCnt());
-                    ((EnhancerAffect) affect).mCnt(enhancerAffect.mCnt());
+                    ((EnhancerAffect) affect).countCount(enhancerAffect.countCount());
+                    ((EnhancerAffect) affect).methodCount(enhancerAffect.methodCount());
                     ((EnhancerAffect) affect).getClassDumpFiles().addAll(enhancerAffect.getClassDumpFiles());
                 }
             }

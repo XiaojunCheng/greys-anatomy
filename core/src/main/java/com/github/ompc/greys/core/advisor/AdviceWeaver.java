@@ -510,7 +510,7 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
         }
 
         // 编织方法计数
-        affect.mCnt(1);
+        affect.methodCount(1);
 
         return new AdviceAdapter(ASM5, new JSRInlinerAdapter(mv, access, name, desc, signature, exceptions), access, name, desc) {
 

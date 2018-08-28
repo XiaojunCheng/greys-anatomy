@@ -2,8 +2,6 @@ package com.github.ompc.greys.core;
 
 import com.sun.tools.attach.VirtualMachine;
 import com.sun.tools.attach.VirtualMachineDescriptor;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,38 +19,12 @@ public class GreysLauncher {
 
     public GreysLauncher(String[] args) {
         //解析配置文件
-        configure = analyzeConfigure(args);
+        configure = Configure.analyzeConfigure(args);
     }
 
     public void launch() throws Exception {
         //加载agent
         attachAgent(configure);
-    }
-
-    /**
-     * 解析Configure
-     */
-    private static Configure analyzeConfigure(String[] args) {
-        final OptionParser parser = new OptionParser();
-        parser.accepts("pid").withRequiredArg().ofType(int.class).required();
-        parser.accepts("target").withOptionalArg().ofType(String.class);
-        parser.accepts("multi").withOptionalArg().ofType(int.class);
-        parser.accepts("core").withOptionalArg().ofType(String.class);
-        parser.accepts("agent").withOptionalArg().ofType(String.class);
-
-        final OptionSet os = parser.parse(args);
-        final Configure configure = new Configure();
-
-        if (os.has("target")) {
-            final String[] strSplit = ((String) os.valueOf("target")).split(":");
-            configure.setTargetIp(strSplit[0]);
-            configure.setTargetPort(Integer.valueOf(strSplit[1]));
-        }
-
-        configure.setJavaPid((Integer) os.valueOf("pid"));
-        configure.setGreysAgent((String) os.valueOf("agent"));
-        configure.setGreysCore((String) os.valueOf("core"));
-        return configure;
     }
 
     /**
@@ -99,15 +71,20 @@ public class GreysLauncher {
         if (i / j == k) {
             //list all vm description
             List<VirtualMachineDescriptor> vmdList = VirtualMachine.list();
+
             //filter matched vm description
             Optional<VirtualMachineDescriptor> vmdOptional = vmdList.stream().filter(vmd -> vmd.id().equals(Integer.toString(configure.getJavaPid()))).findFirst();
             if (!vmdOptional.isPresent()) {
                 throw new IllegalArgumentException("pid:" + configure.getJavaPid() + " not existed.");
             }
             VirtualMachineDescriptor targetVmd = vmdOptional.get();
+
             VirtualMachine vm = null;
             try {
+                //attach
                 vm = VirtualMachine.attach(targetVmd);
+
+                //load agent
                 vm.loadAgent(configure.getGreysAgent(), configure.getGreysCore() + ";" + configure.toString());
             } finally {
                 if (null != vm) {

@@ -31,7 +31,6 @@ public class GaCheckUtils {
         }
 
         return false;
-
     }
 
     /**
@@ -48,15 +47,9 @@ public class GaCheckUtils {
      * (null,"abc")    == false
      */
     public static <E> boolean isEquals(E src, E target) {
-
-        return null == src
-                && null == target
-                || null != src
-                && null != target
-                && src.equals(target);
-
+        return (null == src && null == target)
+                || (null != src && null != target && src.equals(target));
     }
-
 
 
     public static boolean $(String str) {

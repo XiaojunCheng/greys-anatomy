@@ -1,6 +1,8 @@
 package com.github.ompc.greys.core;
 
 import com.github.ompc.greys.core.util.FeatureCodec;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -86,6 +88,32 @@ public class Configure {
 
     public void setGreysCore(String greysCore) {
         this.greysCore = greysCore;
+    }
+
+    /**
+     * 解析Configure
+     */
+    public static Configure analyzeConfigure(String[] args) {
+        final OptionParser parser = new OptionParser();
+        parser.accepts("pid").withRequiredArg().ofType(int.class).required();
+        parser.accepts("target").withOptionalArg().ofType(String.class);
+        parser.accepts("multi").withOptionalArg().ofType(int.class);
+        parser.accepts("core").withOptionalArg().ofType(String.class);
+        parser.accepts("agent").withOptionalArg().ofType(String.class);
+
+        final OptionSet os = parser.parse(args);
+        final Configure configure = new Configure();
+
+        if (os.has("target")) {
+            final String[] strSplit = ((String) os.valueOf("target")).split(":");
+            configure.setTargetIp(strSplit[0]);
+            configure.setTargetPort(Integer.valueOf(strSplit[1]));
+        }
+
+        configure.setJavaPid((Integer) os.valueOf("pid"));
+        configure.setGreysAgent((String) os.valueOf("agent"));
+        configure.setGreysCore((String) os.valueOf("core"));
+        return configure;
     }
 
     /**

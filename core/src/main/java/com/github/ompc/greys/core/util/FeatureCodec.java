@@ -1,9 +1,6 @@
 package com.github.ompc.greys.core.util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 import static com.github.ompc.greys.core.util.GaCheckUtils.isEquals;
 import static com.github.ompc.greys.core.util.GaCheckUtils.isIn;
@@ -64,21 +61,17 @@ public class FeatureCodec {
     public String toString(final Map<String, String> map) {
 
         final StringBuilder featureSB = new StringBuilder().append(kvSegmentSeparator);
-
-        if (null == map
-                || map.isEmpty()) {
+        if (null == map || map.isEmpty()) {
             return featureSB.toString();
         }
 
         for (Map.Entry<String, String> entry : map.entrySet()) {
-
             featureSB
                     .append(escapeEncode(entry.getKey()))
                     .append(kvSeparator)
                     .append(escapeEncode(entry.getValue()))
                     .append(kvSegmentSeparator)
             ;
-
         }
 
         return featureSB.toString();
@@ -93,14 +86,12 @@ public class FeatureCodec {
      */
     public Map<String, String> toMap(final String featureString) {
 
-        final Map<String, String> map = new HashMap<String, String>();
-
+        final Map<String, String> map = new HashMap<>();
         if (isBlank(featureString)) {
             return map;
         }
 
         for (String kv : escapeSplit(featureString, kvSegmentSeparator)) {
-
             if (isBlank(kv)) {
                 // 过滤掉为空的字符串片段
                 continue;
@@ -114,13 +105,10 @@ public class FeatureCodec {
 
             final String k = ar[0];
             final String v = ar[1];
-            if (!isBlank(k)
-                    && !isBlank(v)) {
+            if (!isBlank(k) && !isBlank(v)) {
                 map.put(escapeDecode(k), escapeDecode(v));
             }
-
         }
-
         return map;
     }
 
@@ -190,19 +178,15 @@ public class FeatureCodec {
      */
     private String[] escapeSplit(String string, char splitEscapeChar) {
 
-        final ArrayList<String> segmentArrayList = new ArrayList<String>();
-        final Stack<Character> decodeStack = new Stack<Character>();
+        final List<String> segmentList = new ArrayList<>();
+        final Stack<Character> decodeStack = new Stack<>();
         final int stringLength = string.length();
-
         for (int index = 0; index < stringLength; index++) {
 
             boolean isArchive = false;
-
             final char c = string.charAt(index);
-
-            // 匹配到转义前缀符
+            //匹配到转义前缀符
             if (isEquals(c, ESCAPE_PREFIX_CHAR)) {
-
                 decodeStack.push(c);
                 if (index < stringLength - 1) {
                     final char nextChar = string.charAt(++index);
@@ -211,34 +195,32 @@ public class FeatureCodec {
 
             }
 
-            // 匹配到分割符
+            //匹配到分割符
             else if (isEquals(c, splitEscapeChar)) {
                 isArchive = true;
             }
 
-            // 匹配到其他字符
+            //匹配到其他字符
             else {
                 decodeStack.push(c);
             }
 
-            if (isArchive
-                    || index == stringLength - 1) {
+            if (isArchive || index == stringLength - 1) {
                 final StringBuilder segmentSB = new StringBuilder(decodeStack.size());
                 while (!decodeStack.isEmpty()) {
                     segmentSB.append(decodeStack.pop());
                 }
 
-                segmentArrayList.add(
-                        segmentSB
-                                .reverse()  // 因为堆栈中是逆序的,所以需要对逆序的字符串再次逆序
-                                .toString() // toString
-                                .trim()     // 考虑到字符串片段可能会出现首尾空格的场景，这里做一个过滤
+                segmentList.add(segmentSB
+                        .reverse()  // 因为堆栈中是逆序的,所以需要对逆序的字符串再次逆序
+                        .toString() // toString
+                        .trim()     // 考虑到字符串片段可能会出现首尾空格的场景，这里做一个过滤
                 );
             }
 
         }
 
-        return segmentArrayList.toArray(new String[segmentArrayList.size()]);
+        return segmentList.toArray(new String[segmentList.size()]);
     }
 
 

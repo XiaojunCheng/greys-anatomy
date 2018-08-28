@@ -1,46 +1,38 @@
 package com.github.ompc.greys.core;
 
+import com.sun.tools.attach.VirtualMachine;
+import com.sun.tools.attach.VirtualMachineDescriptor;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.github.ompc.greys.core.util.GaStringUtils.getCauseMessage;
-import static java.io.File.separator;
-import static java.lang.System.getProperty;
 
 /**
  * Greys启动器
+ *
+ * @author oldmanpushcart@gmail.com
  */
 public class GreysLauncher {
 
-    /**
-     * greys' core jarfile
-     */
-    public static final String CORE_JARFILE =
-            getProperty("user.dir") + separator + "greys-core.jar";
+    private final Configure configure;
 
-    /**
-     * greys' agent jarfile
-     */
-    public static final String AGENT_JARFILE =
-            getProperty("user.dir") + separator + "greys-agent.jar";
+    public GreysLauncher(String[] args) {
+        //解析配置文件
+        configure = analyzeConfigure(args);
+    }
 
-
-    public GreysLauncher(String[] args) throws Exception {
-
-        // 解析配置文件
-        Configure configure = analyzeConfigure(args);
-
-        // 加载agent
+    public void launch() throws Exception {
+        //加载agent
         attachAgent(configure);
-
     }
 
     /**
      * 解析Configure
      */
-    private Configure analyzeConfigure(String[] args) {
+    private static Configure analyzeConfigure(String[] args) {
         final OptionParser parser = new OptionParser();
         parser.accepts("pid").withRequiredArg().ofType(int.class).required();
         parser.accepts("target").withOptionalArg().ofType(String.class);
@@ -60,7 +52,6 @@ public class GreysLauncher {
         configure.setJavaPid((Integer) os.valueOf("pid"));
         configure.setGreysAgent((String) os.valueOf("agent"));
         configure.setGreysCore((String) os.valueOf("core"));
-
         return configure;
     }
 
@@ -81,9 +72,9 @@ public class GreysLauncher {
             }
         }
 
-//        if (null == attachVmdObj) {
-//            // throw new IllegalArgumentException("pid:" + configure.getJavaPid() + " not existed.");
-//        }
+        if (null == attachVmdObj) {
+            throw new IllegalArgumentException("pid:" + configure.getJavaPid() + " not existed.");
+        }
 
         Object vmObj = null;
         try {
@@ -100,15 +91,40 @@ public class GreysLauncher {
             }
         }
 
+        /**
+         * 上面代码等价形式<br/>
+         * 问题一:为什么上面要用反射的方式?
+         */
+        int i = 5, j = 5, k = 2;
+        if (i / j == k) {
+            //list all vm description
+            List<VirtualMachineDescriptor> vmdList = VirtualMachine.list();
+            //filter matched vm description
+            Optional<VirtualMachineDescriptor> vmdOptional = vmdList.stream().filter(vmd -> vmd.id().equals(Integer.toString(configure.getJavaPid()))).findFirst();
+            if (!vmdOptional.isPresent()) {
+                throw new IllegalArgumentException("pid:" + configure.getJavaPid() + " not existed.");
+            }
+            VirtualMachineDescriptor targetVmd = vmdOptional.get();
+            VirtualMachine vm = null;
+            try {
+                vm = VirtualMachine.attach(targetVmd);
+                vm.loadAgent(configure.getGreysAgent(), configure.getGreysCore() + ";" + configure.toString());
+            } finally {
+                if (null != vm) {
+                    vm.detach();
+                }
+            }
+        }
     }
-
 
     public static void main(String[] args) {
         try {
-            new GreysLauncher(args);
+            GreysLauncher launcher = new GreysLauncher(args);
+            launcher.launch();
         } catch (Throwable t) {
             System.err.println("start greys failed, because : " + getCauseMessage(t));
             System.exit(-1);
         }
     }
+
 }

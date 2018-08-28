@@ -16,6 +16,12 @@ public class AgentLauncher {
      */
     private static volatile ClassLoader greysClassLoader;
 
+    /**
+     * args通过
+     *
+     * @param args
+     * @param inst
+     */
     public static void premain(String args, Instrumentation inst) {
         main(args, inst);
     }
@@ -90,9 +96,8 @@ public class AgentLauncher {
 
     private static synchronized void main(final String args, final Instrumentation inst) {
         try {
-
-            // 传递的args参数分两个部分:agentJar路径和agentArgs
-            // 分别是Agent的JAR包路径和期望传递到服务端的参数
+            //传递的args参数分两个部分:agentJar路径和agentArgs
+            //分别是Agent的JAR包路径和期望传递到服务端的参数
             final int index = args.indexOf(';');
             final String agentJar = args.substring(0, index);
             final String agentArgs = args.substring(index, args.length());

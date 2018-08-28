@@ -7,7 +7,6 @@ import jline.console.history.History;
 import jline.console.history.MemoryHistory;
 import org.apache.commons.lang3.StringUtils;
 
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -154,20 +153,15 @@ public class GreysConsole {
     private ConsoleReader initConsoleReader() throws IOException {
         final ConsoleReader console = new ConsoleReader(System.in, System.out);
 
-        console.getKeys().bind("" + CTRL_D, new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    socketWriter.write(CTRL_D);
-                    socketWriter.flush();
-                } catch (Exception e1) {
-                    // 这里是控制台，可能么？
-                    GreysConsole.this.err("write fail : %s", e1.getMessage());
-                    shutdown();
-                }
+        console.getKeys().bind("" + CTRL_D, (ActionListener) e -> {
+            try {
+                socketWriter.write(CTRL_D);
+                socketWriter.flush();
+            } catch (Exception e1) {
+                // 这里是控制台，可能么？
+                GreysConsole.this.err("write fail : %s", e1.getMessage());
+                shutdown();
             }
-
         });
 
         return console;
@@ -247,7 +241,7 @@ public class GreysConsole {
 
     private volatile boolean hackingForReDrawPrompt = true;
 
-    /*
+    /**
      * Console在启动的时候会出现第一个提示符占位不准的BUG
      * 这个我无法很优雅的消除，所以这里做了一个小hacking
      */

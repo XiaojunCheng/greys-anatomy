@@ -17,12 +17,28 @@ import static java.lang.reflect.Modifier.isStatic;
  */
 public class Configure {
 
-    private String targetIp;                // 目标主机IP
-    private int targetPort;                 // 目标进程号
-    private int javaPid;                    // 对方java进程号
-    private int connectTimeout = 6000;      // 连接超时时间(ms)
-    private String greysCore;
+    /**
+     * 目标主机IP
+     */
+    private String targetIp;
+    /**
+     * 目标进程号
+     */
+    private int targetPort;
+    /**
+     * 对方java进程号
+     */
+    private int javaPid;
+    /**
+     * 连接超时时间(ms)
+     */
+    private int connectTimeout = 6000;
+    /**
+     * 包含agent的jar包
+     */
     private String greysAgent;
+
+    private String greysCore;
 
     public String getTargetIp() {
         return targetIp;
@@ -99,7 +115,6 @@ public class Configure {
             } catch (Throwable t) {
                 //
             }
-
         }
 
         return codec.toString(map);

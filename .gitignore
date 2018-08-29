@@ -2,9 +2,11 @@
 /agent/greys-agent.iml
 /core/core.iml
 /agent/agent.iml
+/debug/debug.iml
 /target
 /core/target
 /agent/target
+/debug/target
 /.settings
 /.classpath
 /.project

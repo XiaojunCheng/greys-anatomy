@@ -1,10 +1,6 @@
 package com.github.ompc.greys.core;
 
-import com.sun.tools.attach.VirtualMachine;
-import com.sun.tools.attach.VirtualMachineDescriptor;
-
 import java.util.List;
-import java.util.Optional;
 
 import static com.github.ompc.greys.core.util.GaStringUtils.getCauseMessage;
 
@@ -67,31 +63,31 @@ public class GreysLauncher {
          * 上面代码等价形式<br/>
          * 问题一:为什么上面要用反射的方式?
          */
-        int i = 5, j = 5, k = 2;
-        if (i / j == k) {
-            //list all vm description
-            List<VirtualMachineDescriptor> vmdList = VirtualMachine.list();
-
-            //filter matched vm description
-            Optional<VirtualMachineDescriptor> vmdOptional = vmdList.stream().filter(vmd -> vmd.id().equals(Integer.toString(configure.getJavaPid()))).findFirst();
-            if (!vmdOptional.isPresent()) {
-                throw new IllegalArgumentException("pid:" + configure.getJavaPid() + " not existed.");
-            }
-            VirtualMachineDescriptor targetVmd = vmdOptional.get();
-
-            VirtualMachine vm = null;
-            try {
-                //attach
-                vm = VirtualMachine.attach(targetVmd);
-
-                //load agent
-                vm.loadAgent(configure.getGreysAgent(), configure.getGreysCore() + ";" + configure.toString());
-            } finally {
-                if (null != vm) {
-                    vm.detach();
-                }
-            }
-        }
+//        int i = 5, j = 5, k = 2;
+//        if (i / j == k) {
+//            //list all vm description
+//            List<VirtualMachineDescriptor> vmdList = VirtualMachine.list();
+//
+//            //filter matched vm description
+//            Optional<VirtualMachineDescriptor> vmdOptional = vmdList.stream().filter(vmd -> vmd.id().equals(Integer.toString(configure.getJavaPid()))).findFirst();
+//            if (!vmdOptional.isPresent()) {
+//                throw new IllegalArgumentException("pid:" + configure.getJavaPid() + " not existed.");
+//            }
+//            VirtualMachineDescriptor targetVmd = vmdOptional.get();
+//
+//            VirtualMachine vm = null;
+//            try {
+//                //attach
+//                vm = VirtualMachine.attach(targetVmd);
+//
+//                //load agent
+//                vm.loadAgent(configure.getGreysAgent(), configure.getGreysCore() + ";" + configure.toString());
+//            } finally {
+//                if (null != vm) {
+//                    vm.detach();
+//                }
+//            }
+//        }
     }
 
     public static void main(String[] args) {

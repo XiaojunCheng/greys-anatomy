@@ -170,7 +170,7 @@ public class MonitorCommand implements Command {
                              * 监控数据
                              */
                             private final ConcurrentHashMap<Key, AtomicReference<Data>> monitorData
-                                    = new ConcurrentHashMap<Key, AtomicReference<Data>>();
+                                    = new ConcurrentHashMap<>();
 
                             private double div(double a, double b) {
                                 if (b == 0) {
@@ -274,7 +274,7 @@ public class MonitorCommand implements Command {
                                 while (true) {
                                     final AtomicReference<Data> value = monitorData.get(key);
                                     if (null == value) {
-                                        monitorData.putIfAbsent(key, new AtomicReference<Data>(new Data()));
+                                        monitorData.putIfAbsent(key, new AtomicReference<>(new Data()));
                                         // 这里不去判断返回值，用continue去强制获取一次
                                         continue;
                                     }

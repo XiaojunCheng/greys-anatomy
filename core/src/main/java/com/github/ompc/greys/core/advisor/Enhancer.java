@@ -352,7 +352,7 @@ public class Enhancer implements ClassFileTransformer {
 
     private static Map<Class<?>, Matcher<AsmMethod>> toEnhanceMap(final PointCut pointCut) {
 
-        final Map<Class<?>, Matcher<AsmMethod>> enhanceMap = new LinkedHashMap<Class<?>, Matcher<AsmMethod>>();
+        final Map<Class<?>, Matcher<AsmMethod>> enhanceMap = new LinkedHashMap<>();
         final Collection<Class<?>> classes = pointCut.isIncludeSubClass()
                 ? reflectManager.searchClassWithSubClass(pointCut.getClassMatcher())
                 : reflectManager.searchClass(pointCut.getClassMatcher());

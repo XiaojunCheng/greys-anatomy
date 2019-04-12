@@ -20,16 +20,16 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>com.github.ompc.greys</groupId>
-            <artifactId>greys-agent</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.ompc.greys</groupId>
-            <artifactId>greys-core</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.github.ompc.greys</groupId>-->
+            <!--<artifactId>greys-agent</artifactId>-->
+            <!--<version>1.0.0-SNAPSHOT</version>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+            <!--<groupId>com.github.ompc.greys</groupId>-->
+            <!--<artifactId>greys-core</artifactId>-->
+            <!--<version>1.0.0-SNAPSHOT</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>

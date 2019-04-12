@@ -311,7 +311,7 @@ public class GaStringUtils {
         final Thread currentThread = Thread.currentThread();
         final StackTraceElement[] stackTraceElementArray = currentThread.getStackTrace();
 
-        final GaStack<StackTraceElement> elementStack = new ThreadUnsafeGaStack<StackTraceElement>();
+        final GaStack<StackTraceElement> elementStack = new ThreadUnsafeGaStack<>();
 
         final int length = stackTraceElementArray.length;
 

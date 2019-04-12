@@ -32,9 +32,9 @@ import static java.lang.Thread.currentThread;
  */
 class TracingAsmCodeLock extends AsmCodeLock {
 
-    TracingAsmCodeLock(AdviceAdapter aa) {
+    TracingAsmCodeLock(AdviceAdapter adviceAdapter) {
         super(
-                aa,
+                adviceAdapter,
                 new int[]{
                         ICONST_0, POP
                 },
@@ -77,7 +77,6 @@ class AsmMethodMatcher implements Matcher<AsmMethod> {
     }
 
 }
-
 
 /**
  * TryCatch块,用于ExceptionsTable重排序
@@ -139,7 +138,6 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
         }
 
     };
-
 
     /**
      * 方法开始<br/>
@@ -492,6 +490,7 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
         return null == mv
                 || isAbstract(access)
                 || !asmMethodMatcher.matching(new AsmMethod(name, desc))
+                //静态块
                 || isEquals(name, "<clinit>");
     }
 

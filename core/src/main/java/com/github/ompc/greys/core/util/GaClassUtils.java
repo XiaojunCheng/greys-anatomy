@@ -34,7 +34,7 @@ public class GaClassUtils {
     public static Set<Class<?>> scanPackage(final ClassLoader targetClassLoader, final String targetPackageName) {
 
         // 第一个class类的集合
-        Set<Class<?>> classes = new LinkedHashSet<Class<?>>();
+        Set<Class<?>> classes = new LinkedHashSet<>();
         // 是否循环迭代
         // 获取包的名字 并进行替换
         String packageName = targetPackageName;

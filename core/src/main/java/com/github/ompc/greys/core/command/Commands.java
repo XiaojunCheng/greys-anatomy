@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class Commands {
 
-    private final Map<String, Class<?>> commands = new HashMap<String, Class<?>>();
+    private final Map<String, Class<?>> commands = new HashMap<>();
 
     private Commands() {
 

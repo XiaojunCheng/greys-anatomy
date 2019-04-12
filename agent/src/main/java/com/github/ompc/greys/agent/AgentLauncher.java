@@ -53,7 +53,6 @@ public class AgentLauncher {
 
             // 初始化全局间谍
             Spy.initForAgentLauncher(
-                    classLoader,
                     adviceWeaverClass.getMethod("methodOnBegin",
                             int.class,
                             ClassLoader.class,
@@ -91,7 +90,8 @@ public class AgentLauncher {
             );
         }
 
-        return greysClassLoader = classLoader;
+        greysClassLoader = classLoader;
+        return greysClassLoader;
     }
 
     private static synchronized void main(final String args, final Instrumentation inst) {
@@ -100,7 +100,7 @@ public class AgentLauncher {
             //分别是Agent的JAR包路径和期望传递到服务端的参数
             final int index = args.indexOf(';');
             final String agentJar = args.substring(0, index);
-            final String agentArgs = args.substring(index, args.length());
+            final String agentArgs = args.substring(index);
 
             // 将Spy添加到BootstrapClassLoader
             inst.appendToBootstrapClassLoaderSearch(
@@ -128,7 +128,7 @@ public class AgentLauncher {
                     .getMethod("getInstance", int.class, Instrumentation.class)
                     .invoke(null, javaPid, inst);
 
-            // gaServer.isBind()
+            //gaServer.isBind()
             final boolean isBind = (Boolean) classOfGaServer.getMethod("isBind").invoke(objectOfGaServer);
 
             if (!isBind) {

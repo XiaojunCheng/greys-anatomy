@@ -178,7 +178,7 @@ public class HelpCommand implements Command {
     }
 
 
-    /*
+    /**
      * 输出主帮助菜单
      */
     private String mainHelp() {
@@ -189,7 +189,7 @@ public class HelpCommand implements Command {
         });
 
         final Map<String, Class<?>> commandMap = Commands.getInstance().listCommands();
-        final List<Class<?>> classes = new ArrayList<Class<?>>(commandMap.values());
+        final List<Class<?>> classes = new ArrayList<>(commandMap.values());
         Collections.sort(classes, new Comparator<Class<?>>() {
 
             @Override

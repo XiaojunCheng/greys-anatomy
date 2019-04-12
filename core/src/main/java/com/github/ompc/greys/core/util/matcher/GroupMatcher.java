@@ -62,7 +62,7 @@ public interface GroupMatcher<T> extends Matcher<T> {
         private final Collection<Matcher<T>> matchers;
 
         public Or() {
-            this.matchers = new ArrayList<Matcher<T>>();
+            this.matchers = new ArrayList<>();
         }
 
         /**

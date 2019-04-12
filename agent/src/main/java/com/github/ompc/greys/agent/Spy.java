@@ -30,8 +30,6 @@ public class Spy {
      * 用于启动线程初始化
      */
     public static void initForAgentLauncher(
-            @Deprecated
-                    ClassLoader classLoader,
             Method onBeforeMethod,
             Method onReturnMethod,
             Method onThrowsMethod,

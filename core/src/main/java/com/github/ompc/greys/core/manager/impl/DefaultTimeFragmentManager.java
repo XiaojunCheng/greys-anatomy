@@ -27,7 +27,7 @@ public class DefaultTimeFragmentManager implements TimeFragmentManager {
 
     // 时间碎片存储
     private final Map<Integer, TimeFragment> timeFragmentStore
-            = new LinkedHashMap<Integer, TimeFragment>();
+            = new LinkedHashMap<>();
 
     /*
      * 生成下一条序列
@@ -58,7 +58,7 @@ public class DefaultTimeFragmentManager implements TimeFragmentManager {
 
     @Override
     public ArrayList<TimeFragment> list() {
-        return new ArrayList<TimeFragment>(timeFragmentStore.values());
+        return new ArrayList<>(timeFragmentStore.values());
     }
 
     /*
@@ -79,7 +79,7 @@ public class DefaultTimeFragmentManager implements TimeFragmentManager {
 
     @Override
     public ArrayList<TimeFragment> search(final String express) {
-        final ArrayList<TimeFragment> timeFragments = new ArrayList<TimeFragment>();
+        final ArrayList<TimeFragment> timeFragments = new ArrayList<>();
         for (TimeFragment timeFragment : timeFragmentStore.values()) {
             if (is(timeFragment, express)) {
                 timeFragments.add(timeFragment);

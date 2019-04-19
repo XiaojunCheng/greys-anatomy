@@ -42,7 +42,6 @@ class GaAttachment {
     private LineDecodeState lineDecodeState;
     private ByteBuffer lineByteBuffer;
 
-
     GaAttachment(int bufferSize, Session session) {
         this.lineByteBuffer = ByteBuffer.allocate(bufferSize);
         this.bufferSize = bufferSize;
@@ -53,7 +52,6 @@ class GaAttachment {
     public LineDecodeState getLineDecodeState() {
         return lineDecodeState;
     }
-
 
     public void setLineDecodeState(LineDecodeState lineDecodeState) {
         this.lineDecodeState = lineDecodeState;
@@ -143,7 +141,6 @@ public class GaServer {
         initForManager(inst);
 
         Runtime.getRuntime().addShutdownHook(jvmShutdownHooker);
-
     }
 
     /*
@@ -314,7 +311,7 @@ public class GaServer {
                 logger.info("client={}@session[{}] was closed.", socketChannel, session.getSessionId());
                 // closeSocketChannel(key, socketChannel);
                 session.destroy();
-                if(session.isLocked()) {
+                if (session.isLocked()) {
                     session.unLock();
                 }
                 return;

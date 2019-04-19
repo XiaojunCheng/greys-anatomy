@@ -20,7 +20,6 @@ public class AgentLauncher {
         main(args, inst);
     }
 
-
     /**
      * 重置greys的classloader<br/>
      * 让下次再次启动时有机会重新加载
@@ -47,7 +46,6 @@ public class AgentLauncher {
 
             // 初始化全局间谍
             Spy.initForAgentLauncher(
-                    classLoader,
                     adviceWeaverClass.getMethod("methodOnBegin",
                             int.class,
                             ClassLoader.class,
@@ -95,7 +93,7 @@ public class AgentLauncher {
             // 分别是Agent的JAR包路径和期望传递到服务端的参数
             final int index = args.indexOf(';');
             final String agentJar = args.substring(0, index);
-            final String agentArgs = args.substring(index, args.length());
+            final String agentArgs = args.substring(index);
 
             // 将Spy添加到BootstrapClassLoader
             inst.appendToBootstrapClassLoaderSearch(

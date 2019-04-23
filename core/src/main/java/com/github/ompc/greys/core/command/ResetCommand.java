@@ -25,20 +25,11 @@ public class ResetCommand implements Command {
     @Override
     public Action getAction() {
 
-        return new RowAction() {
+        return (RowAction) (session, inst, printer) -> {
 
-            @Override
-            public RowAffect action(
-                    Session session,
-                    Instrumentation inst,
-                    Printer printer) throws Throwable {
-
-                final EnhancerAffect enhancerAffect = Enhancer.reset(inst);
-                printer.print(EMPTY).finish();
-                return new RowAffect(enhancerAffect.cCnt());
-            }
-
-
+            final EnhancerAffect enhancerAffect = Enhancer.reset(inst);
+            printer.print(EMPTY).finish();
+            return new RowAffect(enhancerAffect.cCnt());
         };
     }
 

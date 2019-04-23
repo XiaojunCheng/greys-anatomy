@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class Commands {
 
-    private final Map<String, Class<?>> commands = new HashMap<String, Class<?>>();
+    private final Map<String, Class<?>> commands = new HashMap<>();
 
     private Commands() {
 
@@ -186,7 +186,7 @@ public class Commands {
      * @return 返回当前版本所支持的精简命令集合
      */
     public Map<String, Class<?>> listCommands() {
-        return new HashMap<String, Class<?>>(commands);
+        return new HashMap<>(commands);
     }
 
     private static final Commands instance = new Commands();

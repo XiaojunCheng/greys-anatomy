@@ -22,14 +22,9 @@ public class VersionCommand implements Command {
 
     @Override
     public Action getAction() {
-        return new RowAction() {
-
-            @Override
-            public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
-                printer.print(getLogo()).finish();
-                return new RowAffect(1);
-            }
-
+        return (RowAction) (session, inst, printer) -> {
+            printer.print(getLogo()).finish();
+            return new RowAffect(1);
         };
     }
 

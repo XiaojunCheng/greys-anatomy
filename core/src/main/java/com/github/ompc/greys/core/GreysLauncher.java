@@ -1,5 +1,6 @@
 package com.github.ompc.greys.core;
 
+import com.sun.tools.attach.VirtualMachine;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
@@ -81,9 +82,9 @@ public class GreysLauncher {
             }
         }
 
-//        if (null == attachVmdObj) {
-//            // throw new IllegalArgumentException("pid:" + configure.getJavaPid() + " not existed.");
-//        }
+        if (null == attachVmdObj) {
+            throw new IllegalArgumentException("pid:" + configure.getJavaPid() + " not existed.");
+        }
 
         Object vmObj = null;
         try {

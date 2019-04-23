@@ -74,24 +74,20 @@ public class ShutdownCommand implements Command {
 
     @Override
     public Action getAction() {
-        return new RowAction() {
-            @Override
-            public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
+        return (RowAction) (session, inst, printer) -> {
 
-                // 退出之前需要重置所有的增强类
-                // 重置之前增强的类
-                final EnhancerAffect enhancerAffect = Enhancer.reset(inst);
+            // 退出之前需要重置所有的增强类
+            // 重置之前增强的类
+            final EnhancerAffect enhancerAffect = Enhancer.reset(inst);
 
-                // reset for agent ClassLoader
-                reset();
+            // reset for agent ClassLoader
+            reset();
 
-                // cleanSpy the spy
-                cleanSpy();
+            // cleanSpy the spy
+            cleanSpy();
 
-                printer.println("Greys Server is shut down.").finish();
-                return new RowAffect(enhancerAffect.cCnt());
-            }
-
+            printer.println("Greys Server is shut down.").finish();
+            return new RowAffect(enhancerAffect.cCnt());
         };
     }
 

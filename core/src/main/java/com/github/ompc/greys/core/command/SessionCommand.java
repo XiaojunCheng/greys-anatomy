@@ -34,45 +34,40 @@ public class SessionCommand implements Command {
 
     @Override
     public Action getAction() {
-        return new RowAction() {
+        return (RowAction) (session, inst, printer) -> {
 
-            @Override
-            public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
+            // 设置字符集
+            if (isNotBlank(charsetString)) {
 
-                // 设置字符集
-                if (isNotBlank(charsetString)) {
+                try {
+                    final Charset newCharset = Charset.forName(charsetString);
+                    final Charset beforeCharset = session.getCharset();
+                    session.setCharset(newCharset);
 
-                    try {
-                        final Charset newCharset = Charset.forName(charsetString);
-                        final Charset beforeCharset = session.getCharset();
-                        session.setCharset(newCharset);
-
-                        printer.println(format("Character setValue is modified. [%s] -> [%s]",
-                                beforeCharset,
-                                newCharset))
-                                .finish();
-
-                    } catch (UnsupportedCharsetException e) {
-                        printer.println(format("Desupported character setValue : \"%s\"", charsetString)).finish();
-                    }
-
-                } else {
-                    printer.print(sessionToString(session)).finish();
-                }
-
-                // 设置会话静默
-                if (null != silent) {
-                    final boolean beforeSilent = session.isSilent();
-                    session.setSilent(silent);
-                    printer.println(format("Silent setValue is modified. [%s] -> [%s]",
-                            beforeSilent,
-                            session.isSilent()))
+                    printer.println(format("Character setValue is modified. [%s] -> [%s]",
+                            beforeCharset,
+                            newCharset))
                             .finish();
+
+                } catch (UnsupportedCharsetException e) {
+                    printer.println(format("Desupported character setValue : \"%s\"", charsetString)).finish();
                 }
 
-                return new RowAffect(1);
+            } else {
+                printer.print(sessionToString(session)).finish();
             }
 
+            // 设置会话静默
+            if (null != silent) {
+                final boolean beforeSilent = session.isSilent();
+                session.setSilent(silent);
+                printer.println(format("Silent setValue is modified. [%s] -> [%s]",
+                        beforeSilent,
+                        session.isSilent()))
+                        .finish();
+            }
+
+            return new RowAffect(1);
         };
     }
 

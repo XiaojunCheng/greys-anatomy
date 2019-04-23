@@ -50,7 +50,7 @@ public class GaStringUtils {
      */
     public static String[] splitForArgument(String argumentString) {
 
-        final ArrayList<String> stringList = new ArrayList<String>();
+        final ArrayList<String> stringList = new ArrayList<>();
 
         if (StringUtils.isNotBlank(argumentString)) {
 
@@ -66,13 +66,10 @@ public class GaStringUtils {
             // 是否在片段中
             boolean isInSegment = true;
 
-
             for (char c : argumentString.toCharArray()) {
 
                 switch (state) {
-
                     case READ_CHAR: {
-
                         // 匹配到转义符时，任何时候都跳转到转义处理
                         if (GaCheckUtils.isEquals(c, '\\')) {
                             state = SPLIT_FOR_ARGUMENT_STATE.ESCAPE_CHAR;

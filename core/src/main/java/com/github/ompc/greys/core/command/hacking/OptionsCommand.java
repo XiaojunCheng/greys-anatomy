@@ -83,33 +83,27 @@ public class OptionsCommand implements Command {
     }
 
     private RowAction doShow() {
-        return new RowAction() {
-            @Override
-            public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
-                final RowAffect affect = new RowAffect();
-                final Collection<Field> fields = findOptions(new TrueMatcher<String>());
-                printer.print(drawShowTable(fields)).finish();
-                affect.rCnt(fields.size());
-                return affect;
-            }
+        return (session, inst, printer) -> {
+            final RowAffect affect = new RowAffect();
+            final Collection<Field> fields = findOptions(new TrueMatcher<>());
+            printer.print(drawShowTable(fields)).finish();
+            affect.rCnt(fields.size());
+            return affect;
         };
     }
 
     private RowAction doShowName() {
-        return new RowAction() {
-            @Override
-            public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
-                final RowAffect affect = new RowAffect();
-                final Collection<Field> fields = findOptions(new EqualsMatcher<String>(optionName));
-                printer.print(drawShowTable(fields)).finish();
-                affect.rCnt(fields.size());
-                return affect;
-            }
+        return (session, inst, printer) -> {
+            final RowAffect affect = new RowAffect();
+            final Collection<Field> fields = findOptions(new EqualsMatcher<>(optionName));
+            printer.print(drawShowTable(fields)).finish();
+            affect.rCnt(fields.size());
+            return affect;
         };
     }
 
     private Collection<Field> findOptions(Matcher<String> optionNameMatcher) {
-        final Collection<Field> matchFields = new ArrayList<Field>();
+        final Collection<Field> matchFields = new ArrayList<>();
         for (final Field optionField : FieldUtils.getAllFields(GlobalOptions.class)) {
             if (!optionField.isAnnotationPresent(Option.class)) {
                 continue;
@@ -155,60 +149,57 @@ public class OptionsCommand implements Command {
 
 
     private RowAction doChangeNameValue() {
-        return new RowAction() {
-            @Override
-            public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
+        return (session, inst, printer) -> {
 
-                final RowAffect affect = new RowAffect();
-                final Collection<Field> fields = findOptions(new EqualsMatcher<String>(optionName));
+            final RowAffect affect = new RowAffect();
+            final Collection<Field> fields = findOptions(new EqualsMatcher<>(optionName));
 
-                // name not exists
-                if (fields.isEmpty()) {
-                    printer.println(format("options[%s] not found.", optionName)).finish();
-                    return affect;
-                }
-
-                final Field field = fields.iterator().next();
-                final Option optionAnnotation = field.getAnnotation(Option.class);
-                final Class<?> type = field.getType();
-                final Object beforeValue = FieldUtils.readStaticField(field);
-                final Object afterValue;
-
-                try {
-                    // try to case string to type
-                    if (isIn(type, int.class, Integer.class)) {
-                        writeStaticField(field, afterValue = Integer.valueOf(optionValue));
-                    } else if (isIn(type, long.class, Long.class)) {
-                        writeStaticField(field, afterValue = Long.valueOf(optionValue));
-                    } else if (isIn(type, boolean.class, Boolean.class)) {
-                        writeStaticField(field, afterValue = Boolean.valueOf(optionValue));
-                    } else if (isIn(type, double.class, Double.class)) {
-                        writeStaticField(field, afterValue = Double.valueOf(optionValue));
-                    } else if (isIn(type, float.class, Float.class)) {
-                        writeStaticField(field, afterValue = Float.valueOf(optionValue));
-                    } else if (isIn(type, byte.class, Byte.class)) {
-                        writeStaticField(field, afterValue = Byte.valueOf(optionValue));
-                    } else if (isIn(type, short.class, Short.class)) {
-                        writeStaticField(field, afterValue = Short.valueOf(optionValue));
-                    } else {
-                        printer.println(format("Options[%s] type[%s] desupported.", optionName, type.getSimpleName())).finish();
-                        return affect;
-                    }
-
-                    affect.rCnt(1);
-                } catch (Throwable t) {
-                    printer.println(format("Cannot cast option value[%s] to type[%s].", optionValue, type.getSimpleName())).finish();
-                    return affect;
-                }
-
-                final TTable tTable = new TTable(4)
-                        .padding(1)
-                        .addRow("NAME", "BEFORE-VALUE", "AFTER-VALUE")
-                        .addRow(optionAnnotation.name(), newString(beforeValue), newString(afterValue));
-
-                printer.print(tTable.rendering()).finish();
+            // name not exists
+            if (fields.isEmpty()) {
+                printer.println(format("options[%s] not found.", optionName)).finish();
                 return affect;
             }
+
+            final Field field = fields.iterator().next();
+            final Option optionAnnotation = field.getAnnotation(Option.class);
+            final Class<?> type = field.getType();
+            final Object beforeValue = FieldUtils.readStaticField(field);
+            final Object afterValue;
+
+            try {
+                // try to case string to type
+                if (isIn(type, int.class, Integer.class)) {
+                    writeStaticField(field, afterValue = Integer.valueOf(optionValue));
+                } else if (isIn(type, long.class, Long.class)) {
+                    writeStaticField(field, afterValue = Long.valueOf(optionValue));
+                } else if (isIn(type, boolean.class, Boolean.class)) {
+                    writeStaticField(field, afterValue = Boolean.valueOf(optionValue));
+                } else if (isIn(type, double.class, Double.class)) {
+                    writeStaticField(field, afterValue = Double.valueOf(optionValue));
+                } else if (isIn(type, float.class, Float.class)) {
+                    writeStaticField(field, afterValue = Float.valueOf(optionValue));
+                } else if (isIn(type, byte.class, Byte.class)) {
+                    writeStaticField(field, afterValue = Byte.valueOf(optionValue));
+                } else if (isIn(type, short.class, Short.class)) {
+                    writeStaticField(field, afterValue = Short.valueOf(optionValue));
+                } else {
+                    printer.println(format("Options[%s] type[%s] desupported.", optionName, type.getSimpleName())).finish();
+                    return affect;
+                }
+
+                affect.rCnt(1);
+            } catch (Throwable t) {
+                printer.println(format("Cannot cast option value[%s] to type[%s].", optionValue, type.getSimpleName())).finish();
+                return affect;
+            }
+
+            final TTable tTable = new TTable(4)
+                    .padding(1)
+                    .addRow("NAME", "BEFORE-VALUE", "AFTER-VALUE")
+                    .addRow(optionAnnotation.name(), newString(beforeValue), newString(afterValue));
+
+            printer.print(tTable.rendering()).finish();
+            return affect;
         };
     }
 

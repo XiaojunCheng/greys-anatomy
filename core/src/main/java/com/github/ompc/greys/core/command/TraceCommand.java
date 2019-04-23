@@ -77,152 +77,145 @@ public class TraceCommand implements Command {
     @Override
     public Action getAction() {
 
-        return new GetEnhancerAction() {
+        return (GetEnhancerAction) (session, inst, printer) -> new GetEnhancer() {
 
             @Override
-            public GetEnhancer action(Session session, Instrumentation inst, final Printer printer) throws Throwable {
-                return new GetEnhancer() {
+            public PointCut getPointCut() {
+                return new PointCut(
+                        new ClassMatcher(new PatternMatcher(isRegEx, classPattern)),
+                        new GaMethodMatcher(new PatternMatcher(isRegEx, methodPattern)),
+
+                        // don't include the sub class when tracing...
+                        // fixed for #94
+                        // GlobalOptions.isTracingSubClass
+
+                        // include sub class when tracing now
+                        true
+                );
+            }
+
+            @Override
+            public AdviceListener getAdviceListener() {
+                return new ReflectAdviceTracingListenerAdapter() {
+
+                    private final AtomicInteger timesRef = new AtomicInteger();
+                    private final InvokeCost invokeCost = new InvokeCost();
+                    private final ThreadLocal<Trace> traceRef = new ThreadLocal<Trace>();
 
                     @Override
-                    public PointCut getPointCut() {
-                        return new PointCut(
-                                new ClassMatcher(new PatternMatcher(isRegEx, classPattern)),
-                                new GaMethodMatcher(new PatternMatcher(isRegEx, methodPattern)),
+                    public void tracingInvokeBefore(
+                            Integer tracingLineNumber,
+                            String tracingClassName,
+                            String tracingMethodName,
+                            String tracingMethodDesc) throws Throwable {
+                        final Trace trace = traceRef.get();
+                        if (null == tracingLineNumber) {
+                            trace.tTree.begin(tranClassName(tracingClassName) + ":" + tracingMethodName + "()");
+                        } else {
+                            trace.tTree.begin(tranClassName(tracingClassName) + ":" + tracingMethodName + "(@" + tracingLineNumber + ")");
+                        }
 
-                                // don't include the sub class when tracing...
-                                // fixed for #94
-                                // GlobalOptions.isTracingSubClass
+                    }
 
-                                // include sub class when tracing now
-                                true
+                    @Override
+                    public void tracingInvokeAfter(
+                            Integer tracingLineNumber,
+                            String tracingClassName,
+                            String tracingMethodName,
+                            String tracingMethodDesc) throws Throwable {
+                        final Trace trace = traceRef.get();
+                        if (!trace.tTree.isTop()) {
+                            trace.tTree.end();
+                        }
+
+                    }
+
+                    @Override
+                    public void tracingInvokeThrowing(
+                            Integer tracingLineNumber,
+                            String tracingClassName,
+                            String tracingMethodName,
+                            String tracingMethodDesc,
+                            String throwException) throws Throwable {
+                        final Trace trace = traceRef.get();
+                        if (!trace.tTree.isTop()) {
+                            trace.tTree.set(trace.tTree.get() + "[throw " + throwException + "]").end();
+                        }
+
+                    }
+
+                    private String getTitle(final Advice advice) {
+                        final StringBuilder titleSB = new StringBuilder("Tracing for : ")
+                                .append(getThreadInfo());
+                        if (advice.isTraceSupport()) {
+                            titleSB.append(";traceId=").append(advice.getTraceId()).append(";");
+                        }
+                        return titleSB.toString();
+                    }
+
+                    @Override
+                    public void before(Advice advice) throws Throwable {
+
+                        invokeCost.begin();
+                        traceRef.set(
+                                new Trace(
+                                        new TTree(true, getTitle(advice))
+                                                .begin(advice.getClazz().getName() + ":" + advice.getMethod().getName() + "()")
+                                )
                         );
                     }
 
                     @Override
-                    public AdviceListener getAdviceListener() {
-                        return new ReflectAdviceTracingListenerAdapter() {
-
-                            private final AtomicInteger timesRef = new AtomicInteger();
-                            private final InvokeCost invokeCost = new InvokeCost();
-                            private final ThreadLocal<Trace> traceRef = new ThreadLocal<Trace>();
-
-                            @Override
-                            public void tracingInvokeBefore(
-                                    Integer tracingLineNumber,
-                                    String tracingClassName,
-                                    String tracingMethodName,
-                                    String tracingMethodDesc) throws Throwable {
-                                final Trace trace = traceRef.get();
-                                if (null == tracingLineNumber) {
-                                    trace.tTree.begin(tranClassName(tracingClassName) + ":" + tracingMethodName + "()");
-                                } else {
-                                    trace.tTree.begin(tranClassName(tracingClassName) + ":" + tracingMethodName + "(@" + tracingLineNumber + ")");
-                                }
-
-                            }
-
-                            @Override
-                            public void tracingInvokeAfter(
-                                    Integer tracingLineNumber,
-                                    String tracingClassName,
-                                    String tracingMethodName,
-                                    String tracingMethodDesc) throws Throwable {
-                                final Trace trace = traceRef.get();
-                                if (!trace.tTree.isTop()) {
-                                    trace.tTree.end();
-                                }
-
-                            }
-
-                            @Override
-                            public void tracingInvokeThrowing(
-                                    Integer tracingLineNumber,
-                                    String tracingClassName,
-                                    String tracingMethodName,
-                                    String tracingMethodDesc,
-                                    String throwException) throws Throwable {
-                                final Trace trace = traceRef.get();
-                                if (!trace.tTree.isTop()) {
-                                    trace.tTree.set(trace.tTree.get() + "[throw " + throwException + "]").end();
-                                }
-
-                            }
-
-                            private String getTitle(final Advice advice) {
-                                final StringBuilder titleSB = new StringBuilder("Tracing for : ")
-                                        .append(getThreadInfo());
-                                if (advice.isTraceSupport()) {
-                                    titleSB.append(";traceId=").append(advice.getTraceId()).append(";");
-                                }
-                                return titleSB.toString();
-                            }
-
-                            @Override
-                            public void before(Advice advice) throws Throwable {
-
-                                invokeCost.begin();
-                                traceRef.set(
-                                        new Trace(
-                                                new TTree(true, getTitle(advice))
-                                                        .begin(advice.getClazz().getName() + ":" + advice.getMethod().getName() + "()")
-                                        )
-                                );
-                            }
-
-                            @Override
-                            public void afterReturning(Advice advice) throws Throwable {
-                                final Trace trace = traceRef.get();
-                                if (!trace.tTree.isTop()) {
-                                    trace.tTree.end();
-                                }
-                            }
-
-                            @Override
-                            public void afterThrowing(Advice advice) throws Throwable {
-                                final Trace trace = traceRef.get();
-                                trace.tTree.begin("throw:" + advice.throwExp.getClass().getName() + "()").end();
-                                if (!trace.tTree.isTop()) {
-                                    trace.tTree.end();
-                                }
-
-                                // 这里将堆栈的end全部补上
-                                //while (entity.tracingDeep-- >= 0) {
-                                //    entity.tTree.end();
-                                //}
-
-                            }
-
-                            private boolean isInCondition(Advice advice, long cost) {
-                                try {
-                                    return isBlank(conditionExpress)
-                                            || newExpress(advice).bind("cost", cost).is(conditionExpress);
-                                } catch (ExpressException e) {
-                                    return false;
-                                }
-                            }
-
-                            private boolean isOverThreshold(int currentTimes) {
-                                return null != threshold
-                                        && currentTimes >= threshold;
-                            }
-
-                            @Override
-                            public void afterFinishing(Advice advice) throws Throwable {
-                                final long cost = invokeCost.cost();
-                                if (isInCondition(advice, cost)) {
-                                    final Trace trace = traceRef.get();
-                                    printer.println(trace.tTree.rendering());
-                                    if (isOverThreshold(timesRef.incrementAndGet())) {
-                                        printer.finish();
-                                    }
-                                }
-                            }
-
-                        };
+                    public void afterReturning(Advice advice) throws Throwable {
+                        final Trace trace = traceRef.get();
+                        if (!trace.tTree.isTop()) {
+                            trace.tTree.end();
+                        }
                     }
+
+                    @Override
+                    public void afterThrowing(Advice advice) throws Throwable {
+                        final Trace trace = traceRef.get();
+                        trace.tTree.begin("throw:" + advice.throwExp.getClass().getName() + "()").end();
+                        if (!trace.tTree.isTop()) {
+                            trace.tTree.end();
+                        }
+
+                        // 这里将堆栈的end全部补上
+                        //while (entity.tracingDeep-- >= 0) {
+                        //    entity.tTree.end();
+                        //}
+
+                    }
+
+                    private boolean isInCondition(Advice advice, long cost) {
+                        try {
+                            return isBlank(conditionExpress)
+                                    || newExpress(advice).bind("cost", cost).is(conditionExpress);
+                        } catch (ExpressException e) {
+                            return false;
+                        }
+                    }
+
+                    private boolean isOverThreshold(int currentTimes) {
+                        return null != threshold
+                                && currentTimes >= threshold;
+                    }
+
+                    @Override
+                    public void afterFinishing(Advice advice) throws Throwable {
+                        final long cost = invokeCost.cost();
+                        if (isInCondition(advice, cost)) {
+                            final Trace trace = traceRef.get();
+                            printer.println(trace.tTree.rendering());
+                            if (isOverThreshold(timesRef.incrementAndGet())) {
+                                printer.finish();
+                            }
+                        }
+                    }
+
                 };
             }
-
         };
 
     }

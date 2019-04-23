@@ -31,7 +31,7 @@ public class ResourceCommand implements Command {
 
             // 列出所有已经被加载的ClassLoader
             private Set<ClassLoader> listLoadedClassLoader(Instrumentation inst) {
-                final Set<ClassLoader> classLoaderSet = new HashSet<ClassLoader>();
+                final Set<ClassLoader> classLoaderSet = new HashSet<>();
                 for (Class<?> clazz : inst.getAllLoadedClasses()) {
                     if (null == clazz) {
                         continue;

@@ -30,42 +30,38 @@ public class JvmCommand implements Command {
     private final Collection<GarbageCollectorMXBean> garbageCollectorMXBeans = ManagementFactory.getGarbageCollectorMXBeans();
     private final Collection<MemoryManagerMXBean> memoryManagerMXBeans = ManagementFactory.getMemoryManagerMXBeans();
     private final MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
-    //    private final Collection<MemoryPoolMXBean> memoryPoolMXBeans = ManagementFactory.getMemoryPoolMXBeans();
     private final OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
     private final ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
 
     @Override
     public Action getAction() {
-        return new SilentAction() {
-            @Override
-            public void action(Session session, Instrumentation inst, Printer printer) throws Throwable {
+        return (SilentAction) (session, inst, printer) -> {
 
-                final TTable tTable = new TTable(new TTable.ColumnDefine[]{
-                        new TTable.ColumnDefine(RIGHT),
-                        new TTable.ColumnDefine(LEFT)
-                })
-                        .addRow("CATEGORY", "INFO")
-                        .padding(1);
+            final TTable tTable = new TTable(new TTable.ColumnDefine[]{
+                    new TTable.ColumnDefine(RIGHT),
+                    new TTable.ColumnDefine(LEFT)
+            })
+                    .addRow("CATEGORY", "INFO")
+                    .padding(1);
 
-                tTable.addRow("RUNTIME", drawRuntimeTable());
-                tTable.addRow("CLASS-LOADING", drawClassLoadingTable());
-                tTable.addRow("COMPILATION", drawCompilationTable());
+            tTable.addRow("RUNTIME", drawRuntimeTable());
+            tTable.addRow("CLASS-LOADING", drawClassLoadingTable());
+            tTable.addRow("COMPILATION", drawCompilationTable());
 
-                if (!garbageCollectorMXBeans.isEmpty()) {
-                    tTable.addRow("GARBAGE-COLLECTORS", drawGarbageCollectorsTable());
-                }
-
-                if (!memoryManagerMXBeans.isEmpty()) {
-                    tTable.addRow("MEMORY-MANAGERS", drawMemoryManagersTable());
-                }
-
-                tTable.addRow("MEMORY", drawMemoryTable());
-                tTable.addRow("OPERATING-SYSTEM", drawOperatingSystemMXBeanTable());
-                tTable.addRow("THREAD", drawThreadTable());
-
-                printer.print(tTable.rendering()).finish();
-
+            if (!garbageCollectorMXBeans.isEmpty()) {
+                tTable.addRow("GARBAGE-COLLECTORS", drawGarbageCollectorsTable());
             }
+
+            if (!memoryManagerMXBeans.isEmpty()) {
+                tTable.addRow("MEMORY-MANAGERS", drawMemoryManagersTable());
+            }
+
+            tTable.addRow("MEMORY", drawMemoryTable());
+            tTable.addRow("OPERATING-SYSTEM", drawOperatingSystemMXBeanTable());
+            tTable.addRow("THREAD", drawThreadTable());
+
+            printer.print(tTable.rendering()).finish();
+
         };
     }
 

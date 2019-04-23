@@ -170,28 +170,13 @@ public class JavaScriptCommand implements ScriptSupportCommand, Command {
             loadCustomModule(invocable, scriptPath, fetchCharset());
         } catch (final ScriptException e) {
             logger.warn("javascript compile failed. script={};", scriptPath, e);
-            return new SilentAction() {
-                @Override
-                public void action(Session session, Instrumentation inst, Printer printer) throws Throwable {
-                    printer.println("javascript compile failed. because " + getCauseMessage(e)).finish();
-                }
-            };
+            return (SilentAction) (session, inst, printer) -> printer.println("javascript compile failed. because " + getCauseMessage(e)).finish();
         } catch (final NoSuchMethodException e) {
             logger.warn("javascript function not defined.", e);
-            return new SilentAction() {
-                @Override
-                public void action(Session session, Instrumentation inst, Printer printer) throws Throwable {
-                    printer.println("javascript function not defined. because " + getCauseMessage(e)).finish();
-                }
-            };
+            return (SilentAction) (session, inst, printer) -> printer.println("javascript function not defined. because " + getCauseMessage(e)).finish();
         } catch (final IOException e) {
             logger.warn("load javascript failed.", e);
-            return new SilentAction() {
-                @Override
-                public void action(Session session, Instrumentation inst, Printer printer) throws Throwable {
-                    printer.println("load javascript failed. because " + getCauseMessage(e)).finish();
-                }
-            };
+            return (SilentAction) (session, inst, printer) -> printer.println("load javascript failed. because " + getCauseMessage(e)).finish();
         }
 
         return new GetEnhancerAction() {
@@ -235,29 +220,21 @@ public class JavaScriptCommand implements ScriptSupportCommand, Command {
                             orMethodMatcher.add(new GaMethodMatcher(new PatternMatcher(isRegEx, methodPattern)));
                         }
 
-                        orClassMatcher.add(new Matcher<Class<?>>() {
-
-                            @Override
-                            public boolean matching(Class<?> target) {
-                                try {
-                                    return (Boolean) invocable.invokeFunction("__greys_module_test_java_class_name", target.getName());
-                                } catch (Throwable t) {
-                                    logger.warn("invoke function 'test_java_class_name' failed.", t);
-                                    return false;
-                                }
+                        orClassMatcher.add(target -> {
+                            try {
+                                return (Boolean) invocable.invokeFunction("__greys_module_test_java_class_name", target.getName());
+                            } catch (Throwable t) {
+                                logger.warn("invoke function 'test_java_class_name' failed.", t);
+                                return false;
                             }
-
                         });
 
-                        orMethodMatcher.add(new Matcher<GaMethod>() {
-                            @Override
-                            public boolean matching(GaMethod target) {
-                                try {
-                                    return (Boolean) invocable.invokeFunction("__greys_module_test_java_method_name", target.getName());
-                                } catch (Throwable t) {
-                                    logger.warn("invoke function 'test_java_method_name' failed.", t);
-                                    return false;
-                                }
+                        orMethodMatcher.add(target -> {
+                            try {
+                                return (Boolean) invocable.invokeFunction("__greys_module_test_java_method_name", target.getName());
+                            } catch (Throwable t) {
+                                logger.warn("invoke function 'test_java_method_name' failed.", t);
+                                return false;
                             }
                         });
 
@@ -338,12 +315,7 @@ public class JavaScriptCommand implements ScriptSupportCommand, Command {
      */
     public static class ThreadSafeMap {
 
-        private ThreadLocal<Map<String, Object>> mapRef = new ThreadLocal<Map<String, Object>>() {
-            @Override
-            protected Map<String, Object> initialValue() {
-                return new HashMap<String, Object>();
-            }
-        };
+        private ThreadLocal<Map<String, Object>> mapRef = ThreadLocal.withInitial(() -> new HashMap<>());
 
         public void put(String key, Object val) {
             mapRef.get().put(key, val);

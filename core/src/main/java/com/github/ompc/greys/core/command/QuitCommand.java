@@ -17,13 +17,6 @@ public class QuitCommand implements Command {
 
     @Override
     public Action getAction() {
-        return new SilentAction() {
-
-            @Override
-            public void action(Session session, Instrumentation inst, Printer printer) throws Throwable {
-                printer.println("Bye!").finish();
-            }
-
-        };
+        return (SilentAction) (session, inst, printer) -> printer.println("Bye!").finish();
     }
 }

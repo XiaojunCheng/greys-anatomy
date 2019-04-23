@@ -467,7 +467,7 @@ public class Enhancer implements ClassFileTransformer {
                     String className,
                     Class<?> classBeingRedefined,
                     ProtectionDomain protectionDomain,
-                    byte[] classfileBuffer) throws IllegalClassFormatException {
+                    byte[] classfileBuffer) {
                 return null;
             }
         };

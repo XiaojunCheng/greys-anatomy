@@ -217,86 +217,81 @@ public class TimeTunnelCommand implements Command {
      */
     private GetEnhancerAction doTimeTunnel() {
 
-        return new GetEnhancerAction() {
+        return (session, inst, printer) -> new GetEnhancer() {
+
+            private final AtomicInteger timesRef = new AtomicInteger();
+
             @Override
-            public GetEnhancer action(Session session, Instrumentation inst, final Printer printer) throws Throwable {
-                return new GetEnhancer() {
+            public PointCut getPointCut() {
+                return new PointCut(
+                        new ClassMatcher(new PatternMatcher(isRegEx, classPattern)),
+                        new GaMethodMatcher(new PatternMatcher(isRegEx, methodPattern))
+                );
+            }
 
-                    private final AtomicInteger timesRef = new AtomicInteger();
+            @Override
+            public AdviceListener getAdviceListener() {
+
+                return new ReflectAdviceListenerAdapter() {
+
+                    /*
+                     * 第一次启动标记
+                     */
+                    private volatile boolean isFirst = true;
+
+                    private final InvokeCost invokeCost = new InvokeCost();
+
+                    private boolean isOverThreshold(int currentTimes) {
+                        return null != threshold
+                                && currentTimes >= threshold;
+                    }
+
+                    private boolean isInCondition(final Advice advice, long cost) {
+                        try {
+                            return isBlank(conditionExpress)
+                                    || newExpress(advice).bind("cost", cost).is(conditionExpress);
+                        } catch (ExpressException e) {
+                            return false;
+                        }
+                    }
 
                     @Override
-                    public PointCut getPointCut() {
-                        return new PointCut(
-                                new ClassMatcher(new PatternMatcher(isRegEx, classPattern)),
-                                new GaMethodMatcher(new PatternMatcher(isRegEx, methodPattern))
+                    public void before(Advice advice) throws Throwable {
+                        invokeCost.begin();
+                    }
+
+                    @Override
+                    public void afterFinishing(Advice advice) {
+
+                        final long cost = invokeCost.cost();
+
+                        if (!isInCondition(advice, cost)) {
+                            return;
+                        }
+
+                        final TimeFragment timeFragment = timeFragmentManager.append(
+                                timeFragmentManager.generateProcessId(),
+                                advice,
+                                new Date(),
+                                cost,
+                                getStack(getThreadInfo())
                         );
+
+                        final TTimeFragmentTable view = new TTimeFragmentTable(isFirst)
+                                .turnOffBottom()    // 表格控件不输出表格上边框,这样两个表格就能拼凑在一起
+                                .add(timeFragment)  // 填充表格内容
+                                ;
+                        if (isFirst) {
+                            isFirst = false;
+                        }
+
+                        final boolean isF = isOverThreshold(timesRef.incrementAndGet());
+                        if (isF) {
+                            view.turnOnBottom();
+                        }
+                        printer.print(isF, view.rendering());
                     }
 
-                    @Override
-                    public AdviceListener getAdviceListener() {
-
-                        return new ReflectAdviceListenerAdapter() {
-
-                            /*
-                             * 第一次启动标记
-                             */
-                            private volatile boolean isFirst = true;
-
-                            private final InvokeCost invokeCost = new InvokeCost();
-
-                            private boolean isOverThreshold(int currentTimes) {
-                                return null != threshold
-                                        && currentTimes >= threshold;
-                            }
-
-                            private boolean isInCondition(final Advice advice, long cost) {
-                                try {
-                                    return isBlank(conditionExpress)
-                                            || newExpress(advice).bind("cost", cost).is(conditionExpress);
-                                } catch (ExpressException e) {
-                                    return false;
-                                }
-                            }
-
-                            @Override
-                            public void before(Advice advice) throws Throwable {
-                                invokeCost.begin();
-                            }
-
-                            @Override
-                            public void afterFinishing(Advice advice) {
-
-                                final long cost = invokeCost.cost();
-
-                                if (!isInCondition(advice, cost)) {
-                                    return;
-                                }
-
-                                final TimeFragment timeFragment = timeFragmentManager.append(
-                                        timeFragmentManager.generateProcessId(),
-                                        advice,
-                                        new Date(),
-                                        cost,
-                                        getStack(getThreadInfo())
-                                );
-
-                                final TTimeFragmentTable view = new TTimeFragmentTable(isFirst)
-                                        .turnOffBottom()    // 表格控件不输出表格上边框,这样两个表格就能拼凑在一起
-                                        .add(timeFragment)  // 填充表格内容
-                                        ;
-                                if (isFirst) {
-                                    isFirst = false;
-                                }
-
-                                final boolean isF = isOverThreshold(timesRef.incrementAndGet());
-                                if (isF) {
-                                    view.turnOnBottom();
-                                }
-                                printer.print(isF, view.rendering());
-                            }
-
-                        };
-                    }
                 };
             }
         };

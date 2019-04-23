@@ -119,195 +119,190 @@ public class PathTraceCommand implements Command {
             }
         }
 
-        return new GroupMatcher.Or<String>(matcherList);
+        return new GroupMatcher.Or<>(matcherList);
 
     }
 
     @Override
     public Action getAction() {
 
-        final Matcher<String> classNameMatcher = new CachedMatcher<String>(
+        final Matcher<String> classNameMatcher = new CachedMatcher<>(
                 new PatternMatcher(isRegEx, classPattern),
-                new ThreadUnsafeLRUHashMap<String, Boolean>(GlobalOptions.ptraceClassMatcherLruCapacity)
+                new ThreadUnsafeLRUHashMap<>(GlobalOptions.ptraceClassMatcherLruCapacity)
         );
 
-        final Matcher<String> methodNameMatcher = new CachedMatcher<String>(
+        final Matcher<String> methodNameMatcher = new CachedMatcher<>(
                 new PatternMatcher(isRegEx, methodPattern),
-                new ThreadUnsafeLRUHashMap<String, Boolean>(GlobalOptions.ptraceMethodMatcherLruCapacity)
+                new ThreadUnsafeLRUHashMap<>(GlobalOptions.ptraceMethodMatcherLruCapacity)
         );
 
         final Matcher pathTracingMatcher = newPathTracingMatcher();
 
+        //action
+        return (GetEnhancerAction) (session, inst, printer) -> {
+            return new GetEnhancer() {
 
-        return new GetEnhancerAction() {
+                @Override
+                public PointCut getPointCut() {
+                    return new PointCut(
+                            new ClassMatcher(new GroupMatcher.Or<String>(classNameMatcher, pathTracingMatcher)),
+                            new GaMethodMatcher(new TrueMatcher<String>())
+                    );
+                }
 
-            @Override
-            public GetEnhancer action(Session session, Instrumentation inst, final Printer printer) throws Throwable {
-                return new GetEnhancer() {
+                @Override
+                public AdviceListener getAdviceListener() {
+                    return new ReflectAdviceListenerAdapter() {
 
-                    @Override
-                    public PointCut getPointCut() {
-                        return new PointCut(
-                                new ClassMatcher(new GroupMatcher.Or<String>(classNameMatcher, pathTracingMatcher)),
-                                new GaMethodMatcher(new TrueMatcher<String>())
-                        );
-                    }
+                        private final InvokeCost topInvokeCost = new InvokeCost();
+                        private final InvokeCost invokeCost = new InvokeCost();
 
-                    @Override
-                    public AdviceListener getAdviceListener() {
-                        return new ReflectAdviceListenerAdapter() {
-
-                            private final InvokeCost topInvokeCost = new InvokeCost();
-                            private final InvokeCost invokeCost = new InvokeCost();
-
-                            private final ThreadLocal<PathTrace> pathTraceRef = new ThreadLocal<PathTrace>() {
-                                @Override
-                                protected PathTrace initialValue() {
-                                    return new PathTrace();
-                                }
-                            };
-
-                            private volatile boolean isInit = false;
-
-                            // 执行计数器
-                            private final AtomicInteger timesRef = new AtomicInteger();
-
+                        private final ThreadLocal<PathTrace> pathTraceRef = new ThreadLocal<PathTrace>() {
                             @Override
-                            public void create() {
-                                isInit = true;
+                            protected PathTrace initialValue() {
+                                return new PathTrace();
                             }
-
-                            @Override
-                            public void destroy() {
-                                isInit = false;
-                            }
-
-
-                            // 是否跟踪入口
-                            private boolean isTracingEnter(Class<?> clazz, GaMethod method) {
-                                return classNameMatcher.matching(clazz.getCanonicalName())
-                                        && methodNameMatcher.matching(method.getName());
-                            }
-
-                            @Override
-                            public void before(final Advice advice) throws Throwable {
-
-                                if (!isInit) {
-                                    return;
-                                }
-
-                                invokeCost.begin();
-
-                                final PathTrace pathTrace = pathTraceRef.get();
-                                if (!pathTrace.isTracing) {
-                                    if (isTracingEnter(advice.getClazz(), advice.getMethod())) {
-                                        pathTrace.isTracing = true;
-                                    } else {
-                                        return;
-                                    }
-                                }
-
-                                final Entity entity = pathTrace.getEntity(new InitCallback<Entity>() {
-                                    @Override
-                                    public Entity init() {
-                                        return new Entity(advice, timeFragmentManager.generateProcessId());
-                                    }
-                                });
-
-                                // top invoke
-                                if(entity.deep <= 0) {
-                                    topInvokeCost.begin();
-                                }
-
-                                entity.tTree.begin(advice.getClazz().getCanonicalName() + ":" + advice.getMethod().getName() + "()");
-                                entity.deep++;
-                            }
-
-                            @Override
-                            public void afterFinishing(Advice advice) throws Throwable {
-                                final PathTrace pathTrace = pathTraceRef.get();
-                                if (!isInit
-                                        || !pathTrace.isTracing) {
-                                    return;
-                                }
-
-                                final long cost = invokeCost.cost();
-
-                                final Entity entity = pathTrace.getEntity();
-                                entity.deep--;
-
-                                // add throw exception
-                                if (advice.isThrow) {
-                                    entity.tTree
-                                            .begin("throw:" + advice.throwExp.getClass().getCanonicalName())
-                                            .end();
-                                }
-
-
-                                // 记录下调用过程
-                                if (isTimeTunnel) {
-                                    final TimeFragment timeFragment = timeFragmentManager.append(
-                                            entity.processId,
-                                            advice,
-                                            new Date(),
-                                            cost,
-                                            getStack(getThreadInfo())
-                                    );
-                                    entity.tfTable.add(timeFragment);
-                                    entity.tTree.set(entity.tTree.get() + "; index=" + timeFragment.id + ";");
-                                }
-
-                                entity.tTree.end();
-
-                                if (entity.deep <= 0) {
-
-                                    // top invoke cost
-                                    final long topCost = topInvokeCost.cost();
-
-                                    // 是否有匹配到条件
-                                    // 之所以在这里主要是需要照顾到上下文参数对齐
-                                    if (isInCondition(advice, topCost)) {
-                                        // 输出打印内容
-                                        if (isTimeTunnel) {
-                                            printer.println(entity.tTree.rendering() + entity.tfTable.rendering());
-                                        } else {
-                                            printer.println(entity.tTree.rendering());
-                                        }
-
-                                        // 超过调用限制就关闭掉跟踪
-                                        if (isOverThreshold(timesRef.incrementAndGet())) {
-                                            printer.finish();
-                                        }
-                                    }
-
-                                    pathTrace.isTracing = false;
-                                    pathTrace.removeEntity();
-                                }
-
-                            }
-
-                            // 是否到达节制阀值
-                            private boolean isOverThreshold(int currentTimes) {
-                                return null != threshold
-                                        && currentTimes >= threshold;
-                            }
-
-                            // 匹配过滤规则
-                            private boolean isInCondition(Advice advice, long cost) {
-                                try {
-                                    return isBlank(conditionExpress)
-                                            || newExpress(advice).bind("cost", cost).is(conditionExpress);
-                                } catch (ExpressException e) {
-                                    return false;
-                                }
-                            }
-
                         };
-                    }
 
-                };//getEnhancer:<init>
+                        private volatile boolean isInit = false;
 
-            }//action
+                        // 执行计数器
+                        private final AtomicInteger timesRef = new AtomicInteger();
+
+                        @Override
+                        public void create() {
+                            isInit = true;
+                        }
+
+                        @Override
+                        public void destroy() {
+                            isInit = false;
+                        }
+
+
+                        // 是否跟踪入口
+                        private boolean isTracingEnter(Class<?> clazz, GaMethod method) {
+                            return classNameMatcher.matching(clazz.getCanonicalName())
+                                    && methodNameMatcher.matching(method.getName());
+                        }
+
+                        @Override
+                        public void before(final Advice advice) throws Throwable {
+
+                            if (!isInit) {
+                                return;
+                            }
+
+                            invokeCost.begin();
+
+                            final PathTrace pathTrace = pathTraceRef.get();
+                            if (!pathTrace.isTracing) {
+                                if (isTracingEnter(advice.getClazz(), advice.getMethod())) {
+                                    pathTrace.isTracing = true;
+                                } else {
+                                    return;
+                                }
+                            }
+
+                            final Entity entity = pathTrace.getEntity(new InitCallback<Entity>() {
+                                @Override
+                                public Entity init() {
+                                    return new Entity(advice, timeFragmentManager.generateProcessId());
+                                }
+                            });
+
+                            // top invoke
+                            if (entity.deep <= 0) {
+                                topInvokeCost.begin();
+                            }
+
+                            entity.tTree.begin(advice.getClazz().getCanonicalName() + ":" + advice.getMethod().getName() + "()");
+                            entity.deep++;
+                        }
+
+                        @Override
+                        public void afterFinishing(Advice advice) throws Throwable {
+                            final PathTrace pathTrace = pathTraceRef.get();
+                            if (!isInit
+                                    || !pathTrace.isTracing) {
+                                return;
+                            }
+
+                            final long cost = invokeCost.cost();
+
+                            final Entity entity = pathTrace.getEntity();
+                            entity.deep--;
+
+                            // add throw exception
+                            if (advice.isThrow) {
+                                entity.tTree
+                                        .begin("throw:" + advice.throwExp.getClass().getCanonicalName())
+                                        .end();
+                            }
+
+
+                            // 记录下调用过程
+                            if (isTimeTunnel) {
+                                final TimeFragment timeFragment = timeFragmentManager.append(
+                                        entity.processId,
+                                        advice,
+                                        new Date(),
+                                        cost,
+                                        getStack(getThreadInfo())
+                                );
+                                entity.tfTable.add(timeFragment);
+                                entity.tTree.set(entity.tTree.get() + "; index=" + timeFragment.id + ";");
+                            }
+
+                            entity.tTree.end();
+
+                            if (entity.deep <= 0) {
+
+                                // top invoke cost
+                                final long topCost = topInvokeCost.cost();
+
+                                // 是否有匹配到条件
+                                // 之所以在这里主要是需要照顾到上下文参数对齐
+                                if (isInCondition(advice, topCost)) {
+                                    // 输出打印内容
+                                    if (isTimeTunnel) {
+                                        printer.println(entity.tTree.rendering() + entity.tfTable.rendering());
+                                    } else {
+                                        printer.println(entity.tTree.rendering());
+                                    }
+
+                                    // 超过调用限制就关闭掉跟踪
+                                    if (isOverThreshold(timesRef.incrementAndGet())) {
+                                        printer.finish();
+                                    }
+                                }
+
+                                pathTrace.isTracing = false;
+                                pathTrace.removeEntity();
+                            }
+
+                        }
+
+                        // 是否到达节制阀值
+                        private boolean isOverThreshold(int currentTimes) {
+                            return null != threshold
+                                    && currentTimes >= threshold;
+                        }
+
+                        // 匹配过滤规则
+                        private boolean isInCondition(Advice advice, long cost) {
+                            try {
+                                return isBlank(conditionExpress)
+                                        || newExpress(advice).bind("cost", cost).is(conditionExpress);
+                            } catch (ExpressException e) {
+                                return false;
+                            }
+                        }
+
+                    };
+                }
+
+            };//getEnhancer:<init>
 
         };//return
     }

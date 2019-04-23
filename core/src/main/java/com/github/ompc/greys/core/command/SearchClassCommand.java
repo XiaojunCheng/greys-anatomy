@@ -43,36 +43,31 @@ public class SearchClassCommand implements Command {
 
     @Override
     public Action getAction() {
-        return new RowAction() {
+        return (RowAction) (session, inst, printer) -> {
 
-            @Override
-            public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
+            final ClassMatcher classMatcher = new ClassMatcher(new PatternMatcher(isRegEx, classPattern));
+            final Collection<Class<?>> matchedClassSet = reflectManager.searchClassWithSubClass(classMatcher);
 
-                final ClassMatcher classMatcher = new ClassMatcher(new PatternMatcher(isRegEx, classPattern));
-                final Collection<Class<?>> matchedClassSet = reflectManager.searchClassWithSubClass(classMatcher);
+            // 展示类详情
+            if (isDetail) {
 
-                // 展示类详情
-                if (isDetail) {
-
-                    for (Class<?> clazz : matchedClassSet) {
-                        printer.println(new TClassInfo(clazz, isField).rendering());
-                    }
-
+                for (Class<?> clazz : matchedClassSet) {
+                    printer.println(new TClassInfo(clazz, isField).rendering());
                 }
 
-                // 展示类该要列表
-                else {
-
-                    for (Class<?> clazz : matchedClassSet) {
-                        printer.println(clazz.getName());
-                    }
-
-                }
-
-                printer.print(EMPTY).finish();
-                return new RowAffect(matchedClassSet.size());
             }
 
+            // 展示类该要列表
+            else {
+
+                for (Class<?> clazz : matchedClassSet) {
+                    printer.println(clazz.getName());
+                }
+
+            }
+
+            printer.print(EMPTY).finish();
+            return new RowAffect(matchedClassSet.size());
         };
     }
 

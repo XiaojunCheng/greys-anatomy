@@ -77,72 +77,65 @@ public class StackCommand implements Command {
     @Override
     public Action getAction() {
 
-        return new GetEnhancerAction() {
+        return (GetEnhancerAction) (session, inst, printer) -> new GetEnhancer() {
+
+            private final AtomicInteger times = new AtomicInteger();
 
             @Override
-            public GetEnhancer action(Session session, Instrumentation inst, final Printer printer) throws Throwable {
-                return new GetEnhancer() {
-
-                    private final AtomicInteger times = new AtomicInteger();
-
-                    @Override
-                    public PointCut getPointCut() {
-                        return new PointCut(
-                                new ClassMatcher(new PatternMatcher(isRegEx, classPattern)),
-                                new GaMethodMatcher(new PatternMatcher(isRegEx, methodPattern))
-                        );
-                    }
-
-                    @Override
-                    public AdviceListener getAdviceListener() {
-                        return new ReflectAdviceListenerAdapter() {
-
-                            private final ThreadLocal<String> stackInfoRef = new ThreadLocal<String>();
-                            private final InvokeCost invokeCost = new InvokeCost();
-
-                            private String getTitle(final Advice advice) {
-                                final StringBuilder titleSB = new StringBuilder(getThreadInfo());
-                                if (advice.isTraceSupport()) {
-                                    titleSB.append(";traceId=").append(advice.getTraceId()).append(";");
-                                }
-                                return titleSB.toString();
-                            }
-
-                            @Override
-                            public void before(Advice advice) throws Throwable {
-                                stackInfoRef.set(getStack(getTitle(advice)));
-                                invokeCost.begin();
-                            }
-
-                            private boolean isInCondition(Advice advice, long cost) {
-                                try {
-                                    return isBlank(conditionExpress)
-                                            || newExpress(advice).bind("cost", cost).is(conditionExpress);
-                                } catch (ExpressException e) {
-                                    return false;
-                                }
-                            }
-
-                            private boolean isOverThreshold(int currentTimes) {
-                                return null != threshold
-                                        && currentTimes >= threshold;
-                            }
-
-                            @Override
-                            public void afterFinishing(Advice advice) throws Throwable {
-                                if (isInCondition(advice, invokeCost.cost())) {
-                                    printer.println(stackInfoRef.get());
-                                    if (isOverThreshold(times.incrementAndGet())) {
-                                        printer.finish();
-                                    }
-                                }
-                            }
-
-                        };
-                    }
-                };
+            public PointCut getPointCut() {
+                return new PointCut(
+                        new ClassMatcher(new PatternMatcher(isRegEx, classPattern)),
+                        new GaMethodMatcher(new PatternMatcher(isRegEx, methodPattern))
+                );
             }
 
+            @Override
+            public AdviceListener getAdviceListener() {
+                return new ReflectAdviceListenerAdapter() {
+
+                    private final ThreadLocal<String> stackInfoRef = new ThreadLocal<String>();
+                    private final InvokeCost invokeCost = new InvokeCost();
+
+                    private String getTitle(final Advice advice) {
+                        final StringBuilder titleSB = new StringBuilder(getThreadInfo());
+                        if (advice.isTraceSupport()) {
+                            titleSB.append(";traceId=").append(advice.getTraceId()).append(";");
+                        }
+                        return titleSB.toString();
+                    }
+
+                    @Override
+                    public void before(Advice advice) throws Throwable {
+                        stackInfoRef.set(getStack(getTitle(advice)));
+                        invokeCost.begin();
+                    }
+
+                    private boolean isInCondition(Advice advice, long cost) {
+                        try {
+                            return isBlank(conditionExpress)
+                                    || newExpress(advice).bind("cost", cost).is(conditionExpress);
+                        } catch (ExpressException e) {
+                            return false;
+                        }
+                    }
+
+                    private boolean isOverThreshold(int currentTimes) {
+                        return null != threshold
+                                && currentTimes >= threshold;
+                    }
+
+                    @Override
+                    public void afterFinishing(Advice advice) throws Throwable {
+                        if (isInCondition(advice, invokeCost.cost())) {
+                            printer.println(stackInfoRef.get());
+                            if (isOverThreshold(times.incrementAndGet())) {
+                                printer.finish();
+                            }
+                        }
+                    }
+
+                };
+            }
         };
     }
 

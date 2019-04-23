@@ -142,184 +142,177 @@ public class MonitorCommand implements Command {
     @Override
     public Action getAction() {
 
-        return new GetEnhancerAction() {
+        return (GetEnhancerAction) (session, inst, printer) -> new GetEnhancer() {
 
             @Override
-            public GetEnhancer action(final Session session, Instrumentation inst, final Printer printer) throws Throwable {
-                return new GetEnhancer() {
+            public PointCut getPointCut() {
+                return new PointCut(
+                        new ClassMatcher(new PatternMatcher(isRegEx, classPattern)),
+                        new GaMethodMatcher(new PatternMatcher(isRegEx, methodPattern))
+                );
+            }
 
-                    @Override
-                    public PointCut getPointCut() {
-                        return new PointCut(
-                                new ClassMatcher(new PatternMatcher(isRegEx, classPattern)),
-                                new GaMethodMatcher(new PatternMatcher(isRegEx, methodPattern))
-                        );
+            @Override
+            public AdviceListener getAdviceListener() {
+
+                return new AdviceListenerAdapter() {
+
+                    /*
+                     * 输出定时任务
+                     */
+                    private Timer timer;
+
+                    /*
+                     * 监控数据
+                     */
+                    private final ConcurrentHashMap<Key, AtomicReference<Data>> monitorData
+                            = new ConcurrentHashMap<Key, AtomicReference<Data>>();
+
+                    private double div(double a, double b) {
+                        if (b == 0) {
+                            return 0;
+                        }
+                        return a / b;
                     }
 
                     @Override
-                    public AdviceListener getAdviceListener() {
-
-                        return new AdviceListenerAdapter() {
-
-                            /*
-                             * 输出定时任务
-                             */
-                            private Timer timer;
-
-                            /*
-                             * 监控数据
-                             */
-                            private final ConcurrentHashMap<Key, AtomicReference<Data>> monitorData
-                                    = new ConcurrentHashMap<Key, AtomicReference<Data>>();
-
-                            private double div(double a, double b) {
-                                if (b == 0) {
-                                    return 0;
-                                }
-                                return a / b;
-                            }
+                    public void create() {
+                        timer = new Timer("Timer-for-greys-monitor-" + session.getSessionId(), true);
+                        timer.scheduleAtFixedRate(new TimerTask() {
 
                             @Override
-                            public void create() {
-                                timer = new Timer("Timer-for-greys-monitor-" + session.getSessionId(), true);
-                                timer.scheduleAtFixedRate(new TimerTask() {
-
-                                    @Override
-                                    public void run() {
+                            public void run() {
 //                                        if (monitorData.isTop()) {
 //                                            return;
 //                                        }
 
-                                        final TTable tTable = new TTable(10)
-                                                .addRow(
-                                                        "TIMESTAMP",
-                                                        "CLASS",
-                                                        "METHOD",
-                                                        "TOTAL",
-                                                        "SUCCESS",
-                                                        "FAIL",
-                                                        "FAIL-RATE",
-                                                        "AVG-RT(ms)",
-                                                        "MIN-RT(ms)",
-                                                        "MAX-RT(ms)"
-                                                );
+                                final TTable tTable = new TTable(10)
+                                        .addRow(
+                                                "TIMESTAMP",
+                                                "CLASS",
+                                                "METHOD",
+                                                "TOTAL",
+                                                "SUCCESS",
+                                                "FAIL",
+                                                "FAIL-RATE",
+                                                "AVG-RT(ms)",
+                                                "MIN-RT(ms)",
+                                                "MAX-RT(ms)"
+                                        );
 
-                                        for (Map.Entry<Key, AtomicReference<Data>> entry : monitorData.entrySet()) {
-                                            final AtomicReference<Data> value = entry.getValue();
+                                for (Map.Entry<Key, AtomicReference<Data>> entry : monitorData.entrySet()) {
+                                    final AtomicReference<Data> value = entry.getValue();
 
-                                            Data data;
-                                            while (true) {
-                                                data = value.get();
-                                                if (value.compareAndSet(data, new Data())) {
-                                                    break;
-                                                }
-                                            }
-
-                                            if (null != data) {
-
-                                                final DecimalFormat df = new DecimalFormat("00.00");
-
-                                                tTable.addRow(
-                                                        SimpleDateFormatHolder.getInstance().format(new Date()),
-                                                        entry.getKey().className,
-                                                        entry.getKey().methodName,
-                                                        data.total,
-                                                        data.success,
-                                                        data.failed,
-                                                        df.format(100.0d * div(data.failed, data.total)) + "%",
-                                                        df.format(div(data.cost, data.total)),
-                                                        data.minCost,
-                                                        data.maxCost
-                                                );
-
-                                            }
-                                        }
-
-                                        tTable.padding(1);
-
-                                        printer.println(tTable.rendering());
-                                    }
-
-                                }, 0, cycle * 1000);
-                            }
-
-                            @Override
-                            public void destroy() {
-                                if (null != timer) {
-                                    timer.cancel();
-                                }
-                            }
-
-                            private final InvokeCost invokeCost = new InvokeCost();
-
-                            @Override
-                            public void before(ClassLoader loader, String className, String methodName, String methodDesc, Object target, Object[] args) throws Throwable {
-                                invokeCost.begin();
-                            }
-
-                            @Override
-                            public void afterReturning(ClassLoader loader, String className, String methodName, String methodDesc, Object target, Object[] args, Object returnObject) throws Throwable {
-                                finishing(className, methodName, true);
-                            }
-
-                            @Override
-                            public void afterThrowing(ClassLoader loader, String className, String methodName, String methodDesc, Object target, Object[] args, Throwable throwable) throws Throwable {
-                                finishing(className, methodName, false);
-                            }
-
-                            public void finishing(String className, String methodName, boolean isSuccess) throws Throwable {
-                                final Key key = new Key(className, methodName);
-                                final long cost = invokeCost.cost();
-
-                                while (true) {
-                                    final AtomicReference<Data> value = monitorData.get(key);
-                                    if (null == value) {
-                                        monitorData.putIfAbsent(key, new AtomicReference<Data>(new Data()));
-                                        // 这里不去判断返回值，用continue去强制获取一次
-                                        continue;
-                                    }
-
+                                    Data data;
                                     while (true) {
-                                        Data oData = value.get();
-                                        Data nData = new Data();
-                                        nData.cost = oData.cost + cost;
-                                        if (!isSuccess) {
-                                            nData.failed = oData.failed + 1;
-                                            nData.success = oData.success;
-                                        } else {
-                                            nData.failed = oData.failed;
-                                            nData.success = oData.success + 1;
-                                        }
-                                        nData.total = oData.total + 1;
-
-                                        // setValue max-cost
-                                        if (null == oData.maxCost) {
-                                            nData.maxCost = cost;
-                                        } else {
-                                            nData.maxCost = Math.max(oData.maxCost, cost);
-                                        }
-
-                                        // setValue min-cost
-                                        if (null == oData.minCost) {
-                                            nData.minCost = cost;
-                                        } else {
-                                            nData.minCost = Math.min(oData.minCost, cost);
-                                        }
-
-
-                                        if (value.compareAndSet(oData, nData)) {
+                                        data = value.get();
+                                        if (value.compareAndSet(data, new Data())) {
                                             break;
                                         }
                                     }
+
+                                    if (null != data) {
+
+                                        final DecimalFormat df = new DecimalFormat("00.00");
+
+                                        tTable.addRow(
+                                                SimpleDateFormatHolder.getInstance().format(new Date()),
+                                                entry.getKey().className,
+                                                entry.getKey().methodName,
+                                                data.total,
+                                                data.success,
+                                                data.failed,
+                                                df.format(100.0d * div(data.failed, data.total)) + "%",
+                                                df.format(div(data.cost, data.total)),
+                                                data.minCost,
+                                                data.maxCost
+                                        );
+
+                                    }
+                                }
+
+                                tTable.padding(1);
+
+                                printer.println(tTable.rendering());
+                            }
+
+                        }, 0, cycle * 1000);
+                    }
+
+                    @Override
+                    public void destroy() {
+                        if (null != timer) {
+                            timer.cancel();
+                        }
+                    }
+
+                    private final InvokeCost invokeCost = new InvokeCost();
+
+                    @Override
+                    public void before(ClassLoader loader, String className, String methodName, String methodDesc, Object target, Object[] args) throws Throwable {
+                        invokeCost.begin();
+                    }
+
+                    @Override
+                    public void afterReturning(ClassLoader loader, String className, String methodName, String methodDesc, Object target, Object[] args, Object returnObject) throws Throwable {
+                        finishing(className, methodName, true);
+                    }
+
+                    @Override
+                    public void afterThrowing(ClassLoader loader, String className, String methodName, String methodDesc, Object target, Object[] args, Throwable throwable) throws Throwable {
+                        finishing(className, methodName, false);
+                    }
+
+                    public void finishing(String className, String methodName, boolean isSuccess) throws Throwable {
+                        final Key key = new Key(className, methodName);
+                        final long cost = invokeCost.cost();
+
+                        while (true) {
+                            final AtomicReference<Data> value = monitorData.get(key);
+                            if (null == value) {
+                                monitorData.putIfAbsent(key, new AtomicReference<Data>(new Data()));
+                                // 这里不去判断返回值，用continue去强制获取一次
+                                continue;
+                            }
+
+                            while (true) {
+                                Data oData = value.get();
+                                Data nData = new Data();
+                                nData.cost = oData.cost + cost;
+                                if (!isSuccess) {
+                                    nData.failed = oData.failed + 1;
+                                    nData.success = oData.success;
+                                } else {
+                                    nData.failed = oData.failed;
+                                    nData.success = oData.success + 1;
+                                }
+                                nData.total = oData.total + 1;
+
+                                // setValue max-cost
+                                if (null == oData.maxCost) {
+                                    nData.maxCost = cost;
+                                } else {
+                                    nData.maxCost = Math.max(oData.maxCost, cost);
+                                }
+
+                                // setValue min-cost
+                                if (null == oData.minCost) {
+                                    nData.minCost = cost;
+                                } else {
+                                    nData.minCost = Math.min(oData.minCost, cost);
+                                }
+
+
+                                if (value.compareAndSet(oData, nData)) {
                                     break;
                                 }
                             }
-
-                        };
+                            break;
+                        }
                     }
+
                 };
             }
-
         };
     }
 

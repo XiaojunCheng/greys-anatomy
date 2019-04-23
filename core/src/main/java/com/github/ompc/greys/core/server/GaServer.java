@@ -153,7 +153,7 @@ public class GaServer {
             public Collection<Class<?>> allLoadedClasses() {
                 final Class<?>[] classArray = inst.getAllLoadedClasses();
                 return null == classArray
-                        ? new ArrayList<Class<?>>()
+                        ? new ArrayList > ()
                         : Arrays.asList(classArray);
             }
         });

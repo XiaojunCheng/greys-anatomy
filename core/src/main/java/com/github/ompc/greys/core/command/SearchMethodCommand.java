@@ -52,28 +52,23 @@ public class SearchMethodCommand implements Command {
     @Override
     public Action getAction() {
 
-        return new RowAction() {
+        return (RowAction) (session, inst, printer) -> {
 
-            @Override
-            public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
+            final RowAffect affect = new RowAffect();
 
-                final RowAffect affect = new RowAffect();
-
-                final ClassMatcher classMatcher = new ClassMatcher(new PatternMatcher(isRegEx, classPattern));
-                final TTable tTable = new TTable(new TTable.ColumnDefine[]{
-                        new TTable.ColumnDefine(30, TTable.Align.LEFT),
-                        new TTable.ColumnDefine(100, TTable.Align.LEFT),
-                })
-                        .addRow("DECLARED-CLASS", "VISIBLE-METHOD")
-                        .padding(1);
-                for (Class<?> clazz : reflectManager.searchClassWithSubClass(classMatcher)) {
-                    renderingMethodSummary(tTable, clazz, affect);
-                }
-
-                printer.print(tTable.rendering()).finish();
-                return affect;
+            final ClassMatcher classMatcher = new ClassMatcher(new PatternMatcher(isRegEx, classPattern));
+            final TTable tTable = new TTable(new TTable.ColumnDefine[]{
+                    new TTable.ColumnDefine(30, TTable.Align.LEFT),
+                    new TTable.ColumnDefine(100, TTable.Align.LEFT),
+            })
+                    .addRow("DECLARED-CLASS", "VISIBLE-METHOD")
+                    .padding(1);
+            for (Class<?> clazz : reflectManager.searchClassWithSubClass(classMatcher)) {
+                renderingMethodSummary(tTable, clazz, affect);
             }
 
+            printer.print(tTable.rendering()).finish();
+            return affect;
         };
     }
 

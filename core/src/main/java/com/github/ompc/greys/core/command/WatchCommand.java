@@ -126,94 +126,87 @@ public class WatchCommand implements Command {
             isBefore = true;
         }
 
-        return new GetEnhancerAction() {
+        return (GetEnhancerAction) (session, inst, printer) -> new GetEnhancer() {
+
+            private final AtomicInteger timesRef = new AtomicInteger();
 
             @Override
-            public GetEnhancer action(Session session, Instrumentation inst, final Printer printer) throws Throwable {
-                return new GetEnhancer() {
-
-                    private final AtomicInteger timesRef = new AtomicInteger();
-
-                    @Override
-                    public PointCut getPointCut() {
-                        return new PointCut(
-                                new ClassMatcher(new PatternMatcher(isRegEx, classPattern)),
-                                new GaMethodMatcher(new PatternMatcher(isRegEx, methodPattern))
-                        );
-                    }
-
-                    @Override
-                    public AdviceListener getAdviceListener() {
-
-                        return new ReflectAdviceListenerAdapter() {
-
-                            private final InvokeCost invokeCost = new InvokeCost();
-
-                            @Override
-                            public void before(Advice advice) throws Throwable {
-                                invokeCost.begin();
-                                if (isBefore) {
-                                    watching(advice);
-                                }
-                            }
-
-                            @Override
-                            public void afterReturning(Advice advice) throws Throwable {
-                                if (isSuccess) {
-                                    watching(advice);
-                                }
-                            }
-
-                            @Override
-                            public void afterThrowing(Advice advice) throws Throwable {
-                                if (isException) {
-                                    watching(advice);
-                                }
-                            }
-
-                            @Override
-                            public void afterFinishing(Advice advice) throws Throwable {
-                                if (isFinish) {
-                                    watching(advice);
-                                }
-                            }
-
-                            private boolean isOverThreshold(int currentTimes) {
-                                return null != threshold
-                                        && currentTimes >= threshold;
-                            }
-
-                            private boolean isInCondition(Advice advice) {
-                                try {
-                                    return isBlank(conditionExpress)
-                                            || newExpress(advice).bind("cost", invokeCost.cost()).is(conditionExpress);
-                                } catch (ExpressException e) {
-                                    return false;
-                                }
-                            }
-
-                            private void watching(Advice advice) {
-                                try {
-
-                                    if (isInCondition(advice)) {
-                                        printer.println(new TObject(newExpress(advice).get(express), expend).rendering());
-                                        if (isOverThreshold(timesRef.incrementAndGet())) {
-                                            printer.finish();
-                                        }
-                                    }
-
-                                } catch (Exception e) {
-                                    logger.warn("watch failed.", e);
-                                    printer.println(getCauseMessage(e));
-                                }
-                            }
-
-                        };
-
-                    }
-                };
+            public PointCut getPointCut() {
+                return new PointCut(
+                        new ClassMatcher(new PatternMatcher(isRegEx, classPattern)),
+                        new GaMethodMatcher(new PatternMatcher(isRegEx, methodPattern))
+                );
             }
 
+            @Override
+            public AdviceListener getAdviceListener() {
+
+                return new ReflectAdviceListenerAdapter() {
+
+                    private final InvokeCost invokeCost = new InvokeCost();
+
+                    @Override
+                    public void before(Advice advice) throws Throwable {
+                        invokeCost.begin();
+                        if (isBefore) {
+                            watching(advice);
+                        }
+                    }
+
+                    @Override
+                    public void afterReturning(Advice advice) throws Throwable {
+                        if (isSuccess) {
+                            watching(advice);
+                        }
+                    }
+
+                    @Override
+                    public void afterThrowing(Advice advice) throws Throwable {
+                        if (isException) {
+                            watching(advice);
+                        }
+                    }
+
+                    @Override
+                    public void afterFinishing(Advice advice) throws Throwable {
+                        if (isFinish) {
+                            watching(advice);
+                        }
+                    }
+
+                    private boolean isOverThreshold(int currentTimes) {
+                        return null != threshold
+                                && currentTimes >= threshold;
+                    }
+
+                    private boolean isInCondition(Advice advice) {
+                        try {
+                            return isBlank(conditionExpress)
+                                    || newExpress(advice).bind("cost", invokeCost.cost()).is(conditionExpress);
+                        } catch (ExpressException e) {
+                            return false;
+                        }
+                    }
+
+                    private void watching(Advice advice) {
+                        try {
+
+                            if (isInCondition(advice)) {
+                                printer.println(new TObject(newExpress(advice).get(express), expend).rendering());
+                                if (isOverThreshold(timesRef.incrementAndGet())) {
+                                    printer.finish();
+                                }
+                            }
+
+                        } catch (Exception e) {
+                            logger.warn("watch failed.", e);
+                            printer.println(getCauseMessage(e));
+                        }
+                    }
+
+                };
+
+            }
         };
     }
 

@@ -45,7 +45,7 @@ public class TObject implements TComponent {
             } else {
                 return newString(object);
             }
-        } catch(Throwable t) {
+        } catch (Throwable t) {
             return "ERROR DATA!!!";
         }
     }
@@ -222,7 +222,7 @@ public class TObject implements TComponent {
                 final String typeName = obj.getClass().getSimpleName();
 
                 // int[]
-                if (typeName.equals("int[]")) {
+                if ("int[]".equals(typeName)) {
 
                     final int[] arrays = (int[]) obj;
                     // 非根节点或空集合只展示摘要信息
@@ -251,7 +251,7 @@ public class TObject implements TComponent {
                 }
 
                 // long[]
-                else if (typeName.equals("long[]")) {
+                else if ("long[]".equals(typeName)) {
 
                     final long[] arrays = (long[]) obj;
                     // 非根节点或空集合只展示摘要信息
@@ -280,8 +280,7 @@ public class TObject implements TComponent {
                 }
 
                 // short[]
-                else if (typeName.equals("short[]")) {
-
+                else if ("short[]".equals(typeName)) {
                     final short[] arrays = (short[]) obj;
                     // 非根节点或空集合只展示摘要信息
                     if (!isExpand(deep, expand)
@@ -309,8 +308,7 @@ public class TObject implements TComponent {
                 }
 
                 // float[]
-                else if (typeName.equals("float[]")) {
-
+                else if ("float[]".equals(typeName)) {
                     final float[] arrays = (float[]) obj;
                     // 非根节点或空集合只展示摘要信息
                     if (!isExpand(deep, expand)
@@ -338,7 +336,7 @@ public class TObject implements TComponent {
                 }
 
                 // double[]
-                else if (typeName.equals("double[]")) {
+                else if ("double[]".equals(typeName)) {
 
                     final double[] arrays = (double[]) obj;
                     // 非根节点或空集合只展示摘要信息
@@ -367,7 +365,7 @@ public class TObject implements TComponent {
                 }
 
                 // boolean[]
-                else if (typeName.equals("boolean[]")) {
+                else if ("boolean[]".equals(typeName)) {
 
                     final boolean[] arrays = (boolean[]) obj;
                     // 非根节点或空集合只展示摘要信息
@@ -396,7 +394,7 @@ public class TObject implements TComponent {
                 }
 
                 // char[]
-                else if (typeName.equals("char[]")) {
+                else if ("char[]".equals(typeName)) {
 
                     final char[] arrays = (char[]) obj;
                     // 非根节点或空集合只展示摘要信息
@@ -425,7 +423,7 @@ public class TObject implements TComponent {
                 }
 
                 // byte[]
-                else if (typeName.equals("byte[]")) {
+                else if ("byte[]".equals(typeName)) {
 
                     final byte[] arrays = (byte[]) obj;
                     // 非根节点或空集合只展示摘要信息

@@ -17,7 +17,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 
 /**
- * 帮助明令<br/>
+ * 帮助命令<br/>
  * 这个类的代码丑得一B啊，我都不想看
  * <p/>
  * Created by oldmanpushcart@gmail.com on 14/10/26.
@@ -36,20 +36,16 @@ public class HelpCommand implements Command {
 
     @Override
     public Action getAction() {
-        return new RowAction() {
-
-            @Override
-            public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
-                if (isBlank(cmd)
-                        || !Commands.getInstance().listCommands().containsKey(cmd)) {
-                    printer.print(mainHelp()).finish();
-                } else {
-                    final Class<?> clazz = Commands.getInstance().listCommands().get(cmd);
-                    printer.print(commandHelp(clazz)).finish();
-                }
-
-                return new RowAffect(1);
+        return (RowAction) (session, inst, printer) -> {
+            if (isBlank(cmd)
+                    || !Commands.getInstance().listCommands().containsKey(cmd)) {
+                printer.print(mainHelp()).finish();
+            } else {
+                final Class<?> clazz = Commands.getInstance().listCommands().get(cmd);
+                printer.print(commandHelp(clazz)).finish();
             }
+
+            return new RowAffect(1);
         };
 
     }
@@ -189,16 +185,11 @@ public class HelpCommand implements Command {
         });
 
         final Map<String, Class<?>> commandMap = Commands.getInstance().listCommands();
-        final List<Class<?>> classes = new ArrayList<Class<?>>(commandMap.values());
-        Collections.sort(classes, new Comparator<Class<?>>() {
-
-            @Override
-            public int compare(Class<?> o1, Class<?> o2) {
-                final Integer o1s = o1.getAnnotation(Cmd.class).sort();
-                final Integer o2s = o2.getAnnotation(Cmd.class).sort();
-                return o1s.compareTo(o2s);
-            }
-
+        final List<Class<?>> classes = new ArrayList<>(commandMap.values());
+        Collections.sort(classes, (o1, o2) -> {
+            final Integer o1s = o1.getAnnotation(Cmd.class).sort();
+            final Integer o2s = o2.getAnnotation(Cmd.class).sort();
+            return o1s.compareTo(o2s);
         });
         for (Class<?> clazz : classes) {
 

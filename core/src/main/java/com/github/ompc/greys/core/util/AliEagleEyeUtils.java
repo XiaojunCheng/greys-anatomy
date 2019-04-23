@@ -29,8 +29,8 @@ public class AliEagleEyeUtils {
         }
         final Thread currentThread = Thread.currentThread();
         final ClassLoader contextClassLoader = currentThread.getContextClassLoader();
-        currentThread.setContextClassLoader(loader);
         try {
+            currentThread.setContextClassLoader(loader);
             final Class<?> classOfEagleEye = loader.loadClass(EAGLE_EYE_CLASS_NAME);
             final Method methodOfGetTraceId = classOfEagleEye.getMethod(GET_TRACE_ID_NAME);
             final Object returnOfGetTraceId = methodOfGetTraceId.invoke(null);

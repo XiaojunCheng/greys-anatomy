@@ -13,6 +13,12 @@ public abstract class LazyGet<T> {
     private volatile boolean isInit = false;
     private volatile T object;
 
+    /**
+     * 获取初始值
+     *
+     * @return
+     * @throws Throwable
+     */
     abstract protected T initialValue() throws Throwable;
 
     public T get() {
@@ -29,7 +35,6 @@ public abstract class LazyGet<T> {
         } catch (Throwable throwable) {
             throw new UnCaughtException(throwable);
         }
-
     }
 
 }

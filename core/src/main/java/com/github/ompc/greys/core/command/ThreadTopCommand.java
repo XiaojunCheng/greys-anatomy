@@ -20,7 +20,7 @@ import java.util.Collections;
 /**
  * 查看占用CPU资源的TOP线程
  *
- * @author https://github.com/rodbate
+ * @author <a href="https://github.com/rodbate">https://github.com/rodbate</a>
  */
 @Cmd(name = "top", sort = 13, summary = "Display The Threads Of Top CPU TIME",
         eg = {
@@ -58,7 +58,7 @@ public class ThreadTopCommand implements Command {
     public Action getAction() {
         return (RowAction) (session, inst, printer) -> {
 
-            final ArrayList<ThreadInfoData> threadInfoDatas = new ArrayList<ThreadInfoData>();
+            final ArrayList<ThreadInfoData> threadInfoDataList = new ArrayList<>();
 
             long totalCpuTime = threadMXBean.getCurrentThreadCpuTime();
             for (ThreadInfo tInfo : threadMXBean.getThreadInfo(threadMXBean.getAllThreadIds(), Integer.MAX_VALUE)) {
@@ -70,12 +70,12 @@ public class ThreadTopCommand implements Command {
                         ? stackToString(tInfo.getStackTrace())
                         : StringUtils.EMPTY;
                 totalCpuTime += cpuTime;
-                threadInfoDatas.add(new ThreadInfoData(tId, cpuTime, tName, tStateStr, tStackStr));
+                threadInfoDataList.add(new ThreadInfoData(tId, cpuTime, tName, tStateStr, tStackStr));
             }
 
 
-            final int topFix = top == null ? threadInfoDatas.size() : Math.min(top, threadInfoDatas.size());
-            Collections.sort(threadInfoDatas);
+            final int topFix = top == null ? threadInfoDataList.size() : Math.min(top, threadInfoDataList.size());
+            Collections.sort(threadInfoDataList);
 
             final TTable tTable = new TTable(
                     isDetail
@@ -101,7 +101,7 @@ public class ThreadTopCommand implements Command {
 
             final DecimalFormat df = new DecimalFormat("00.00");
             for (int index = 0; index < topFix; index++) {
-                final ThreadInfoData data = threadInfoDatas.get(index);
+                final ThreadInfoData data = threadInfoDataList.get(index);
                 if (StringUtils.isNotBlank(tid)) {
                     final String fixTid = StringUtils.replace(tid, "#", "");
                     if (!StringUtils.equals("" + data.tId, fixTid)) {

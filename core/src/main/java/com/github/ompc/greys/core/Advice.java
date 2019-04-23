@@ -6,6 +6,8 @@ import com.github.ompc.greys.core.util.LazyGet;
 
 /**
  * 通知点
+ *
+ * @author vlinux
  */
 public final class Advice {
 
@@ -71,7 +73,9 @@ public final class Advice {
         // playIndex = PlayIndexHolder.getInstance().get();
     }
 
-    // 获取阿里巴巴中间件鹰眼ID
+    /**
+     * 获取阿里巴巴中间件鹰眼ID
+     */
     private LazyGet<String> lazyGetAliEagleEyeTraceId(final ClassLoader loader) {
         return new LazyGet<String>() {
             @Override

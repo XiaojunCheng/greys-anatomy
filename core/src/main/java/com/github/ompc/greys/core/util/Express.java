@@ -61,12 +61,7 @@ public interface Express {
      */
     class ExpressFactory {
 
-        private static final ThreadLocal<Express> expressRef = new ThreadLocal<Express>() {
-            @Override
-            protected Express initialValue() {
-                return new OgnlExpress();
-            }
-        };
+        private static final ThreadLocal<Express> expressRef = ThreadLocal.withInitial(() -> new OgnlExpress());
 
         /**
          * 构造表达式执行类
@@ -97,7 +92,7 @@ public interface Express {
         }
 
         @Override
-        public boolean is(String express) throws ExpressException {
+        public boolean is(String express) {
             try {
                 final Object ret = get(express);
                 return null != ret

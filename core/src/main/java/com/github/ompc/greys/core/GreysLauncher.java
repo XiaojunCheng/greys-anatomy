@@ -3,7 +3,17 @@ package com.github.ompc.greys.core;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.util.List;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 
 import static com.github.ompc.greys.core.util.GaStringUtils.getCauseMessage;
 import static java.io.File.separator;
@@ -101,8 +111,17 @@ public class GreysLauncher {
 
     }
 
-
     public static void main(String[] args) {
+
+        /**
+         * attach 
+         */
+
+
+
+        /**
+         *
+         */
         try {
             new GreysLauncher(args);
         } catch (Throwable t) {
@@ -110,4 +129,5 @@ public class GreysLauncher {
             System.exit(-1);
         }
     }
+
 }

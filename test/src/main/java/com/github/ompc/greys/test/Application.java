@@ -24,5 +24,6 @@ public class Application {
         vm.loadAgent(agentJar, coreJar + ";targetIp=127.0.0.1;targetPort=2345;connectTimeout=60000000");
         vm.detach();
         SpringApplication.run(Application.class, args);
+        System.out.println(Test.class.getName());
     }
 }

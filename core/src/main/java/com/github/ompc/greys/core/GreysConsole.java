@@ -37,8 +37,10 @@ public class GreysConsole {
     private static final byte EOT = 0x04;
     private static final byte EOF = -1;
 
-    // 5分钟
-    private static final int _1MIN = 60 * 1000;
+    /**
+     * 5分钟
+     */
+    private static final int _1MIN = 60 * 60 * 1000;
 
     // 工作目录
     private static final String WORKING_DIR = getProperty("user.home");

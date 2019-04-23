@@ -26,7 +26,8 @@ public class DefaultSessionManager implements SessionManager {
     private static final long DURATION_5_MINUTE = 5L * 60 * 1000;
 
     // 会话超时时间
-    private static final long DEFAULT_SESSION_DURATION = DURATION_5_MINUTE;
+    //TODO
+    private static final long DEFAULT_SESSION_DURATION = DURATION_5_MINUTE * 100;
 
     // 会话管理Map
     private final ConcurrentHashMap<Integer, Session> sessionMap = new ConcurrentHashMap<Integer, Session>();

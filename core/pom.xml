@@ -108,23 +108,6 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>org.springframework</groupId>-->
-        <!--<artifactId>spring-context</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.codehaus.groovy</groupId>-->
-        <!--<artifactId>groovy-all</artifactId>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-        <!--<groupId>org.mozilla</groupId>-->
-        <!--<artifactId>rhino</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>de.christophkraemer</groupId>-->
-        <!--<artifactId>rhino-script-engine</artifactId>-->
-        <!--</dependency>-->
     </dependencies>
 
 </project>

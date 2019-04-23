@@ -18,7 +18,7 @@ public class Application {
 
     public static void main(String[] args) throws IOException, AttachNotSupportedException, AgentLoadException, AgentInitializationException {
         String agentJar = System.getProperty("user.dir") + '/' + "greys-agent.jar";
-        String coreJar = System.getProperty("user.dir") + '/' + "greys-core.jar";
+        String coreJar = System.getProperty("user.dir") + "/core/target/greys-core-jar-with-dependencies.jar";
         String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
         VirtualMachine vm = VirtualMachine.attach(pid);
         vm.loadAgent(agentJar, coreJar + ";targetIp=127.0.0.1;targetPort=2345;connectTimeout=60000000");

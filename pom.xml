@@ -124,7 +124,7 @@
                 <artifactId>logback-core</artifactId>
                 <version>1.0.13</version>
             </dependency>
-            <dependency>ª
+            <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
                 <version>2.3.1</version>

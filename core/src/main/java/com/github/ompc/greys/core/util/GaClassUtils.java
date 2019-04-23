@@ -16,7 +16,9 @@ import java.util.jar.JarFile;
 
 /**
  * Greys封装的类操作工具类
- * Created by vlinux on 15/10/25.
+ *
+ * @author vlinux
+ * @date 15/10/25
  */
 public class GaClassUtils {
 

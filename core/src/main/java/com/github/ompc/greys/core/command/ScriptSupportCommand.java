@@ -2,7 +2,9 @@ package com.github.ompc.greys.core.command;
 
 /**
  * 脚本支持命令
- * Created by oldmanpushcart@gmail.com on 15/6/1.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/6/1
  */
 public interface ScriptSupportCommand {
 

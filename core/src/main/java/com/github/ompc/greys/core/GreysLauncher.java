@@ -1,6 +1,5 @@
 package com.github.ompc.greys.core;
 
-import com.sun.tools.attach.VirtualMachine;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 

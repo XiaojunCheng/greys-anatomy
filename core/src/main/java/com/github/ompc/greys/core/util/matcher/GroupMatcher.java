@@ -6,7 +6,9 @@ import java.util.Collection;
 
 /**
  * 组匹配
- * Created by vlinux on 15/11/1.
+ *
+ * @author vlinux
+ * @date 15/11/1
  */
 public interface GroupMatcher<T> extends Matcher<T> {
 

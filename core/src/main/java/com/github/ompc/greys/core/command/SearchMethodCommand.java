@@ -4,7 +4,6 @@ import com.github.ompc.greys.core.command.annotation.Cmd;
 import com.github.ompc.greys.core.command.annotation.IndexArg;
 import com.github.ompc.greys.core.command.annotation.NamedArg;
 import com.github.ompc.greys.core.manager.ReflectManager;
-import com.github.ompc.greys.core.server.Session;
 import com.github.ompc.greys.core.textui.TLadder;
 import com.github.ompc.greys.core.textui.TTable;
 import com.github.ompc.greys.core.textui.ext.TGaMethodInfo;
@@ -16,7 +15,6 @@ import com.github.ompc.greys.core.util.matcher.PatternMatcher;
 import com.github.ompc.greys.core.util.matcher.TrueMatcher;
 import org.apache.commons.lang3.StringUtils;
 
-import java.lang.instrument.Instrumentation;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -73,30 +71,30 @@ public class SearchMethodCommand implements Command {
     }
 
 
-    /*
+    /**
      * 构造方法名匹配
      * 这里修复一个网友的咨询,如果methodPattern不填,是否可以默认为匹配为所有方法
      * 这个是我的一个疏忽,在老的版本中不填methodPattern确实greys会自动默认进行全方法匹配
      * 在某一个版本的优化中我随意去掉了这个功能,导致用户行为习惯受阻,非常抱歉
      */
-    private GaMethodMatcher toGaMethodMatcher() {
+    private GaMethodMatcher buildGaMethodMatcher() {
         return new GaMethodMatcher(
                 StringUtils.isBlank(methodPattern)
-                        ? new TrueMatcher<String>()
+                        ? new TrueMatcher<>()
                         : new PatternMatcher(isRegEx, methodPattern)
         );
     }
 
 
-    /*
+    /**
      * 渲染类方法摘要信息
      */
     private void renderingMethodSummary(final TTable view, final Class<?> clazz, final RowAffect affect) {
 
         final TLadder classLadderView = new TLadder();
-        final GaMethodMatcher gaMethodMatcher = toGaMethodMatcher();
+        final GaMethodMatcher gaMethodMatcher = buildGaMethodMatcher();
         final Collection<GaMethod> gaMethods = reflectManager.searchClassGaMethods(clazz, gaMethodMatcher);
-        final Set<Class<?>> uniqueSet = new HashSet<Class<?>>();
+        final Set<Class<?>> uniqueSet = new HashSet<>();
 
         classLadderView.addItem(clazz.getName());
         uniqueSet.add(clazz);

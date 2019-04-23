@@ -15,7 +15,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static com.github.ompc.greys.core.util.GaReflectUtils.recGetSuperClass;
+import static com.github.ompc.greys.core.util.GaReflectUtils.getSuperClassRecursive;
 
 /**
  * 默认反射操作管理类实现
@@ -31,7 +31,7 @@ public class DefaultReflectManager implements ReflectManager {
 
     @Override
     public Collection<Class<?>> searchClass(final Matcher<Class<?>> classMatcher) {
-        final Set<Class<?>> classSet = new LinkedHashSet<Class<?>>();
+        final Set<Class<?>> classSet = new LinkedHashSet<>();
         for (Class<?> clazz : classDataSource.allLoadedClasses()) {
             if (classMatcher.matching(clazz)) {
                 classSet.add(clazz);
@@ -42,7 +42,7 @@ public class DefaultReflectManager implements ReflectManager {
 
     @Override
     public Collection<Class<?>> searchSubClass(final Class<?> targetClass) {
-        final Set<Class<?>> classSet = new LinkedHashSet<Class<?>>();
+        final Set<Class<?>> classSet = new LinkedHashSet<>();
         for (Class<?> clazz : classDataSource.allLoadedClasses()) {
             if (!clazz.equals(targetClass)
                     && targetClass.isAssignableFrom(clazz)) {
@@ -54,7 +54,7 @@ public class DefaultReflectManager implements ReflectManager {
 
     @Override
     public Collection<Class<?>> searchClassWithSubClass(Matcher<Class<?>> classMatcher) {
-        final Set<Class<?>> matchedClassSet = new LinkedHashSet<Class<?>>();
+        final Set<Class<?>> matchedClassSet = new LinkedHashSet<>();
 
         // 搜索所有匹配器需求
         // 搜索当前匹配器所匹配的类
@@ -81,7 +81,7 @@ public class DefaultReflectManager implements ReflectManager {
      * @return 类的所有可见方法
      */
     private Set<Method> listVisualMethod(final Class<?> clazz) {
-        final Set<Method> methodSet = new LinkedHashSet<Method>();
+        final Set<Method> methodSet = new LinkedHashSet<>();
 
         // 首先查出当前类所声明的所有方法
         final Method[] classDeclaredMethodArray = clazz.getDeclaredMethods();
@@ -92,7 +92,7 @@ public class DefaultReflectManager implements ReflectManager {
         }
 
         // 查出当前类所有的父类
-        final Collection<Class<?>> superClassSet = recGetSuperClass(clazz);
+        final Collection<Class<?>> superClassSet = getSuperClassRecursive(clazz);
 
         // 查出所有父类的可见方法
         for (Class<?> superClass : superClassSet) {
@@ -149,7 +149,7 @@ public class DefaultReflectManager implements ReflectManager {
     @Override
     public Collection<GaMethod> searchClassGaMethods(Class<?> targetClass, Matcher<GaMethod> gaMethodMatcher) {
 
-        final Set<GaMethod> gaMethodSet = new LinkedHashSet<GaMethod>();
+        final Set<GaMethod> gaMethodSet = new LinkedHashSet<>();
 
         for (final Method method : listVisualMethod(targetClass)) {
             final GaMethod gaMethod = new GaMethod.MethodImpl(method);

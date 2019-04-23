@@ -8,10 +8,11 @@ import java.util.ArrayDeque;
 import java.util.IdentityHashMap;
 
 
-
 /**
  * 计算一个对象的大小
- * Created by vlinux on 15/12/10.
+ *
+ * @author vlinux
+ * @date 15/12/10
  */
 public class SizeOf {
 
@@ -27,7 +28,6 @@ public class SizeOf {
          * 深引用大小
          */
         RETAINED
-
     }
 
     private final Instrumentation inst;
@@ -79,9 +79,9 @@ public class SizeOf {
      */
     private long getRetainedSize(final Object target) {
         long result = getShallowSize(target);
-        final IdentityHashMap<Object, Void> references = new IdentityHashMap<Object, Void>();
+        final IdentityHashMap<Object, Void> references = new IdentityHashMap<>();
         references.put(target, null);
-        final ArrayDeque<Object> unprocessed = new ArrayDeque<Object>();
+        final ArrayDeque<Object> unprocessed = new ArrayDeque<>();
         unprocessed.addFirst(target);
         do {
             Object node = unprocessed.removeFirst();
@@ -188,6 +188,6 @@ public class SizeOf {
     public String toString() {
         if (size < 1024) return size + " B";
         int z = (63 - Long.numberOfLeadingZeros(size)) / 10;
-        return String.format("%.1f %sB", (double)size / (1L << (z*10)), " KMGTPE".charAt(z));
+        return String.format("%.1f %sB", (double) size / (1L << (z * 10)), " KMGTPE".charAt(z));
     }
 }

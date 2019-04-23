@@ -43,7 +43,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * 命令处理器
- * Created by oldmanpushcart@gmail.com on 15/5/2.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/5/2
  */
 public class DefaultCommandHandler implements CommandHandler {
 

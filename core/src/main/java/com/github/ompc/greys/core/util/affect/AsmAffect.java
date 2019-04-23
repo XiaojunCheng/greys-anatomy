@@ -6,12 +6,13 @@ import java.util.List;
 
 /**
  * Asm命令特殊返回
- * Created by vlinux on 16/1/7.
+ *
+ * @author vlinux
+ * @date 16/1/7
  */
 public final class AsmAffect extends RowAffect {
 
-    private final List<ClassInfo> classInfos = new ArrayList<ClassInfo>();
-
+    private final List<ClassInfo> classInfos = new ArrayList<>();
 
     /**
      * 获取类信息集合

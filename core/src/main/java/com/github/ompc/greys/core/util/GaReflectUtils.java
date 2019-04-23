@@ -7,7 +7,10 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * 反射工具类 Created by oldmanpushcart@gmail.com on 15/5/18.
+ * 反射工具类
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/5/18
  */
 public class GaReflectUtils {
 
@@ -58,7 +61,7 @@ public class GaReflectUtils {
      * @return 类下所有属性
      */
     public static Set<Field> getFields(Class<?> clazz) {
-        final Set<Field> fields = new LinkedHashSet<Field>();
+        final Set<Field> fields = new LinkedHashSet<>();
         final Class<?> parentClazz = clazz.getSuperclass();
         Collections.addAll(fields, clazz.getDeclaredFields());
         if (null != parentClazz) {
@@ -91,7 +94,6 @@ public class GaReflectUtils {
      * @param value 目标值
      * @return 类型转换后的值
      */
-    @SuppressWarnings("unchecked")
     public static <T> T valueOf(Class<T> t, String value) {
         if (GaCheckUtils.isIn(t, int.class, Integer.class)) {
             return (T) Integer.valueOf(value);
@@ -190,9 +192,9 @@ public class GaReflectUtils {
      * @param targetClass 目标类
      * @return 目标类的父类列表(顺序按照类继承顺序倒序)
      */
-    public static ArrayList<Class<?>> recGetSuperClass(Class<?> targetClass) {
+    public static ArrayList<Class<?>> getSuperClassRecursive(Class<?> targetClass) {
 
-        final ArrayList<Class<?>> superClassList = new ArrayList<Class<?>>();
+        final ArrayList<Class<?>> superClassList = new ArrayList<>();
         Class<?> currentClass = targetClass;
         do {
             final Class<?> superClass = currentClass.getSuperclass();
@@ -204,7 +206,6 @@ public class GaReflectUtils {
         return superClassList;
 
     }
-
 
     /**
      * 计算ClassType
@@ -254,7 +255,6 @@ public class GaReflectUtils {
                     | TYPE_ANONYMOUS | TYPE_ARRAY | TYPE_ENUM
                     | TYPE_INTERFACE | TYPE_LOCAL | TYPE_MEMBER
                     | TYPE_PRIMITIVE | TYPE_SYNTHETIC;
-
 
     /**
      * 计算类修饰符

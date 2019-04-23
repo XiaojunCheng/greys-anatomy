@@ -11,17 +11,19 @@ import static java.lang.String.format;
 /**
  * 增强影响范围<br/>
  * 统计影响类/方法/耗时
- * Created by oldmanpushcart@gmail.com on 15/5/19.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/5/19
  */
 public final class EnhancerAffect extends Affect {
 
     private final AtomicInteger cCnt = new AtomicInteger();
     private final AtomicInteger mCnt = new AtomicInteger();
 
-    /*
+    /**
      * dumpClass的文件存放集合
      */
-    private final Collection<File> classDumpFiles = new ArrayList<File>();
+    private final Collection<File> classDumpFiles = new ArrayList<>();
 
     public EnhancerAffect() {
 

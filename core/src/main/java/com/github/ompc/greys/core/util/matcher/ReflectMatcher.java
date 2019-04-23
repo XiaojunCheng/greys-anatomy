@@ -7,7 +7,9 @@ import static com.github.ompc.greys.core.util.GaReflectUtils.DEFAULT_MOD;
 
 /**
  * 反射相关匹配器
- * Created by vlinux on 15/11/1.
+ *
+ * @author vlinux
+ * @date 15/11/1
  */
 public abstract class ReflectMatcher<T> implements Matcher<T> {
 

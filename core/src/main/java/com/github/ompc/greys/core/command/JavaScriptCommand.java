@@ -29,7 +29,9 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 /**
  * js脚本增强命令
- * Created by vlinux on 16/2/9.
+ *
+ * @author vlinux
+ * @date 16/2/9
  */
 @Cmd(name = "js", sort = 6, summary = "Enhanced JavaScript",
         eg = {

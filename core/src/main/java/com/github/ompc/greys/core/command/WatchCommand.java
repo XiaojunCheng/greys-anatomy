@@ -24,6 +24,9 @@ import static com.github.ompc.greys.core.util.Express.ExpressFactory.newExpress;
 import static com.github.ompc.greys.core.util.GaStringUtils.getCauseMessage;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+/**
+ * @author vlinux
+ */
 @Cmd(name = "watch", sort = 4, summary = "Display the details of specified class and method",
         eg = {
                 "watch -Eb org\\.apache\\.commons\\.lang\\.StringUtils isBlank params[0]",

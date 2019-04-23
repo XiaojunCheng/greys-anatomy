@@ -20,7 +20,9 @@ import static org.apache.commons.lang3.reflect.FieldUtils.getField;
 
 /**
  * 关闭命令
- * Created by oldmanpushcart@gmail.com on 14/10/23.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 14/10/23
  */
 @Cmd(name = "shutdown", sort = 11, summary = "Shut down Greys server and exit the console",
         eg = {

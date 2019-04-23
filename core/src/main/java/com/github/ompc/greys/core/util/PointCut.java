@@ -4,7 +4,9 @@ import com.github.ompc.greys.core.util.matcher.Matcher;
 
 /**
  * 切入点
- * Created by oldmanpushcart@gmail.com on 15/10/24.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/10/24
  */
 public class PointCut {
 

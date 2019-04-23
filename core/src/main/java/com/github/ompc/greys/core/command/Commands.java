@@ -19,6 +19,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author vlinux
+ */
 public class Commands {
 
     private final Map<String, Class<?>> commands = new HashMap<>();

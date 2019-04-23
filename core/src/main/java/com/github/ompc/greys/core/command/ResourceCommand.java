@@ -13,7 +13,9 @@ import java.util.Set;
 
 /**
  * 资源查询命令
- * Created by vlinux on 16/9/24.
+ *
+ * @author vlinux
+ * @date 16/9/24
  */
 //@Cmd(name = "resource", sort = 8, summary = "Finds the resource with the given name",
 //        eg = {

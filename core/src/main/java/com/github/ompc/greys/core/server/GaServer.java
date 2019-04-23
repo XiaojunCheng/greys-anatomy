@@ -153,7 +153,7 @@ public class GaServer {
             public Collection<Class<?>> allLoadedClasses() {
                 final Class<?>[] classArray = inst.getAllLoadedClasses();
                 return null == classArray
-                        ? new ArrayList > ()
+                        ? new ArrayList<>()
                         : Arrays.asList(classArray);
             }
         });
@@ -348,31 +348,27 @@ public class GaServer {
                     case READ_EOL: {
                         final String line = attachment.clearAndGetLine(session.getCharset());
 
-                        executorService.execute(new Runnable() {
-                            @Override
-                            public void run() {
+                        executorService.execute(() -> {
+                            // 会话只有未锁定的时候才能响应命令
+                            if (session.tryLock()) {
+                                try {
 
-                                // 会话只有未锁定的时候才能响应命令
-                                if (session.tryLock()) {
-                                    try {
+                                    // 命令执行
+                                    commandHandler.executeCommand(line, session);
 
-                                        // 命令执行
-                                        commandHandler.executeCommand(line, session);
+                                    // 命令结束之后需要传输EOT告诉client命令传输已经完结，可以展示提示符
+                                    socketChannel.write(ByteBuffer.wrap(new byte[]{EOT}));
 
-                                        // 命令结束之后需要传输EOT告诉client命令传输已经完结，可以展示提示符
-                                        socketChannel.write(ByteBuffer.wrap(new byte[]{EOT}));
-
-                                    } catch (IOException e) {
-                                        logger.info("network communicate failed, session[{}] will be close.",
-                                                session.getSessionId());
-                                        session.destroy();
-                                    } finally {
-                                        session.unLock();
-                                    }
-                                } else {
-                                    logger.info("session[{}] was locked, ignore this command.",
+                                } catch (IOException e) {
+                                    logger.info("network communicate failed, session[{}] will be close.",
                                             session.getSessionId());
+                                    session.destroy();
+                                } finally {
+                                    session.unLock();
                                 }
+                            } else {
+                                logger.info("session[{}] was locked, ignore this command.",
+                                        session.getSessionId());
                             }
                         });
 

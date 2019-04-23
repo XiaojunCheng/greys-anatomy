@@ -4,7 +4,9 @@ import java.util.Collection;
 
 /**
  * 类据源
- * Created by oldmanpushcart@gmail.com on 15/12/13.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/12/13
  */
 public interface ClassDataSource {
 

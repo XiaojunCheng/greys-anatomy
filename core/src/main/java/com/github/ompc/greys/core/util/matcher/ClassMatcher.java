@@ -9,7 +9,9 @@ import static com.github.ompc.greys.core.util.GaReflectUtils.*;
 
 /**
  * 类匹配
- * Created by vlinux on 15/10/31.
+ *
+ * @author vlinux
+ * @date 15/10/31
  */
 public class ClassMatcher extends ReflectMatcher<Class<?>> {
 

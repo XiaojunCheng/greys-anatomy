@@ -15,7 +15,9 @@ import static com.github.ompc.greys.core.textui.TTable.Align.RIGHT;
 
 /**
  * JVM info command
- * Created by oldmanpushcart@gmail.com on 15/6/6.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/6/6
  */
 @Cmd(name = "jvm", sort = 10, summary = "Display the target JVM information",
         eg = {

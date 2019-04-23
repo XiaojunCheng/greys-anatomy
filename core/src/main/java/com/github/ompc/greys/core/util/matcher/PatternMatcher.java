@@ -2,7 +2,9 @@ package com.github.ompc.greys.core.util.matcher;
 
 /**
  * 模版匹配
- * Created by oldmanpushcart@gmail.com on 15/10/31.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/10/31
  */
 public class PatternMatcher implements Matcher<String> {
 

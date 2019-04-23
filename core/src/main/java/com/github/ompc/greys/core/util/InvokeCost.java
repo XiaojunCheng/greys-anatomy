@@ -2,11 +2,13 @@ package com.github.ompc.greys.core.util;
 
 /**
  * 调用耗时
- * Created by vlinux on 16/6/1.
+ *
+ * @author vlinux
+ * @date 16/6/1
  */
 public class InvokeCost {
 
-    private final ThreadLocal<Long> timestampRef = new ThreadLocal<Long>();
+    private final ThreadLocal<Long> timestampRef = new ThreadLocal<>();
 
     public long begin() {
         final long timestamp = System.currentTimeMillis();

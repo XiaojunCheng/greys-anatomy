@@ -13,7 +13,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * Feature编解器(线程安全)<br/>
  * <p/>
  * 用于封装系统内部features/attribute等扩展字段的管理
- * Created by dukun@taobao.com on 15/3/31.
+ *
+ * @author dukun@taobao.com
+ * @date 15/3/31
  */
 public class FeatureCodec {
 

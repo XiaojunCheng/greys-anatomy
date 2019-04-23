@@ -7,7 +7,9 @@ import java.lang.instrument.Instrumentation;
 
 /**
  * 退出命令
- * Created by oldmanpushcart@gmail.com on 15/5/18.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/5/18
  */
 @Cmd(name = "quit", sort = 8, summary = "Quit Greys console",
         eg = {

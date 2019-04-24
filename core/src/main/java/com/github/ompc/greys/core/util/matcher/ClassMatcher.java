@@ -15,7 +15,9 @@ import static com.github.ompc.greys.core.util.GaReflectUtils.*;
  */
 public class ClassMatcher extends ReflectMatcher<Class<?>> {
 
-    // 类型
+    /**
+     * 类型
+     */
     private final int type;
 
     /**

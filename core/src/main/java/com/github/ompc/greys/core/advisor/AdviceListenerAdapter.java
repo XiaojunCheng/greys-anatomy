@@ -2,7 +2,9 @@ package com.github.ompc.greys.core.advisor;
 
 /**
  * 监听适配器
- * Created by vlinux on 16/6/1.
+ *
+ * @author vlinux
+ * @date 16/6/1
  */
 public class AdviceListenerAdapter implements AdviceListener {
 

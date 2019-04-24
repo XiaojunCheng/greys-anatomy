@@ -13,13 +13,19 @@ import static com.github.ompc.greys.core.util.GaReflectUtils.DEFAULT_MOD;
  */
 public abstract class ReflectMatcher<T> implements Matcher<T> {
 
-    // 访问修饰符
+    /**
+     * 访问修饰符
+     */
     private final int modifier;
 
-    // 名称匹配
+    /**
+     * 名称匹配
+     */
     private final Matcher<String> name;
 
-    // 声明Annotation匹配
+    /**
+     * 声明Annotation匹配
+     */
     private final Collection<Matcher<Class<? extends Annotation>>> annotations;
 
     /**

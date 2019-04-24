@@ -42,7 +42,9 @@ import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
 
 /**
  * 对类进行通知增强
- * Created by oldmanpushcart@gmail.com on 15/5/17.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/5/17
  */
 public class Enhancer implements ClassFileTransformer {
 
@@ -55,9 +57,11 @@ public class Enhancer implements ClassFileTransformer {
 
     private static final ReflectManager reflectManager = ReflectManager.Factory.getInstance();
 
-    // 类-字节码缓存
-    private final static Map<Class<?>/*Class*/, byte[]/*bytes of Class*/> classBytesCache
-            = new WeakHashMap<Class<?>, byte[]>();
+    /**
+     * 类-字节码缓存
+     * Class -> bytes of Class
+     */
+    private final static Map<Class<?>, byte[]> classBytesCache = new WeakHashMap<>();
 
     /**
      * @param adviceId   通知编号
@@ -269,7 +273,7 @@ public class Enhancer implements ClassFileTransformer {
         return null;
     }
 
-    /*
+    /**
      * dump class to file
      */
     private static void dumpClassIfNecessary(String className, byte[] data, EnhancerAffect affect) {
@@ -311,7 +315,7 @@ public class Enhancer implements ClassFileTransformer {
                 || isGreysClass(clazz);
     }
 
-    /*
+    /**
      * 是否过滤Greys加载的类
      */
     private static boolean isSelf(Class<?> clazz) {
@@ -319,7 +323,7 @@ public class Enhancer implements ClassFileTransformer {
                 && isEquals(clazz.getClassLoader(), Enhancer.class.getClassLoader());
     }
 
-    /*
+    /**
      * 是否过滤unsafe类
      */
     private static boolean isUnsafeClass(Class<?> clazz) {
@@ -327,8 +331,10 @@ public class Enhancer implements ClassFileTransformer {
                 && clazz.getClassLoader() == null;
     }
 
-    /*
+    /**
      * 是否过滤目前暂不支持的类
+     *
+     * @param clazz
      */
     private static boolean isUnsupportedClass(Class<?> clazz) {
 
@@ -349,7 +355,7 @@ public class Enhancer implements ClassFileTransformer {
 
     private static Map<Class<?>, Matcher<AsmMethod>> toEnhanceMap(final PointCut pointCut) {
 
-        final Map<Class<?>, Matcher<AsmMethod>> enhanceMap = new LinkedHashMap<Class<?>, Matcher<AsmMethod>>();
+        final Map<Class<?>, Matcher<AsmMethod>> enhanceMap = new LinkedHashMap<>();
         final Collection<Class<?>> classes = pointCut.isIncludeSubClass()
                 ? reflectManager.searchClassWithSubClass(pointCut.getClassMatcher())
                 : reflectManager.searchClass(pointCut.getClassMatcher());
@@ -370,7 +376,7 @@ public class Enhancer implements ClassFileTransformer {
                 if (enhanceMap.containsKey(targetClass)) {
                     groupMatcher = enhanceMap.get(targetClass);
                 } else {
-                    groupMatcher = new GroupMatcher.Or<AsmMethod>();
+                    groupMatcher = new GroupMatcher.Or<>();
                     enhanceMap.put(targetClass, groupMatcher);
                 }
 

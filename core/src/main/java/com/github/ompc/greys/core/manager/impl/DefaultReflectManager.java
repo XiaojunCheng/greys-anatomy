@@ -19,7 +19,9 @@ import static com.github.ompc.greys.core.util.GaReflectUtils.getSuperClassRecurs
 
 /**
  * 默认反射操作管理类实现
- * Created by vlinux on 15/11/1.
+ *
+ * @author vlinux
+ * @date 15/11/1
  */
 public class DefaultReflectManager implements ReflectManager {
 

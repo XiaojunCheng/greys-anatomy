@@ -18,22 +18,35 @@ public interface GaMethod {
 
     /**
      * {@link Method#invoke(Object, Object...)}
+     *
+     * @param obj
+     * @param args
+     * @return
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     * @throws InstantiationException
      */
     Object invoke(Object obj, Object... args)
             throws IllegalAccessException, InvocationTargetException, InstantiationException;
 
     /**
      * {@link Method#isAccessible()}
+     *
+     * @return
      */
     boolean isAccessible();
 
     /**
      * {@link Method#setAccessible(boolean)}
+     *
+     * @param accessFlag
      */
     void setAccessible(boolean accessFlag);
 
     /**
      * {@link Method#getName()}
+     *
+     * @return
      */
     String getName();
 

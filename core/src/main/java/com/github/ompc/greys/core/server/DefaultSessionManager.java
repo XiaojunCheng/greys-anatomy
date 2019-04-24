@@ -22,17 +22,19 @@ public class DefaultSessionManager implements SessionManager {
 
     private final Logger logger = LogUtil.getLogger();
 
-    // 5分钟
     private static final long DURATION_5_MINUTE = 5L * 60 * 1000;
-
-    // 会话超时时间
-    //TODO
-    private static final long DEFAULT_SESSION_DURATION = DURATION_5_MINUTE * 100;
-
-    // 会话管理Map
-    private final ConcurrentHashMap<Integer, Session> sessionMap = new ConcurrentHashMap<Integer, Session>();
-
-    // 会话ID序列生成器
+    /**
+     * 会话超时时间
+     * NOTE: 为了调试方便，特意调大
+     */
+    private static final long DEFAULT_SESSION_DURATION = DURATION_5_MINUTE * 1000;
+    /**
+     * 会话管理Map
+     */
+    private final ConcurrentHashMap<Integer, Session> sessionMap = new ConcurrentHashMap<>();
+    /**
+     * 会话ID序列生成器
+     */
     private final AtomicInteger sessionIndexSequence = new AtomicInteger(0);
 
     private final AtomicBoolean isDestroyRef = new AtomicBoolean(false);

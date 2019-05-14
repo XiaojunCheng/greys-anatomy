@@ -6,10 +6,11 @@ import java.net.URLClassLoader;
 
 /**
  * Agent ClassLoader
- * Created by vlinux on 2016/11/7.
+ *
+ * @author vlinux
+ * @date 2016/11/7
  */
 public class AgentClassLoader extends URLClassLoader {
-
 
     public AgentClassLoader(final String agentJar) throws MalformedURLException {
         super(new URL[]{new URL("file:" + agentJar)});

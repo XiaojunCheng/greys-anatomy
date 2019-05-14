@@ -15,7 +15,7 @@ public class HelloController {
     @RequestMapping("/hello")
     public String hello() {
         List<Test.Pojo> list = new ArrayList<>();
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < 3; i++) {
             Test.Pojo pojo = new Test.Pojo();
             pojo.setName("name " + i);
             pojo.setAge(i + 2);

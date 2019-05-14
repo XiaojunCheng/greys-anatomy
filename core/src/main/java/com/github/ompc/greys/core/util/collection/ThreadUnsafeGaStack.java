@@ -8,9 +8,9 @@ import static java.lang.System.arraycopy;
  * 线程不安全不固定栈深的堆栈实现<br/>
  * 比默认的实现带来3倍的性能提升
  *
+ * @param <E>
  * @author oldmanpushcart@gmail.com
  * @date 15/6/21
- * @param <E>
  */
 public class ThreadUnsafeGaStack<E> implements GaStack<E> {
 
@@ -27,7 +27,6 @@ public class ThreadUnsafeGaStack<E> implements GaStack<E> {
     public ThreadUnsafeGaStack(int stackSize) {
         this.elementArray = new Object[stackSize];
     }
-
 
     /**
      * 自动扩容<br/>

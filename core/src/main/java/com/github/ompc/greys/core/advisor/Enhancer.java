@@ -79,8 +79,7 @@ public class Enhancer implements ClassFileTransformer {
         this.affect = affect;
     }
 
-
-    /*
+    /**
      * 从GreysClassLoader中加载Spy
      */
     private Class<?> loadSpyClassFromGreysClassLoader(final ClassLoader greysClassLoader, final String spyClassName) {
@@ -92,7 +91,7 @@ public class Enhancer implements ClassFileTransformer {
         }
     }
 
-    /*
+    /**
      * 派遣间谍混入对方的classLoader中
      */
     private void spy(final ClassLoader targetClassLoader)
@@ -102,7 +101,6 @@ public class Enhancer implements ClassFileTransformer {
         if (null == targetClassLoader) {
             return;
         }
-
 
         // Enhancer类只可能从greysClassLoader中加载
         // 所以找他要ClassLoader是靠谱的
@@ -181,29 +179,22 @@ public class Enhancer implements ClassFileTransformer {
             final ProtectionDomain protectionDomain,
             final byte[] classfileBuffer) throws IllegalClassFormatException {
 
-        // 过滤掉不在增强集合范围内的类
+        //过滤掉不在增强集合范围内的类
         if (!enhanceMap.containsKey(classBeingRedefined)) {
             return null;
         }
 
-        final ClassReader cr;
-
-        // 首先先检查是否在缓存中存在Class字节码
-        // 因为要支持多人协作,存在多人同时增强的情况
+        //首先先检查是否在缓存中存在Class字节码
+        //因为要支持多人协作,存在多人同时增强的情况
         final byte[] byteOfClassInCache = classBytesCache.get(classBeingRedefined);
-        if (null != byteOfClassInCache) {
-            cr = new ClassReader(byteOfClassInCache);
-        }
-
-        // 如果没有命中缓存,则从原始字节码开始增强
-        else {
-            cr = new ClassReader(classfileBuffer);
-        }
+        //如果没有命中缓存,则从原始字节码开始增强
+        final ClassReader cr = new ClassReader((byteOfClassInCache == null) ? classfileBuffer : byteOfClassInCache);
 
         // 获取这个类所对应的asm方法匹配
         final Matcher<AsmMethod> asmMethodMatcher = enhanceMap.get(classBeingRedefined);
 
         // 字节码增强
+        // NOTE by cxj: asm4-guide.pdf page 50 ClassWriter option
         final ClassWriter cw = new ClassWriter(cr, COMPUTE_FRAMES | COMPUTE_MAXS) {
 
             /*
@@ -257,7 +248,7 @@ public class Enhancer implements ClassFileTransformer {
             // 成功计数
             affect.cCnt(1);
 
-            // 排遣间谍
+            // 派遣间谍
             try {
                 spy(inClassLoader);
             } catch (Throwable t) {
@@ -409,7 +400,6 @@ public class Enhancer implements ClassFileTransformer {
 
         final EnhancerAffect affect = new EnhancerAffect();
 
-
         final Map<Class<?>, Matcher<AsmMethod>> enhanceMap = toEnhanceMap(pointCut);
 
         // 构建增强器
@@ -516,32 +506,24 @@ public class Enhancer implements ClassFileTransformer {
             return affect;
         }
 
-        final ClassFileTransformer getClassByteArrayFileTransformer = new ClassFileTransformer() {
-            @Override
-            public byte[] transform(
-                    ClassLoader loader,
-                    String className,
-                    Class<?> classBeingRedefined,
-                    ProtectionDomain protectionDomain,
-                    byte[] classfileBuffer) throws IllegalClassFormatException {
+        final ClassFileTransformer getClassByteArrayFileTransformer = (loader, className, classBeingRedefined, protectionDomain, classfileBuffer) -> {
 
-                if (classes.contains(classBeingRedefined)) {
-                    affect.getClassInfos().add(new AsmAffect.ClassInfo(
-                            classBeingRedefined,
-                            loader,
-                            classfileBuffer,
-                            protectionDomain
-                    ));
-                    affect.rCnt(1);
-                }
-
-                if (classBytesCache.containsKey(classBeingRedefined)) {
-                    return classBytesCache.get(classBeingRedefined);
-                } else {
-                    return null;
-                }
-
+            if (classes.contains(classBeingRedefined)) {
+                affect.getClassInfos().add(new AsmAffect.ClassInfo(
+                        classBeingRedefined,
+                        loader,
+                        classfileBuffer,
+                        protectionDomain
+                ));
+                affect.rCnt(1);
             }
+
+            if (classBytesCache.containsKey(classBeingRedefined)) {
+                return classBytesCache.get(classBeingRedefined);
+            } else {
+                return null;
+            }
+
         };
 
         try {
@@ -555,7 +537,6 @@ public class Enhancer implements ClassFileTransformer {
         }
 
         return affect;
-
     }
 
 }

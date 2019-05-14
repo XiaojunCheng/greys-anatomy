@@ -280,9 +280,10 @@ public class TimeTunnelCommand implements Command {
                         );
 
                         final TTimeFragmentTable view = new TTimeFragmentTable(isFirst)
-                                .turnOffBottom()    // 表格控件不输出表格上边框,这样两个表格就能拼凑在一起
-                                .add(timeFragment)  // 填充表格内容
-                                ;
+                                // 表格控件不输出表格上边框,这样两个表格就能拼凑在一起
+                                .turnOffBottom()
+                                // 填充表格内容
+                                .add(timeFragment);
                         if (isFirst) {
                             isFirst = false;
                         }
@@ -301,18 +302,14 @@ public class TimeTunnelCommand implements Command {
     }
 
 
-    /*
+    /**
      * do list timeFragmentMap
      */
     private RowAction doList() {
-
-        return new RowAction() {
-            @Override
-            public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
-                final ArrayList<TimeFragment> timeFragments = timeFragmentManager.list();
-                printer.print(drawTimeTunnelTable(timeFragments)).finish();
-                return new RowAffect(timeFragments.size());
-            }
+        return (session, inst, printer) -> {
+            final ArrayList<TimeFragment> timeFragments = timeFragmentManager.list();
+            printer.print(drawTimeTunnelTable(timeFragments)).finish();
+            return new RowAffect(timeFragments.size());
         };
 
     }
@@ -330,195 +327,180 @@ public class TimeTunnelCommand implements Command {
                 && expend > 0;
     }
 
-    /*
+    /**
      * do search timeFragmentMap
      */
     private RowAction doSearch() {
+        return (session, inst, printer) -> {
 
-        return new RowAction() {
-            @Override
-            public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
+            // 匹配的时间片段
+            final ArrayList<TimeFragment> matchingTimeFragments = timeFragmentManager.search(searchExpress);
 
-                // 匹配的时间片段
-                final ArrayList<TimeFragment> matchingTimeFragments = timeFragmentManager.search(searchExpress);
+            // 执行watchExpress
+            if (hasWatchExpress()) {
 
-                // 执行watchExpress
-                if (hasWatchExpress()) {
+                final TTable tTable = new TTable(new TTable.ColumnDefine[]{
+                        new TTable.ColumnDefine(TTable.Align.RIGHT),
+                        new TTable.ColumnDefine(TTable.Align.LEFT)
+                })
+                        .padding(1)
+                        .addRow("INDEX", "SEARCH-RESULT");
 
-                    final TTable tTable = new TTable(new TTable.ColumnDefine[]{
-                            new TTable.ColumnDefine(TTable.Align.RIGHT),
-                            new TTable.ColumnDefine(TTable.Align.LEFT)
-                    })
-                            .padding(1)
-                            .addRow("INDEX", "SEARCH-RESULT");
+                for (TimeFragment timeFragment : matchingTimeFragments) {
+                    final Object value = newExpress(timeFragment.advice).get(watchExpress);
+                    tTable.addRow(
+                            timeFragment.id,
+                            isNeedExpend()
+                                    ? new TObject(value, expend).rendering()
+                                    : value
+                    );
 
-                    for (TimeFragment timeFragment : matchingTimeFragments) {
-                        final Object value = newExpress(timeFragment.advice).get(watchExpress);
-                        tTable.addRow(
-                                timeFragment.id,
-                                isNeedExpend()
-                                        ? new TObject(value, expend).rendering()
-                                        : value
-                        );
-
-                    }
-
-                    printer.print(tTable.rendering()).finish();
-                } // 单纯的列表格
-                else {
-                    printer.print(drawTimeTunnelTable(matchingTimeFragments)).finish();
                 }
 
-                return new RowAffect(matchingTimeFragments.size());
+                printer.print(tTable.rendering()).finish();
+            } // 单纯的列表格
+            else {
+                printer.print(drawTimeTunnelTable(matchingTimeFragments)).finish();
             }
+
+            return new RowAffect(matchingTimeFragments.size());
         };
 
     }
 
-    /*
+    /**
      * 清除所有的记录
      */
     private RowAction doDeleteAll() {
-        return new RowAction() {
-
-            @Override
-            public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
-                final int count = timeFragmentManager.clean();
-                printer.println("Time fragments are cleaned.").finish();
-                return new RowAffect(count);
-            }
+        return (session, inst, printer) -> {
+            final int count = timeFragmentManager.clean();
+            printer.println("Time fragments are cleaned.").finish();
+            return new RowAffect(count);
         };
 
     }
 
-    /*
+    /**
      * 查看记录信息
      */
     private RowAction doWatch() {
+        return (session, inst, printer) -> {
 
-        return new RowAction() {
-            @Override
-            public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
-
-                final TimeFragment timeFragment = timeFragmentManager.get(index);
-                if (null == timeFragment) {
-                    printer.println(format("Time fragment[%d] does not exist.", index)).finish();
-                    return new RowAffect();
-                }
-
-                final Advice advice = timeFragment.advice;
-                final Object value = newExpress(advice).get(watchExpress);
-                if (isNeedExpend()) {
-                    printer.println(new TObject(value, expend).rendering()).finish();
-                } else {
-                    printer.println(newString(value)).finish();
-                }
-
-                return new RowAffect(1);
+            final TimeFragment timeFragment = timeFragmentManager.get(index);
+            if (null == timeFragment) {
+                printer.println(format("Time fragment[%d] does not exist.", index)).finish();
+                return new RowAffect();
             }
+
+            final Advice advice = timeFragment.advice;
+            final Object value = newExpress(advice).get(watchExpress);
+            if (isNeedExpend()) {
+                printer.println(new TObject(value, expend).rendering()).finish();
+            } else {
+                printer.println(newString(value)).finish();
+            }
+
+            return new RowAffect(1);
         };
 
     }
 
-    /*
+    /**
      * 重放指定记录
      */
     private RowAction doPlay() {
-        return new RowAction() {
-            @Override
-            public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
+        return (session, inst, printer) -> {
 
-                final TimeFragment timeFragment = timeFragmentManager.get(index);
-                if (null == timeFragment) {
-                    printer.println(format("Time fragment[%d] does not exist.", index)).finish();
-                    return new RowAffect();
+            final TimeFragment timeFragment = timeFragmentManager.get(index);
+            if (null == timeFragment) {
+                printer.println(format("Time fragment[%d] does not exist.", index)).finish();
+                return new RowAffect();
+            }
+
+            final Advice advice = timeFragment.advice;
+            final GaMethod method = advice.getMethod();
+            final boolean accessible = advice.getMethod().isAccessible();
+
+            final long beginTimestamp = System.currentTimeMillis();
+            final long cost;
+            Advice reAdvice = null;
+
+            // 注入时间片段id
+            PlayIndexHolder.getInstance().set(timeFragment.id);
+
+            try {
+                method.setAccessible(true);
+                final Object returnObj = method.invoke(advice.target, advice.params);
+                reAdvice = newForAfterRetuning(
+                        advice.loader,
+                        new LazyGet<Class<?>>() {
+                            @Override
+                            protected Class<?> initialValue() throws Throwable {
+                                return advice.getClazz();
+                            }
+                        },
+                        new LazyGet<GaMethod>() {
+                            @Override
+                            protected GaMethod initialValue() throws Throwable {
+                                return advice.getMethod();
+                            }
+                        },
+                        advice.target,
+                        advice.params,
+                        returnObj
+                );
+            } catch (Throwable t) {
+
+                // 执行失败:输出失败异常信息
+                final Throwable cause;
+                if (t instanceof InvocationTargetException) {
+                    cause = t.getCause();
+                } else {
+                    cause = t;
                 }
 
-                final Advice advice = timeFragment.advice;
-                final GaMethod method = advice.getMethod();
-                final boolean accessible = advice.getMethod().isAccessible();
-
-                final long beginTimestamp = System.currentTimeMillis();
-                final long cost;
-                Advice reAdvice = null;
-
-                // 注入时间片段id
-                PlayIndexHolder.getInstance().set(timeFragment.id);
-
-                try {
-                    method.setAccessible(true);
-                    final Object returnObj = method.invoke(advice.target, advice.params);
-                    reAdvice = newForAfterRetuning(
-                            advice.loader,
-                            new LazyGet<Class<?>>() {
-                                @Override
-                                protected Class<?> initialValue() throws Throwable {
-                                    return advice.getClazz();
-                                }
-                            },
-                            new LazyGet<GaMethod>() {
-                                @Override
-                                protected GaMethod initialValue() throws Throwable {
-                                    return advice.getMethod();
-                                }
-                            },
-                            advice.target,
-                            advice.params,
-                            returnObj
-                    );
-                } catch (Throwable t) {
-
-                    // 执行失败:输出失败异常信息
-                    final Throwable cause;
-                    if (t instanceof InvocationTargetException) {
-                        cause = t.getCause();
-                    } else {
-                        cause = t;
-                    }
-
-                    reAdvice = newForAfterThrowing(
-                            advice.loader,
-                            new LazyGet<Class<?>>() {
-                                @Override
-                                protected Class<?> initialValue() throws Throwable {
-                                    return advice.getClazz();
-                                }
-                            },
-                            new LazyGet<GaMethod>() {
-                                @Override
-                                protected GaMethod initialValue() throws Throwable {
-                                    return advice.getMethod();
-                                }
-                            },
-                            advice.target,
-                            advice.params,
-                            cause
-                    );
-
-                } finally {
-                    method.setAccessible(accessible);
-                    cost = System.currentTimeMillis() - beginTimestamp;
-
-                    // 清除时间片段id
-                    // PlayIndexHolder.getInstance().remove();
-                }
-
-                final TimeFragment reTimeFragment = new TimeFragment(
-                        timeFragment.id,
-                        timeFragment.processId,
-                        reAdvice,
-                        timeFragment.gmtCreate,
-                        cost,
-                        timeFragment.stack
+                reAdvice = newForAfterThrowing(
+                        advice.loader,
+                        new LazyGet<Class<?>>() {
+                            @Override
+                            protected Class<?> initialValue() throws Throwable {
+                                return advice.getClazz();
+                            }
+                        },
+                        new LazyGet<GaMethod>() {
+                            @Override
+                            protected GaMethod initialValue() throws Throwable {
+                                return advice.getMethod();
+                            }
+                        },
+                        advice.target,
+                        advice.params,
+                        cause
                 );
 
+            } finally {
+                method.setAccessible(accessible);
+                cost = System.currentTimeMillis() - beginTimestamp;
 
-                final TTimeFragmentDetail view = new TTimeFragmentDetail(inst, reTimeFragment, expend);
-                printer.print(view.rendering())
-                        .println(format("Time fragment[%d] successfully replayed.", index))
-                        .finish();
-                return new RowAffect(1);
+                // 清除时间片段id
+                // PlayIndexHolder.getInstance().remove();
             }
+
+            final TimeFragment reTimeFragment = new TimeFragment(
+                    timeFragment.id,
+                    timeFragment.processId,
+                    reAdvice,
+                    timeFragment.gmtCreate,
+                    cost,
+                    timeFragment.stack
+            );
+
+
+            final TTimeFragmentDetail view = new TTimeFragmentDetail(inst, reTimeFragment, expend);
+            printer.print(view.rendering())
+                    .println(format("Time fragment[%d] successfully replayed.", index))
+                    .finish();
+            return new RowAffect(1);
         };
     }
 
@@ -602,16 +584,12 @@ public class TimeTunnelCommand implements Command {
         } else if (hasSearchExpress()) {
             action = doSearch();
         } else {
-            action = new SilentAction() {
-                @Override
-                public void action(Session session, Instrumentation inst, Printer printer) throws Throwable {
-                    throw new UnsupportedOperationException("not support operation.");
-                }
+            action = (SilentAction) (session, inst, printer) -> {
+                throw new UnsupportedOperationException("not support operation.");
             };
         }
 
         return action;
-
     }
 
 }

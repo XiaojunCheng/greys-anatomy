@@ -5,11 +5,15 @@ import java.util.jar.JarFile;
 
 /**
  * 代理启动类
- * Created by oldmanpushcart@gmail.com on 15/5/19.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/5/19
  */
 public class AgentLauncher {
 
-    // 全局持有classloader用于隔离greys实现
+    /**
+     * 全局持有classloader用于隔离greys实现
+     */
     private static volatile ClassLoader greysClassLoader;
 
     public static void premain(String args, Instrumentation inst) {
@@ -28,79 +32,79 @@ public class AgentLauncher {
         greysClassLoader = null;
     }
 
-    private static ClassLoader loadOrDefineClassLoader(String agentJar) throws Throwable {
+    private synchronized static ClassLoader loadOrDefineClassLoader(String agentJar) throws Throwable {
 
-        final ClassLoader classLoader;
-
-        // 如果已经被启动则返回之前启动的classloader
+        //如果已经被启动则返回之前启动的classloader
         if (null != greysClassLoader) {
-            classLoader = greysClassLoader;
+            return greysClassLoader;
         }
 
-        // 如果未启动则重新加载
-        else {
-            classLoader = new AgentClassLoader(agentJar);
+        //如果未启动则重新加载
+        final ClassLoader classLoader = new AgentClassLoader(agentJar);
 
-            // 获取各种Hook
-            final Class<?> adviceWeaverClass = classLoader.loadClass("com.github.ompc.greys.core.advisor.AdviceWeaver");
+        // 获取各种Hook
+        final Class<?> adviceWeaverClass = classLoader.loadClass("com.github.ompc.greys.core.advisor.AdviceWeaver");
 
-            // 初始化全局间谍
-            Spy.initForAgentLauncher(
-                    adviceWeaverClass.getMethod("methodOnBegin",
-                            int.class,
-                            ClassLoader.class,
-                            String.class,
-                            String.class,
-                            String.class,
-                            Object.class,
-                            Object[].class),
-                    adviceWeaverClass.getMethod("methodOnReturnEnd",
-                            Object.class,
-                            int.class),
-                    adviceWeaverClass.getMethod("methodOnThrowingEnd",
-                            Throwable.class,
-                            int.class),
-                    adviceWeaverClass.getMethod("methodOnInvokeBeforeTracing",
-                            int.class,
-                            Integer.class,
-                            String.class,
-                            String.class,
-                            String.class),
-                    adviceWeaverClass.getMethod("methodOnInvokeAfterTracing",
-                            int.class,
-                            Integer.class,
-                            String.class,
-                            String.class,
-                            String.class),
-                    adviceWeaverClass.getMethod("methodOnInvokeThrowTracing",
-                            int.class,
-                            Integer.class,
-                            String.class,
-                            String.class,
-                            String.class,
-                            String.class),
-                    AgentLauncher.class.getMethod("resetGreysClassLoader")
-            );
-        }
+        // 初始化全局间谍
+        Spy.initForAgentLauncher(
+                adviceWeaverClass.getMethod("methodOnBegin",
+                        int.class,
+                        ClassLoader.class,
+                        String.class,
+                        String.class,
+                        String.class,
+                        Object.class,
+                        Object[].class),
+                adviceWeaverClass.getMethod("methodOnReturnEnd",
+                        Object.class,
+                        int.class),
+                adviceWeaverClass.getMethod("methodOnThrowingEnd",
+                        Throwable.class,
+                        int.class),
+                adviceWeaverClass.getMethod("methodOnInvokeBeforeTracing",
+                        int.class,
+                        Integer.class,
+                        String.class,
+                        String.class,
+                        String.class),
+                adviceWeaverClass.getMethod("methodOnInvokeAfterTracing",
+                        int.class,
+                        Integer.class,
+                        String.class,
+                        String.class,
+                        String.class),
+                adviceWeaverClass.getMethod("methodOnInvokeThrowTracing",
+                        int.class,
+                        Integer.class,
+                        String.class,
+                        String.class,
+                        String.class,
+                        String.class),
+                AgentLauncher.class.getMethod("resetGreysClassLoader")
+        );
 
-        return greysClassLoader = classLoader;
+        greysClassLoader = classLoader;
+        return greysClassLoader;
     }
 
     private static synchronized void main(final String args, final Instrumentation inst) {
         try {
 
-            // 传递的args参数分两个部分:agentJar路径和agentArgs
-            // 分别是Agent的JAR包路径和期望传递到服务端的参数
+            //传递的args参数分两个部分:agentJar路径和agentArgs
+            //分别是Agent的JAR包路径和期望传递到服务端的参数
             final int index = args.indexOf(';');
             final String agentJar = args.substring(0, index);
             final String agentArgs = args.substring(index);
 
-            // 将Spy添加到BootstrapClassLoader
+            /**
+             * FIXME: 为什么要加到 BootstrapClassLoader 中
+             */
+            //将Spy添加到BootstrapClassLoader
             inst.appendToBootstrapClassLoaderSearch(
                     new JarFile(AgentLauncher.class.getProtectionDomain().getCodeSource().getLocation().getFile())
             );
 
-            // 构造自定义的类加载器，尽量减少Greys对现有工程的侵蚀
+            //构造自定义的类加载器，尽量减少Greys对现有工程的侵蚀
             final ClassLoader agentLoader = loadOrDefineClassLoader(agentJar);
 
             // Configure类定义

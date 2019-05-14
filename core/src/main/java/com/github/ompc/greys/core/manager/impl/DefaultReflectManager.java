@@ -131,7 +131,7 @@ public class DefaultReflectManager implements ReflectManager {
         return methodSet;
     }
 
-    /*
+    /**
      * 移除来自{@link java.lang.Object}的方法
      */
     private Collection<GaMethod> removeObjectMethods(final Collection<GaMethod> gaMethods) {

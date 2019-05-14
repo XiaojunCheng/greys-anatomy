@@ -9,6 +9,7 @@ import com.github.ompc.greys.core.util.collection.GaStack;
 import com.github.ompc.greys.core.util.collection.ThreadUnsafeFixGaStack;
 import com.github.ompc.greys.core.util.collection.ThreadUnsafeGaStack;
 import com.github.ompc.greys.core.util.matcher.Matcher;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.objectweb.asm.*;
 import org.objectweb.asm.commons.AdviceAdapter;
@@ -78,10 +79,10 @@ class AsmMethodMatcher implements Matcher<AsmMethod> {
 
 }
 
-
 /**
  * TryCatch块,用于ExceptionsTable重排序
  */
+@Getter
 class AsmTryCatchBlock {
 
     protected final Label start;
@@ -112,18 +113,22 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
 
     private final static Logger logger = LogUtil.getLogger();
 
-    // 线程帧栈堆栈大小
+    /**
+     * 线程帧栈堆栈大小
+     */
     private final static int FRAME_STACK_SIZE = 7;
-
-    // 通知监听器集合
-    private final static Map<Integer/*ADVICE_ID*/, AdviceListener> advices
-            = new ConcurrentHashMap<Integer, AdviceListener>();
-
-    // 线程帧封装
-    private static final Map<Thread, GaStack<GaStack<Object>>> threadBoundContexts
-            = new ConcurrentHashMap<Thread, GaStack<GaStack<Object>>>();
-
-    // 防止自己递归调用
+    /**
+     * 通知监听器集合
+     * adviceId -> listener
+     */
+    private final static Map<Integer, AdviceListener> advices = new ConcurrentHashMap<>();
+    /**
+     * 线程帧封装
+     */
+    private static final Map<Thread, GaStack<GaStack<Object>>> threadBoundContexts = new ConcurrentHashMap<>();
+    /**
+     * 防止自己递归调用
+     */
     private static final ThreadLocal<Boolean> isSelfCallRef = new ThreadLocal<Boolean>() {
 
         @Override
@@ -132,7 +137,6 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
         }
 
     };
-
 
     /**
      * 方法开始<br/>
@@ -164,7 +168,7 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
 
         try {
             // 构建执行帧栈,保护当前的执行现场
-            final GaStack<Object> frameStack = new ThreadUnsafeFixGaStack<Object>(FRAME_STACK_SIZE);
+            final GaStack<Object> frameStack = new ThreadUnsafeFixGaStack<>(FRAME_STACK_SIZE);
             frameStack.push(loader);
             frameStack.push(className);
             frameStack.push(methodName);
@@ -183,9 +187,7 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
         } finally {
             isSelfCallRef.set(false);
         }
-
     }
-
 
     /**
      * 方法以返回结束<br/>
@@ -193,6 +195,7 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
      *
      * @param returnObject 返回对象
      *                     若目标为静态方法,则为null
+     * @param adviceId
      */
     public static void methodOnReturnEnd(Object returnObject, int adviceId) {
         methodOnEnd(adviceId, false, returnObject);
@@ -331,7 +334,7 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
     }
 
 
-    /*
+    /**
      * 线程帧栈压栈<br/>
      * 将当前执行帧栈压入线程栈
      */
@@ -339,7 +342,7 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
         final Thread thread = currentThread();
         GaStack<GaStack<Object>> threadFrameStack = threadBoundContexts.get(thread);
         if (null == threadFrameStack) {
-            threadBoundContexts.put(thread, threadFrameStack = new ThreadUnsafeGaStack<GaStack<Object>>());
+            threadBoundContexts.put(thread, threadFrameStack = new ThreadUnsafeGaStack<>());
         }
         threadFrameStack.push(frameStack);
     }
@@ -348,8 +351,7 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
         final GaStack<GaStack<Object>> stackGaStack = threadBoundContexts.get(currentThread());
 
         // 用于保护reg和before并发导致before/end乱序的场景
-        if (null == stackGaStack
-                || stackGaStack.isEmpty()) {
+        if (null == stackGaStack || stackGaStack.isEmpty()) {
             return null;
         }
         return stackGaStack.pop();
@@ -358,7 +360,6 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
     private static AdviceListener getListener(int adviceId) {
         return advices.get(adviceId);
     }
-
 
     /**
      * 注册监听器
@@ -434,14 +435,11 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
         }
     }
 
-
     private final int adviceId;
     private final boolean isTracing;
-    private final String internalClassName;
     private final String javaClassName;
     private final Matcher<AsmMethod> asmMethodMatcher;
     private final EnhancerAffect affect;
-
 
     /**
      * 构建通知编织器
@@ -464,7 +462,6 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
         super(ASM5, cv);
         this.adviceId = adviceId;
         this.isTracing = isTracing;
-        this.internalClassName = internalClassName;
         this.javaClassName = tranClassName(internalClassName);
         this.asmMethodMatcher = asmMethodMatcher;
         this.affect = affect;
@@ -476,7 +473,6 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
     private boolean isAbstract(int access) {
         return (ACC_ABSTRACT & access) == ACC_ABSTRACT;
     }
-
 
     /**
      * 是否需要忽略
@@ -507,7 +503,7 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
 
         return new AdviceAdapter(ASM5, new JSRInlinerAdapter(mv, access, name, desc, signature, exceptions), access, name, desc) {
 
-            // -- Lebel for try...catch block
+            // -- Label for try...catch block
             private final Label beginLabel = new Label();
             private final Label endLabel = new Label();
 
@@ -518,7 +514,6 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
             private final int KEY_GREYS_ADVICE_BEFORE_INVOKING_METHOD = 3;
             private final int KEY_GREYS_ADVICE_AFTER_INVOKING_METHOD = 4;
             private final int KEY_GREYS_ADVICE_THROW_INVOKING_METHOD = 5;
-
 
             // -- KEY of ASM_TYPE or ASM_METHOD --
             private final Type ASM_TYPE_SPY = Type.getType("Lcom/github/ompc/greys/agent/Spy;");
@@ -535,7 +530,6 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
 
             // 代码锁
             private final CodeLock codeLockForTracing = new TracingAsmCodeLock(this);
-
 
             private void _debug(final StringBuilder append, final String msg) {
 
@@ -678,7 +672,6 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
                 arrayStore(ASM_TYPE_OBJECT_ARRAY);
             }
 
-
             @Override
             protected void onMethodEnter() {
 
@@ -712,8 +705,7 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
 
             }
 
-
-            /*
+            /**
              * 加载return通知参数数组
              */
             private void loadReturnArgs() {
@@ -771,8 +763,7 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
 
             }
 
-
-            /*
+            /**
              * 创建throwing通知参数本地变量
              */
             private void loadThrowArgs() {
@@ -911,7 +902,6 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
                 dup();
             }
 
-
             /**
              * 加载方法调用跟踪通知所需参数数组(for before/after)
              */
@@ -962,7 +952,6 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
                 box(ASM_TYPE_INT);
                 arrayStore(ASM_TYPE_INTEGER);
 
-
                 if (null != currentLineNumber) {
                     dup();
                     push(1);
@@ -999,13 +988,11 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
                 // e,a
             }
 
-
             @Override
             public void visitInsn(int opcode) {
                 super.visitInsn(opcode);
                 codeLockForTracing.code(opcode);
             }
-
 
             /*
              * 跟踪代码
@@ -1031,32 +1018,29 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
                     }
                 }
 
-                codeLockForTracing.lock(new CodeLock.Block() {
-                    @Override
-                    public void code() {
+                codeLockForTracing.lock(() -> {
 
-                        final StringBuilder append = new StringBuilder();
-                        _debug(append, "debug:" + label + "()");
+                    final StringBuilder append = new StringBuilder();
+                    _debug(append, "debug:" + label + "()");
 
-                        if (tracingType == KEY_GREYS_ADVICE_THROW_INVOKING_METHOD) {
-                            loadArrayForInvokeThrowTracing(owner, name, desc);
-                        } else {
-                            loadArrayForInvokeBeforeOrAfterTracing(owner, name, desc);
-                        }
-                        _debug(append, "loadArrayForInvokeTracing()");
-
-                        loadAdviceMethod(tracingType);
-                        swap();
-                        _debug(append, "loadAdviceMethod()");
-
-                        pushNull();
-                        swap();
-
-                        invokeVirtual(ASM_TYPE_METHOD, ASM_METHOD_METHOD_INVOKE);
-                        pop();
-                        _debug(append, "invokeVirtual()");
-
+                    if (tracingType == KEY_GREYS_ADVICE_THROW_INVOKING_METHOD) {
+                        loadArrayForInvokeThrowTracing(owner, name, desc);
+                    } else {
+                        loadArrayForInvokeBeforeOrAfterTracing(owner, name, desc);
                     }
+                    _debug(append, "loadArrayForInvokeTracing()");
+
+                    loadAdviceMethod(tracingType);
+                    swap();
+                    _debug(append, "loadAdviceMethod()");
+
+                    pushNull();
+                    swap();
+
+                    invokeVirtual(ASM_TYPE_METHOD, ASM_METHOD_METHOD_INVOKE);
+                    pop();
+                    _debug(append, "invokeVirtual()");
+
                 });
 
             }
@@ -1113,8 +1097,8 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
 
             }
 
-            // 用于try-catch的冲排序,目的是让tracing的try...catch能在exceptions tables排在前边
-            private final Collection<AsmTryCatchBlock> asmTryCatchBlocks = new ArrayList<AsmTryCatchBlock>();
+            // 用于try-catch的重排序,目的是让tracing的try...catch能在exceptions tables排在前边
+            private final Collection<AsmTryCatchBlock> asmTryCatchBlocks = new ArrayList<>();
 
             @Override
             public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
@@ -1129,7 +1113,6 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
                 super.visitEnd();
             }
         };
-
     }
 
 

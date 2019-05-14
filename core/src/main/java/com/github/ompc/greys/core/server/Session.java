@@ -3,6 +3,9 @@ package com.github.ompc.greys.core.server;
 import com.github.ompc.greys.core.GlobalOptions;
 import com.github.ompc.greys.core.advisor.AdviceWeaver;
 import com.github.ompc.greys.core.util.LogUtil;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 
 import java.nio.channels.SocketChannel;
@@ -26,37 +29,56 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class Session {
 
     private final Logger logger = LogUtil.getLogger();
-
-    // 会话锁ID序列
+    /**
+     * 会话锁ID序列
+     */
     private final static AtomicInteger lockTxSeq = new AtomicInteger();
-
-    // 空锁
+    /**
+     * 空锁
+     */
     private final static int LOCK_TX_EMPTY = -1;
-
-
+    @Getter
     private final int javaPid;
+    @Getter
     private final int sessionId;
+    /**
+     * session过期时间
+     */
+    @Getter
     private final long sessionDuration;
+    @Getter
     private final SocketChannel socketChannel;
+    @Getter
+    @Setter
     private Charset charset;
-
-    // 是否会话静默,静默的会话不输出提示符,LOGO,同时也会影响一些命令的输出
+    /**
+     * 是否会话静默,静默的会话不输出提示符,LOGO,同时也会影响一些命令的输出
+     */
+    @Getter
+    @Setter
     private boolean silent = true;
-
-    // 提示符
+    /**
+     * 提示符
+     */
+    @Getter
+    @Setter
     private String prompt = DEFAULT_PROMPT;
-
-    // 会话最后一次交互时间(触摸时间)
+    /**
+     * 会话最后一次交互时间(触摸时间)
+     */
     private volatile long gmtLastTouch;
-
-    // 是否被销毁
+    /**
+     * 是否被销毁
+     */
     private volatile boolean isDestroy = false;
-
-    // 会话锁ID
+    /**
+     * 会话锁ID
+     */
     private final AtomicInteger lockTx = new AtomicInteger(LOCK_TX_EMPTY);
-
-    // 会话输出阻塞队列
-    private final BlockingQueue<String> writeQueue = new LinkedBlockingQueue<String>(GlobalOptions.sessionWriteQueueCapacity);
+    /**
+     * 会话输出阻塞队列
+     */
+    private final BlockingQueue<String> writeQueue = new LinkedBlockingQueue<>(GlobalOptions.sessionWriteQueueCapacity);
 
     /**
      * 构建Session
@@ -80,12 +102,9 @@ public class Session {
      * 销毁会话
      */
     public void destroy() {
-
         isDestroy = true;
         closeQuietly(socketChannel);
-
         logger.info("session[{}] destroyed.", sessionId);
-
     }
 
     /**
@@ -171,27 +190,7 @@ public class Session {
      * @return 可以正常绘制的提示符
      */
     public String prompt() {
-        return isNotBlank(getPrompt())
-                ? "\r" + getPrompt()
-                : EMPTY;
-    }
-
-    /**
-     * 获取会话提示符
-     *
-     * @return 会话提示符
-     */
-    public String getPrompt() {
-        return prompt;
-    }
-
-    /**
-     * 设置会话提示符
-     *
-     * @param prompt 会话提示符
-     */
-    public void setPrompt(String prompt) {
-        this.prompt = prompt;
+        return isNotBlank(getPrompt()) ? "\r" + getPrompt() : EMPTY;
     }
 
     /**
@@ -203,35 +202,5 @@ public class Session {
         return writeQueue;
     }
 
-    public int getSessionId() {
-        return sessionId;
-    }
 
-    public Charset getCharset() {
-        return charset;
-    }
-
-    public SocketChannel getSocketChannel() {
-        return socketChannel;
-    }
-
-    public void setCharset(Charset charset) {
-        this.charset = charset;
-    }
-
-    public long getSessionDuration() {
-        return sessionDuration;
-    }
-
-    public int getJavaPid() {
-        return javaPid;
-    }
-
-    public boolean isSilent() {
-        return silent;
-    }
-
-    public void setSilent(boolean silent) {
-        this.silent = silent;
-    }
 }

@@ -40,6 +40,7 @@ public class DefaultSessionManager implements SessionManager {
     private final AtomicBoolean isDestroyRef = new AtomicBoolean(false);
 
     public DefaultSessionManager() {
+        //激活session过期检测后台线程
         activeSessionExpireDaemon();
     }
 
@@ -73,7 +74,6 @@ public class DefaultSessionManager implements SessionManager {
      */
     private void activeSessionExpireDaemon() {
         final Thread sessionExpireDaemon = new Thread("ga-session-expire-daemon") {
-
             @Override
             public void run() {
                 while (!isDestroyRef.get()
@@ -90,36 +90,26 @@ public class DefaultSessionManager implements SessionManager {
 
                         final int sessionId = entry.getKey();
                         final Session session = entry.getValue();
-                        if (null == session
-                                || session.isExpired()) {
-
+                        if (null == session || session.isExpired()) {
                             logger.info("session[{}] was expired", sessionId);
-
                             if (null != session) {
-
                                 try {
                                     // 会话超时，关闭之前输出超时信息
                                     session.getSocketChannel().write(ByteBuffer.wrap("Session timed out.\n".getBytes(session.getCharset())));
                                 } catch (IOException e) {
                                     logger.debug("write expired message to session[{}] failed.", sessionId, e);
                                 }
-
                                 session.destroy();
                             }
-
                             sessionMap.remove(sessionId);
-
                         }
-
                     }
-
                 }
             }
         };
         sessionExpireDaemon.setDaemon(true);
         sessionExpireDaemon.start();
     }
-
 
     @Override
     public void clean() {
@@ -129,9 +119,7 @@ public class DefaultSessionManager implements SessionManager {
         }
 
         sessionMap.clear();
-
         logger.info("session manager clean completed.");
-
     }
 
     @Override
@@ -141,14 +129,11 @@ public class DefaultSessionManager implements SessionManager {
 
     @Override
     public void destroy() {
-
         if (!isDestroyRef.compareAndSet(false, true)) {
             throw new IllegalStateException("already destroy");
         }
 
         clean();
-
         logger.info("session manager destroy completed.");
-
     }
 }

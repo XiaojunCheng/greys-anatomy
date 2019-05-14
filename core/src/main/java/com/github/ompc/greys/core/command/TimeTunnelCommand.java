@@ -55,10 +55,13 @@ import static org.apache.commons.lang3.StringUtils.*;
         })
 public class TimeTunnelCommand implements Command {
 
-    // 时间片段管理
+    /**
+     * 时间片段管理
+     */
     private final TimeFragmentManager timeFragmentManager = TimeFragmentManager.Factory.getInstance();
-
-    // TimeTunnel the method call
+    /**
+     * TimeTunnel the method call
+     */
     @NamedArg(name = "t", summary = "Record the method invocation within time fragments")
     private boolean isTimeTunnel = false;
 
@@ -93,22 +96,26 @@ public class TimeTunnelCommand implements Command {
     )
     private String conditionExpress;
 
-    // list the TimeTunnel
+    /**
+     * list the TimeTunnel
+     */
     @NamedArg(name = "l", summary = "List all the time fragments")
     private boolean isList = false;
-
     @NamedArg(name = "D", summary = "Delete all the time fragments")
     private boolean isDeleteAll = false;
-
-    // index of TimeTunnel
+    /**
+     * index of TimeTunnel
+     */
     @NamedArg(name = "i", hasValue = true, summary = "Display the detailed information from specified time fragment")
     private Integer index;
-
-    // expend of TimeTunnel
+    /**
+     * expend of TimeTunnel
+     */
     @NamedArg(name = "x", hasValue = true, summary = "Expand level of object (0 by default)")
     private Integer expend;
-
-    // watch the index TimeTunnel
+    /**
+     * watch the index TimeTunnel
+     */
     @NamedArg(name = "w",
             hasValue = true,
             summary = "watch-express, watch the time fragment by OGNL express, like params[0], returnObj, throwExp and so on.",
@@ -163,18 +170,18 @@ public class TimeTunnelCommand implements Command {
                     "           #cost : the cost time of time-fragment record"
     )
     private String searchExpress = EMPTY;
-
-    // play the index TimeTunnel
+    /**
+     * play the index TimeTunnel
+     */
     @NamedArg(name = "p", summary = "Replay the time fragment specified by index")
     private boolean isPlay = false;
-
-    // delete the index TimeTunnel
+    /**
+     * delete the index TimeTunnel
+     */
     @NamedArg(name = "d", summary = "Delete time fragment specified by index")
     private boolean isDelete = false;
-
     @NamedArg(name = "E", summary = "Enable regular expression to match (wildcard matching by default)")
     private boolean isRegEx = false;
-
     @NamedArg(name = "n", hasValue = true, summary = "Threshold of execution times")
     private Integer threshold;
 
@@ -184,8 +191,7 @@ public class TimeTunnelCommand implements Command {
     private void checkArguments() {
 
         // 检查d/p参数是否有i参数配套
-        if ((isDelete || isPlay)
-                && null == index) {
+        if ((isDelete || isPlay) && null == index) {
             throw new IllegalArgumentException("Time fragment index is expected, please type -i to specify");
         }
 
@@ -213,8 +219,7 @@ public class TimeTunnelCommand implements Command {
 
     }
 
-
-    /*
+    /**
      * do the TimeTunnel command
      */
     private GetEnhancerAction doTimeTunnel() {
@@ -258,7 +263,7 @@ public class TimeTunnelCommand implements Command {
                     }
 
                     @Override
-                    public void before(Advice advice) throws Throwable {
+                    public void before(Advice advice) {
                         invokeCost.begin();
                     }
 
@@ -300,7 +305,6 @@ public class TimeTunnelCommand implements Command {
         };
 
     }
-
 
     /**
      * do list timeFragmentMap
@@ -504,7 +508,7 @@ public class TimeTunnelCommand implements Command {
         };
     }
 
-    /*
+    /**
      * 删除指定记录
      */
     private RowAction doDelete() {
@@ -523,7 +527,7 @@ public class TimeTunnelCommand implements Command {
 
     }
 
-    /*
+    /**
      * 绘制TimeTunnel表格
      */
     private String drawTimeTunnelTable(final ArrayList<TimeFragment> timeFragments) {
@@ -535,27 +539,21 @@ public class TimeTunnelCommand implements Command {
     }
 
 
-    /*
+    /**
      * 展示指定记录
      */
     private RowAction doShow() {
+        return (session, inst, printer) -> {
 
-        return new RowAction() {
-            @Override
-            public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
-
-                final TimeFragment timeFragment = timeFragmentManager.get(index);
-                if (null == timeFragment) {
-                    printer.println(format("Time fragment[%d] does not exist.", index)).finish();
-                    return new RowAffect();
-                }
-
-                printer.print(new TTimeFragmentDetail(inst, timeFragment, expend).rendering()).finish();
-                return new RowAffect(1);
-
+            final TimeFragment timeFragment = timeFragmentManager.get(index);
+            if (null == timeFragment) {
+                printer.println(format("Time fragment[%d] does not exist.", index)).finish();
+                return new RowAffect();
             }
-        };
 
+            printer.print(new TTimeFragmentDetail(inst, timeFragment, expend).rendering()).finish();
+            return new RowAffect(1);
+        };
     }
 
     @Override

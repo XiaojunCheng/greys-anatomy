@@ -9,10 +9,11 @@ import java.util.Date;
 
 /**
  * 时间片段管理
- * Created by oldmanpushcart@gmail.com on 15/10/3.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/10/3
  */
 public interface TimeFragmentManager {
-
 
     /**
      * 生成全局过程ID
@@ -76,19 +77,11 @@ public interface TimeFragmentManager {
      */
     class Factory {
 
-        private static volatile TimeFragmentManager instance = null;
+        private static volatile TimeFragmentManager instance = new DefaultTimeFragmentManager();
 
         public static TimeFragmentManager getInstance() {
-            if (null == instance) {
-                synchronized (TimeFragmentManager.class) {
-                    if (instance == null) {
-                        instance = new DefaultTimeFragmentManager();
-                    }
-                }
-            }
             return instance;
         }
-
     }
 
 }

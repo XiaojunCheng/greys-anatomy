@@ -1,11 +1,12 @@
 package com.github.ompc.greys.core.server;
 
-import com.github.ompc.greys.core.ClassDataSource;
 import com.github.ompc.greys.core.Configure;
 import com.github.ompc.greys.core.manager.ReflectManager;
 import com.github.ompc.greys.core.manager.TimeFragmentManager;
 import com.github.ompc.greys.core.util.GaCheckUtils;
 import com.github.ompc.greys.core.util.LogUtil;
+import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -16,7 +17,6 @@ import java.nio.channels.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,29 +32,25 @@ import static org.apache.commons.io.IOUtils.closeQuietly;
 
 /**
  * GaServer操作的附件
- * Created by oldmanpushcart@gmail.com on 15/5/3.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/5/3
  */
 class GaAttachment {
 
     private final int bufferSize;
-    private final Session session;
-
-    private LineDecodeState lineDecodeState;
     private ByteBuffer lineByteBuffer;
+    @Getter
+    private final Session session;
+    @Getter
+    @Setter
+    private LineDecodeState lineDecodeState;
 
     GaAttachment(int bufferSize, Session session) {
         this.lineByteBuffer = ByteBuffer.allocate(bufferSize);
         this.bufferSize = bufferSize;
         this.lineDecodeState = READ_CHAR;
         this.session = session;
-    }
-
-    public LineDecodeState getLineDecodeState() {
-        return lineDecodeState;
-    }
-
-    public void setLineDecodeState(LineDecodeState lineDecodeState) {
-        this.lineDecodeState = lineDecodeState;
     }
 
     public void put(byte data) {
@@ -78,27 +74,23 @@ class GaAttachment {
         return line;
     }
 
-    public Session getSession() {
-        return session;
-    }
-
 }
 
 /**
  * 行解码
  */
 enum LineDecodeState {
-
     // 读字符
     READ_CHAR,
-
     // 读换行
     READ_EOL
 }
 
 /**
  * Greys 服务端<br/>
- * Created by oldmanpushcart@gmail.com on 15/5/2.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/5/2
  */
 public class GaServer {
 
@@ -115,22 +107,21 @@ public class GaServer {
     private final AtomicBoolean isBindRef = new AtomicBoolean(false);
     private final SessionManager sessionManager;
     private final CommandHandler commandHandler;
+    /**
+     * FIXME: 在这里有什么作用？
+     */
     private final int javaPid;
     private final Thread jvmShutdownHooker = new Thread("ga-shutdown-hooker") {
-
         @Override
         public void run() {
             GaServer.this._destroy();
         }
     };
 
-    private final ExecutorService executorService = Executors.newCachedThreadPool(new ThreadFactory() {
-        @Override
-        public Thread newThread(Runnable r) {
-            final Thread t = new Thread(r, "ga-command-execute-daemon");
-            t.setDaemon(true);
-            return t;
-        }
+    private final ExecutorService executorService = Executors.newCachedThreadPool(r -> {
+        final Thread t = new Thread(r, "ga-command-execute-daemon");
+        t.setDaemon(true);
+        return t;
     });
 
     private GaServer(int javaPid, Instrumentation inst) {
@@ -139,23 +130,19 @@ public class GaServer {
         this.commandHandler = new DefaultCommandHandler(this, inst);
 
         initForManager(inst);
-
         Runtime.getRuntime().addShutdownHook(jvmShutdownHooker);
     }
 
-    /*
+    /**
      * 初始化各种manager
      */
     private void initForManager(final Instrumentation inst) {
         TimeFragmentManager.Factory.getInstance();
-        ReflectManager.Factory.initInstance(new ClassDataSource() {
-            @Override
-            public Collection<Class<?>> allLoadedClasses() {
-                final Class<?>[] classArray = inst.getAllLoadedClasses();
-                return null == classArray
-                        ? new ArrayList<>()
-                        : Arrays.asList(classArray);
-            }
+        ReflectManager.Factory.initInstance(() -> {
+            final Class<?>[] classArray = inst.getAllLoadedClasses();
+            return null == classArray
+                    ? new ArrayList<>()
+                    : Arrays.asList(classArray);
         });
     }
 
@@ -167,7 +154,6 @@ public class GaServer {
     public boolean isBind() {
         return isBindRef.get();
     }
-
 
     private ServerSocketChannel serverSocketChannel = null;
     private Selector selector = null;
@@ -184,7 +170,6 @@ public class GaServer {
         }
 
         try {
-
             serverSocketChannel = ServerSocketChannel.open();
             selector = Selector.open();
 
@@ -200,15 +185,13 @@ public class GaServer {
                     configure.getConnectTimeout());
 
             activeSelectorDaemon(selector, configure);
-
         } catch (IOException e) {
             unbind();
             throw e;
         }
-
     }
 
-    /*
+    /**
      * 获取绑定网络地址信息<br/>
      * 这里做个小修正,如果targetIp为127.0.0.1(本地环回口)，则需要绑定所有网卡
      * 否则外部无法访问，只能通过127.0.0.1来进行了
@@ -260,10 +243,7 @@ public class GaServer {
                     } catch (ClosedSelectorException e) {
                         logger.debug("selector closed.", e);
                     }
-
-
                 }
-
             }
         };
         gaServerSelectorDaemon.setDaemon(true);
@@ -381,7 +361,6 @@ public class GaServer {
             byteBuffer.clear();
 
         }
-
         // 处理
         catch (IOException e) {
             logger.warn("read/write data failed, session[{}] will be close.", session.getSessionId(), e);
@@ -418,7 +397,6 @@ public class GaServer {
         }
     }
 
-
     private void _destroy() {
         if (isBind()) {
             unbind();
@@ -429,7 +407,6 @@ public class GaServer {
         }
 
         executorService.shutdown();
-
         logger.info("ga-server destroy completed.");
     }
 
@@ -443,6 +420,7 @@ public class GaServer {
     /**
      * 单例
      *
+     * @param javaPid
      * @param instrumentation JVM增强
      * @return GaServer单例
      */

@@ -61,13 +61,11 @@ public class DefaultCommandHandler implements CommandHandler {
 
     @Override
     public void executeCommand(final String line, final Session session) throws IOException {
-
         final SocketChannel socketChannel = session.getSocketChannel();
 
         // 只有输入了有效字符才进行命令解析
         // 否则仅仅重绘提示符
         if (isBlank(line)) {
-
             // 这里因为控制不好，造成了输出两次提示符的问题
             // 第一次是因为这里，第二次则是下边（命令结束重绘提示符）
             // 这里做了一次取巧，虽然依旧是重绘了两次提示符，但在提示符之间增加了\r
@@ -88,27 +86,21 @@ public class DefaultCommandHandler implements CommandHandler {
             final Command command = Commands.getInstance().newCommand(line);
             execute(session, command);
 
-            // 退出命令，需要关闭会话
+            //退出命令，需要关闭会话
             if (command instanceof QuitCommand) {
                 session.destroy();
             }
-
-            // 关闭命令，需要关闭整个服务端
+            //关闭命令，需要关闭整个服务端
             else if (command instanceof ShutdownCommand) {
                 DefaultCommandHandler.this.gaServer.destroy();
             }
-
-            // 其他命令需要重新绘制提示符
+            //其他命令需要重新绘制提示符
             else {
                 logger.debug("reDrawPrompt for command execute finished.");
                 reDrawPrompt(session, socketChannel, session.getCharset(), session.prompt());
             }
-
-        }
-
-        // 命令准备错误(参数校验等)
-        catch (CommandException t) {
-
+        } catch (CommandException t) {
+            // 命令准备错误(参数校验等)
             final String message;
             if (t instanceof CommandNotFoundException) {
                 message = format("Command \"%s\" not found.", t.getCommand());
@@ -122,11 +114,8 @@ public class DefaultCommandHandler implements CommandHandler {
             reDrawPrompt(session, socketChannel, session.getCharset(), session.prompt());
 
             logger.info(message, t);
-
-        }
-
-        // 命令执行错误
-        catch (GaExecuteException e) {
+        } catch (GaExecuteException e) {
+            // 命令执行错误
             logger.warn("command execute failed.", e);
 
             final String cause = GaStringUtils.getCauseMessage(e);
@@ -135,14 +124,11 @@ public class DefaultCommandHandler implements CommandHandler {
             } else {
                 write(socketChannel, "Command execution failed.\n", session.getCharset());
             }
-
             reDrawPrompt(session, socketChannel, session.getCharset(), session.prompt());
         }
-
     }
 
-
-    /*
+    /**
      * 执行命令
      */
     private void execute(final Session session, final Command command) throws GaExecuteException, IOException {
@@ -156,7 +142,7 @@ public class DefaultCommandHandler implements CommandHandler {
             @Override
             public Printer print(boolean isF, String message) {
 
-                if(isFinishRef.get()) {
+                if (isFinishRef.get()) {
                     return this;
                 }
 

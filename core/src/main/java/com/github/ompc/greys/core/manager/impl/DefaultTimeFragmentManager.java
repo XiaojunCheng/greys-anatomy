@@ -14,22 +14,27 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 默认时间碎片实现
- * Created by oldmanpushcart@gmail.com on 15/10/3.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/10/3
  */
 public class DefaultTimeFragmentManager implements TimeFragmentManager {
 
-    // 时间碎片序列生成器
-    private final AtomicInteger TIME_FRAGMENT_SEQUENCER
-            = new AtomicInteger(1000);
-
-    private final AtomicInteger PROCESS_SEQUENCER
-            = new AtomicInteger(1000);
-
-    // 时间碎片存储
+    /**
+     * 时间碎片序列生成器
+     */
+    private final AtomicInteger TIME_FRAGMENT_SEQUENCER = new AtomicInteger(1000);
+    /**
+     *
+     */
+    private final AtomicInteger PROCESS_SEQUENCER = new AtomicInteger(1000);
+    /**
+     * 时间碎片存储
+     */
     private final Map<Integer, TimeFragment> timeFragmentStore
             = new LinkedHashMap<>();
 
-    /*
+    /**
      * 生成下一条序列
      */
     private int nextSequence() {
@@ -61,7 +66,7 @@ public class DefaultTimeFragmentManager implements TimeFragmentManager {
         return new ArrayList<>(timeFragmentStore.values());
     }
 
-    /*
+    /**
      * 搜索匹配
      */
     private boolean is(final TimeFragment timeFragment, final String express) {

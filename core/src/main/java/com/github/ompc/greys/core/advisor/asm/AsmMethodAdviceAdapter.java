@@ -26,30 +26,6 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
      */
     private final Label beginLabel = new Label();
     private final Label endLabel = new Label();
-    //
-    /**
-     * -- KEY of advice --
-     */
-    private final int KEY_GREYS_ADVICE_BEFORE_METHOD = 0;
-    private final int KEY_GREYS_ADVICE_RETURN_METHOD = 1;
-    private final int KEY_GREYS_ADVICE_THROWS_METHOD = 2;
-    private final int KEY_GREYS_ADVICE_BEFORE_INVOKING_METHOD = 3;
-    private final int KEY_GREYS_ADVICE_AFTER_INVOKING_METHOD = 4;
-    private final int KEY_GREYS_ADVICE_THROW_INVOKING_METHOD = 5;
-    /**
-     * -- KEY of ASM_TYPE or ASM_METHOD --
-     */
-    private final Type ASM_TYPE_SPY = Type.getType("Lcom/github/ompc/greys/agent/Spy;");
-    private final Type ASM_TYPE_OBJECT = Type.getType(Object.class);
-    private final Type ASM_TYPE_OBJECT_ARRAY = Type.getType(Object[].class);
-    private final Type ASM_TYPE_CLASS = Type.getType(Class.class);
-    private final Type ASM_TYPE_INTEGER = Type.getType(Integer.class);
-    private final Type ASM_TYPE_CLASS_LOADER = Type.getType(ClassLoader.class);
-    private final Type ASM_TYPE_STRING = Type.getType(String.class);
-    private final Type ASM_TYPE_THROWABLE = Type.getType(Throwable.class);
-    private final Type ASM_TYPE_INT = Type.getType(int.class);
-    private final Type ASM_TYPE_METHOD = Type.getType(java.lang.reflect.Method.class);
-    private final Method ASM_METHOD_METHOD_INVOKE = Method.getMethod("Object invoke(Object,Object[])");
     /**
      * 代码锁
      */
@@ -89,52 +65,6 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
         visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
     }
 
-    /**
-     * 加载通知方法
-     *
-     * @param keyOfMethod 通知方法KEY
-     */
-    private void loadAdviceMethod(int keyOfMethod) {
-
-        switch (keyOfMethod) {
-
-            case KEY_GREYS_ADVICE_BEFORE_METHOD: {
-                getStatic(ASM_TYPE_SPY, "ON_BEFORE_METHOD", ASM_TYPE_METHOD);
-                break;
-            }
-
-            case KEY_GREYS_ADVICE_RETURN_METHOD: {
-                getStatic(ASM_TYPE_SPY, "ON_RETURN_METHOD", ASM_TYPE_METHOD);
-                break;
-            }
-
-            case KEY_GREYS_ADVICE_THROWS_METHOD: {
-                getStatic(ASM_TYPE_SPY, "ON_THROWS_METHOD", ASM_TYPE_METHOD);
-                break;
-            }
-
-            case KEY_GREYS_ADVICE_BEFORE_INVOKING_METHOD: {
-                getStatic(ASM_TYPE_SPY, "BEFORE_INVOKING_METHOD", ASM_TYPE_METHOD);
-                break;
-            }
-
-            case KEY_GREYS_ADVICE_AFTER_INVOKING_METHOD: {
-                getStatic(ASM_TYPE_SPY, "AFTER_INVOKING_METHOD", ASM_TYPE_METHOD);
-                break;
-            }
-
-            case KEY_GREYS_ADVICE_THROW_INVOKING_METHOD: {
-                getStatic(ASM_TYPE_SPY, "THROW_INVOKING_METHOD", ASM_TYPE_METHOD);
-                break;
-            }
-
-            default: {
-                throw new IllegalArgumentException("illegal keyOfMethod=" + keyOfMethod);
-            }
-
-        }
-
-    }
 
     /**
      * 加载ClassLoader<br/>
@@ -158,14 +88,14 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
             // 当前类并没有完成实例化,会引起JVM对class文件的合法性校验失败
             // 未来我可能会在这一块考虑性能优化,但对于当前而言,功能远远重要于性能,也就不打算折腾这么复杂了
             visitLdcInsn(javaClassName);
-            invokeStatic(ASM_TYPE_CLASS, Method.getMethod("Class forName(String)"));
-            invokeVirtual(ASM_TYPE_CLASS, Method.getMethod("ClassLoader getClassLoader()"));
+            invokeStatic(AsmSpyHelper.ASM_TYPE_CLASS, Method.getMethod("Class forName(String)"));
+            invokeVirtual(AsmSpyHelper.ASM_TYPE_CLASS, Method.getMethod("ClassLoader getClassLoader()"));
 //                    }
 
         } else {
             loadThis();
-            invokeVirtual(ASM_TYPE_OBJECT, Method.getMethod("Class getClass()"));
-            invokeVirtual(ASM_TYPE_CLASS, Method.getMethod("ClassLoader getClassLoader()"));
+            invokeVirtual(AsmSpyHelper.ASM_TYPE_OBJECT, Method.getMethod("Class getClass()"));
+            invokeVirtual(AsmSpyHelper.ASM_TYPE_CLASS, Method.getMethod("ClassLoader getClassLoader()"));
         }
 
     }
@@ -175,43 +105,43 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
      */
     private void loadArrayForBefore() {
         push(7);
-        newArray(ASM_TYPE_OBJECT);
+        newArray(AsmSpyHelper.ASM_TYPE_OBJECT);
 
         dup();
         push(0);
         push(adviceId);
-        box(ASM_TYPE_INT);
-        arrayStore(ASM_TYPE_INTEGER);
+        box(AsmSpyHelper.ASM_TYPE_INT);
+        arrayStore(AsmSpyHelper.ASM_TYPE_INTEGER);
 
         dup();
         push(1);
         loadClassLoader();
-        arrayStore(ASM_TYPE_CLASS_LOADER);
+        arrayStore(AsmSpyHelper.ASM_TYPE_CLASS_LOADER);
 
         dup();
         push(2);
         push(GaStringUtils.tranClassName(javaClassName));
-        arrayStore(ASM_TYPE_STRING);
+        arrayStore(AsmSpyHelper.ASM_TYPE_STRING);
 
         dup();
         push(3);
         push(name);
-        arrayStore(ASM_TYPE_STRING);
+        arrayStore(AsmSpyHelper.ASM_TYPE_STRING);
 
         dup();
         push(4);
         push(desc);
-        arrayStore(ASM_TYPE_STRING);
+        arrayStore(AsmSpyHelper.ASM_TYPE_STRING);
 
         dup();
         push(5);
         loadThisOrPushNullIfIsStatic();
-        arrayStore(ASM_TYPE_OBJECT);
+        arrayStore(AsmSpyHelper.ASM_TYPE_OBJECT);
 
         dup();
         push(6);
         loadArgArray();
-        arrayStore(ASM_TYPE_OBJECT_ARRAY);
+        arrayStore(AsmSpyHelper.ASM_TYPE_OBJECT_ARRAY);
     }
 
     @Override
@@ -221,7 +151,7 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
             _debug(append, "debug:onMethodEnter()");
 
             // 加载before方法
-            loadAdviceMethod(KEY_GREYS_ADVICE_BEFORE_METHOD);
+            loadAdviceMethod(AsmSpyHelper.KEY_GREYS_ADVICE_BEFORE_METHOD);
             _debug(append, "loadAdviceMethod()");
 
             // 推入Method.invoke()的第一个参数
@@ -232,7 +162,7 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
             _debug(append, "loadArrayForBefore()");
 
             // 调用方法
-            invokeVirtual(ASM_TYPE_METHOD, ASM_METHOD_METHOD_INVOKE);
+            invokeVirtual(AsmSpyHelper.ASM_TYPE_METHOD, AsmSpyHelper.ASM_METHOD_METHOD_INVOKE);
             pop();
             _debug(append, "invokeVirtual()");
         });
@@ -248,19 +178,19 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
         dup2X1();
         pop2();
         push(2);
-        newArray(ASM_TYPE_OBJECT);
+        newArray(AsmSpyHelper.ASM_TYPE_OBJECT);
         dup();
         dup2X1();
         pop2();
         push(0);
         swap();
-        arrayStore(ASM_TYPE_OBJECT);
+        arrayStore(AsmSpyHelper.ASM_TYPE_OBJECT);
 
         dup();
         push(1);
         push(adviceId);
-        box(ASM_TYPE_INT);
-        arrayStore(ASM_TYPE_INTEGER);
+        box(AsmSpyHelper.ASM_TYPE_INT);
+        arrayStore(AsmSpyHelper.ASM_TYPE_INTEGER);
     }
 
     @Override
@@ -279,7 +209,7 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
                     _debug(append, "loadReturn()");
 
                     // 加载returning方法
-                    loadAdviceMethod(KEY_GREYS_ADVICE_RETURN_METHOD);
+                    loadAdviceMethod(AsmSpyHelper.KEY_GREYS_ADVICE_RETURN_METHOD);
                     _debug(append, "loadAdviceMethod()");
 
                     // 推入Method.invoke()的第一个参数
@@ -289,7 +219,7 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
                     loadReturnArgs();
                     _debug(append, "loadReturnArgs()");
 
-                    invokeVirtual(ASM_TYPE_METHOD, ASM_METHOD_METHOD_INVOKE);
+                    invokeVirtual(AsmSpyHelper.ASM_TYPE_METHOD, AsmSpyHelper.ASM_METHOD_METHOD_INVOKE);
                     pop();
                     _debug(append, "invokeVirtual()");
 
@@ -306,26 +236,26 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
         dup2X1();
         pop2();
         push(2);
-        newArray(ASM_TYPE_OBJECT);
+        newArray(AsmSpyHelper.ASM_TYPE_OBJECT);
         dup();
         dup2X1();
         pop2();
         push(0);
         swap();
-        arrayStore(ASM_TYPE_THROWABLE);
+        arrayStore(AsmSpyHelper.ASM_TYPE_THROWABLE);
 
         dup();
         push(1);
         push(adviceId);
-        box(ASM_TYPE_INT);
-        arrayStore(ASM_TYPE_INTEGER);
+        box(AsmSpyHelper.ASM_TYPE_INT);
+        arrayStore(AsmSpyHelper.ASM_TYPE_INTEGER);
     }
 
     @Override
     public void visitMaxs(int maxStack, int maxLocals) {
 
         mark(endLabel);
-        visitTryCatchBlock(beginLabel, endLabel, mark(), ASM_TYPE_THROWABLE.getInternalName());
+        visitTryCatchBlock(beginLabel, endLabel, mark(), AsmSpyHelper.ASM_TYPE_THROWABLE.getInternalName());
         // catchException(beginLabel, endLabel, ASM_TYPE_THROWABLE);
 
         codeLockForTracing.lock(new Block() {
@@ -340,7 +270,7 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
                 _debug(append, "loadAdviceMethod()");
 
                 // 加载throwing方法
-                loadAdviceMethod(KEY_GREYS_ADVICE_THROWS_METHOD);
+                loadAdviceMethod(AsmSpyHelper.KEY_GREYS_ADVICE_THROWS_METHOD);
                 _debug(append, "loadAdviceMethod()");
 
                 // 推入Method.invoke()的第一个参数
@@ -351,7 +281,7 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
                 _debug(append, "loadThrowArgs()");
 
                 // 调用方法
-                invokeVirtual(ASM_TYPE_METHOD, ASM_METHOD_METHOD_INVOKE);
+                invokeVirtual(AsmSpyHelper.ASM_TYPE_METHOD, AsmSpyHelper.ASM_METHOD_METHOD_INVOKE);
                 pop();
                 _debug(append, "invokeVirtual()");
 
@@ -446,36 +376,36 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
      */
     private void loadArrayForInvokeBeforeOrAfterTracing(String owner, String name, String desc) {
         push(5);
-        newArray(ASM_TYPE_OBJECT);
+        newArray(AsmSpyHelper.ASM_TYPE_OBJECT);
 
         dup();
         push(0);
         push(adviceId);
-        box(ASM_TYPE_INT);
-        arrayStore(ASM_TYPE_INTEGER);
+        box(AsmSpyHelper.ASM_TYPE_INT);
+        arrayStore(AsmSpyHelper.ASM_TYPE_INTEGER);
 
         if (null != currentLineNumber) {
             dup();
             push(1);
             push(currentLineNumber);
-            box(ASM_TYPE_INT);
-            arrayStore(ASM_TYPE_INTEGER);
+            box(AsmSpyHelper.ASM_TYPE_INT);
+            arrayStore(AsmSpyHelper.ASM_TYPE_INTEGER);
         }
 
         dup();
         push(2);
         push(owner);
-        arrayStore(ASM_TYPE_STRING);
+        arrayStore(AsmSpyHelper.ASM_TYPE_STRING);
 
         dup();
         push(3);
         push(name);
-        arrayStore(ASM_TYPE_STRING);
+        arrayStore(AsmSpyHelper.ASM_TYPE_STRING);
 
         dup();
         push(4);
         push(desc);
-        arrayStore(ASM_TYPE_STRING);
+        arrayStore(AsmSpyHelper.ASM_TYPE_STRING);
     }
 
     /**
@@ -483,46 +413,46 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
      */
     private void loadArrayForInvokeThrowTracing(String owner, String name, String desc) {
         push(6);
-        newArray(ASM_TYPE_OBJECT);
+        newArray(AsmSpyHelper.ASM_TYPE_OBJECT);
 
         dup();
         push(0);
         push(adviceId);
-        box(ASM_TYPE_INT);
-        arrayStore(ASM_TYPE_INTEGER);
+        box(AsmSpyHelper.ASM_TYPE_INT);
+        arrayStore(AsmSpyHelper.ASM_TYPE_INTEGER);
 
         if (null != currentLineNumber) {
             dup();
             push(1);
             push(currentLineNumber);
-            box(ASM_TYPE_INT);
-            arrayStore(ASM_TYPE_INTEGER);
+            box(AsmSpyHelper.ASM_TYPE_INT);
+            arrayStore(AsmSpyHelper.ASM_TYPE_INTEGER);
         }
 
         dup();
         push(2);
         push(owner);
-        arrayStore(ASM_TYPE_STRING);
+        arrayStore(AsmSpyHelper.ASM_TYPE_STRING);
 
         dup();
         push(3);
         push(name);
-        arrayStore(ASM_TYPE_STRING);
+        arrayStore(AsmSpyHelper.ASM_TYPE_STRING);
 
         dup();
         push(4);
         push(desc);
-        arrayStore(ASM_TYPE_STRING);
+        arrayStore(AsmSpyHelper.ASM_TYPE_STRING);
 
         dup2(); // e,a,e,a
         swap(); // e,a,a,e
-        invokeVirtual(ASM_TYPE_OBJECT, Method.getMethod("Class getClass()"));
-        invokeVirtual(ASM_TYPE_CLASS, Method.getMethod("String getName()"));
+        invokeVirtual(AsmSpyHelper.ASM_TYPE_OBJECT, Method.getMethod("Class getClass()"));
+        invokeVirtual(AsmSpyHelper.ASM_TYPE_CLASS, Method.getMethod("String getName()"));
 
         // e,a,a,s
         push(5); // e,a,a,s,4
         swap();  // e,a,a,4,s
-        arrayStore(ASM_TYPE_STRING);
+        arrayStore(AsmSpyHelper.ASM_TYPE_STRING);
 
         // e,a
     }
@@ -540,15 +470,15 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
 
         final String label;
         switch (tracingType) {
-            case KEY_GREYS_ADVICE_BEFORE_INVOKING_METHOD: {
+            case AsmSpyHelper.KEY_GREYS_ADVICE_BEFORE_INVOKING_METHOD: {
                 label = "beforeInvoking";
                 break;
             }
-            case KEY_GREYS_ADVICE_AFTER_INVOKING_METHOD: {
+            case AsmSpyHelper.KEY_GREYS_ADVICE_AFTER_INVOKING_METHOD: {
                 label = "afterInvoking";
                 break;
             }
-            case KEY_GREYS_ADVICE_THROW_INVOKING_METHOD: {
+            case AsmSpyHelper.KEY_GREYS_ADVICE_THROW_INVOKING_METHOD: {
                 label = "throwInvoking";
                 break;
             }
@@ -562,7 +492,7 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
             final StringBuilder append = new StringBuilder();
             _debug(append, "debug:" + label + "()");
 
-            if (tracingType == KEY_GREYS_ADVICE_THROW_INVOKING_METHOD) {
+            if (tracingType == AsmSpyHelper.KEY_GREYS_ADVICE_THROW_INVOKING_METHOD) {
                 loadArrayForInvokeThrowTracing(owner, name, desc);
             } else {
                 loadArrayForInvokeBeforeOrAfterTracing(owner, name, desc);
@@ -576,7 +506,7 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
             pushNull();
             swap();
 
-            invokeVirtual(ASM_TYPE_METHOD, ASM_METHOD_METHOD_INVOKE);
+            invokeVirtual(AsmSpyHelper.ASM_TYPE_METHOD, AsmSpyHelper.ASM_METHOD_METHOD_INVOKE);
             pop();
             _debug(append, "invokeVirtual()");
 
@@ -601,7 +531,7 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
         }
 
         // 方法调用前通知
-        tracing(KEY_GREYS_ADVICE_BEFORE_INVOKING_METHOD, owner, name, desc);
+        tracing(AsmSpyHelper.KEY_GREYS_ADVICE_BEFORE_INVOKING_METHOD, owner, name, desc);
 
         final Label beginLabel = new Label();
         final Label endLabel = new Label();
@@ -615,15 +545,15 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
         mark(endLabel);
 
         // 方法调用后通知
-        tracing(KEY_GREYS_ADVICE_AFTER_INVOKING_METHOD, owner, name, desc);
+        tracing(AsmSpyHelper.KEY_GREYS_ADVICE_AFTER_INVOKING_METHOD, owner, name, desc);
         goTo(finallyLabel);
 
         // }
         // catch
         // {
 
-        catchException(beginLabel, endLabel, ASM_TYPE_THROWABLE);
-        tracing(KEY_GREYS_ADVICE_THROW_INVOKING_METHOD, owner, name, desc);
+        catchException(beginLabel, endLabel, AsmSpyHelper.ASM_TYPE_THROWABLE);
+        tracing(AsmSpyHelper.KEY_GREYS_ADVICE_THROW_INVOKING_METHOD, owner, name, desc);
 
         throwException();
 
@@ -650,5 +580,17 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
             super.visitTryCatchBlock(tcb.getStart(), tcb.getEnd(), tcb.getHandler(), tcb.getType());
         }
         super.visitEnd();
+    }
+
+    //=================================== 工具类
+
+    /**
+     * 加载通知方法
+     *
+     * @param keyOfMethod 通知方法KEY
+     */
+    public void loadAdviceMethod(int keyOfMethod) {
+        String spyMethodFieldName = AsmSpyHelper.getSpyMethodField(keyOfMethod);
+        getStatic(AsmSpyHelper.ASM_TYPE_SPY, spyMethodFieldName, AsmSpyHelper.ASM_TYPE_METHOD);
     }
 }

@@ -3,7 +3,8 @@ package com.github.ompc.greys.core.util.affect;
 import static java.lang.System.currentTimeMillis;
 
 /**
- * 影响反馈
+ * 影响反馈<br/>
+ * 耗时
  *
  * @author oldmanpushcart@gmail.com
  * @date 15/5/21

@@ -499,9 +499,7 @@ public class AsmClassFileTransformer implements ClassFileTransformer {
     public static synchronized AsmAffect getClassByteArray(final Collection<Class<?>> classes, final Instrumentation inst) throws UnmodifiableClassException {
 
         final AsmAffect affect = new AsmAffect();
-
-        if (null == classes
-                || classes.isEmpty()) {
+        if (null == classes || classes.isEmpty()) {
             return affect;
         }
 
@@ -522,7 +520,6 @@ public class AsmClassFileTransformer implements ClassFileTransformer {
             } else {
                 return null;
             }
-
         };
 
         try {

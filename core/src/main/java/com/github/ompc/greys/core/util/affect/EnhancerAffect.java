@@ -17,21 +17,14 @@ import static java.lang.String.format;
  */
 public final class EnhancerAffect extends Affect {
 
-    private final AtomicInteger cCnt = new AtomicInteger();
-    private final AtomicInteger mCnt = new AtomicInteger();
-
+    private final AtomicInteger classCount = new AtomicInteger();
+    private final AtomicInteger methodCount = new AtomicInteger();
     /**
      * dumpClass的文件存放集合
      */
     private final Collection<File> classDumpFiles = new ArrayList<>();
 
     public EnhancerAffect() {
-
-    }
-
-    public EnhancerAffect(int cCnt, int mCnt) {
-        this.cCnt(cCnt);
-        this.mCnt(mCnt);
     }
 
     /**
@@ -41,7 +34,7 @@ public final class EnhancerAffect extends Affect {
      * @return 当前影响类个数
      */
     public int cCnt(int cc) {
-        return cCnt.addAndGet(cc);
+        return classCount.addAndGet(cc);
     }
 
     /**
@@ -51,7 +44,7 @@ public final class EnhancerAffect extends Affect {
      * @return 当前影响方法个数
      */
     public int mCnt(int mc) {
-        return mCnt.addAndGet(mc);
+        return methodCount.addAndGet(mc);
     }
 
     /**
@@ -60,7 +53,7 @@ public final class EnhancerAffect extends Affect {
      * @return 影响类个数
      */
     public int cCnt() {
-        return cCnt.get();
+        return classCount.get();
     }
 
     /**
@@ -69,7 +62,7 @@ public final class EnhancerAffect extends Affect {
      * @return 影响方法个数
      */
     public int mCnt() {
-        return mCnt.get();
+        return methodCount.get();
     }
 
     /**
@@ -84,9 +77,7 @@ public final class EnhancerAffect extends Affect {
     @Override
     public String toString() {
         final StringBuilder infoSB = new StringBuilder();
-        if (GlobalOptions.isDump
-                && !classDumpFiles.isEmpty()) {
-
+        if (GlobalOptions.isDump && !classDumpFiles.isEmpty()) {
             for (File classDumpFile : classDumpFiles) {
                 infoSB.append("[dump: ").append(classDumpFile.getAbsoluteFile()).append("]\n");
             }

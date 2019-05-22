@@ -146,7 +146,7 @@ public abstract class ReflectAdviceListenerAdapter extends AdviceListenerAdapter
     private final ThreadLocal<GaStack<LazyGet<?>>> infoStackRef = new ThreadLocal<GaStack<LazyGet<?>>>() {
         @Override
         protected GaStack<LazyGet<?>> initialValue() {
-            return new ThreadUnsafeGaStack<LazyGet<?>>();
+            return new ThreadUnsafeGaStack<>();
         }
     };
 

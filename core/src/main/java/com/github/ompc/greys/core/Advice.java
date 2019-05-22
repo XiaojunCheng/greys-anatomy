@@ -100,8 +100,10 @@ public final class Advice {
                 methodRef,
                 target,
                 params,
-                null, //returnObj
-                null, //throwExp
+                //returnObj
+                null,
+                //throwExp
+                null,
                 ACCESS_BEFORE
         );
     }
@@ -123,7 +125,8 @@ public final class Advice {
                 target,
                 params,
                 returnObj,
-                null, //throwExp
+                //throwExp
+                null,
                 ACCESS_AFTER_RETUNING
         );
     }
@@ -144,7 +147,8 @@ public final class Advice {
                 methodRef,
                 target,
                 params,
-                null, //returnObj
+                //returnObj
+                null,
                 throwExp,
                 ACCESS_AFTER_THROWING
         );
@@ -167,7 +171,6 @@ public final class Advice {
     public GaMethod getMethod() {
         return methodRef.get();
     }
-
 
     /**
      * 本次调用是否支持阿里巴巴中间件鹰眼系统
@@ -197,12 +200,11 @@ public final class Advice {
      * @return true:支持被跟踪;false:不支持
      */
     public boolean isTraceSupport() {
-        return GlobalOptions.isEnableTraceId
-                && isAliEagleEyeSupport();
+        return GlobalOptions.isEnableTraceId && isAliEagleEyeSupport();
     }
 
     /**
-     * {{@link #getAliEagleEyeTraceId()}} 的别名,方便命令行使用
+     * {@link #getAliEagleEyeTraceId()} 的别名,方便命令行使用
      *
      * @return 本次调用的跟踪号
      */

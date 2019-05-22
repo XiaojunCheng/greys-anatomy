@@ -10,22 +10,31 @@ import java.util.Date;
  */
 public final class TimeFragment {
 
-    // 时间片段ID
+    /**
+     * 时间片段ID
+     * FIXME: 谁生成的？
+     */
     public final int id;
-
-    // 过程ID
+    /**
+     * 过程ID
+     * FIXME：过程id是个什么概念
+     */
     public final int processId;
-
-    // 通知数据
+    /**
+     * 通知数据
+     */
     public final Advice advice;
-
-    // 记录时间戳
+    /**
+     * 记录时间戳
+     */
     public final Date gmtCreate;
-
-    // 片段耗时
+    /**
+     * 片段耗时
+     */
     public final long cost;
-
-    // 片段堆栈
+    /**
+     * 片段堆栈
+     */
     public final String stack;
 
     /**

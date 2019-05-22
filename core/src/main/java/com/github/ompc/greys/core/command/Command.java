@@ -1,6 +1,6 @@
 package com.github.ompc.greys.core.command;
 
-import com.github.ompc.greys.core.advisor.AdviceListener;
+import com.github.ompc.greys.core.advisor.listener.AdviceListener;
 import com.github.ompc.greys.core.server.Session;
 import com.github.ompc.greys.core.util.PointCut;
 import com.github.ompc.greys.core.util.affect.RowAffect;

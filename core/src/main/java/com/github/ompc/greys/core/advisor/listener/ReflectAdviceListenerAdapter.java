@@ -1,4 +1,4 @@
-package com.github.ompc.greys.core.advisor;
+package com.github.ompc.greys.core.advisor.listener;
 
 import com.github.ompc.greys.core.Advice;
 import com.github.ompc.greys.core.util.GaCheckUtils;

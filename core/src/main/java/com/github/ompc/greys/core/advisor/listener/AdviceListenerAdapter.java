@@ -1,4 +1,4 @@
-package com.github.ompc.greys.core.advisor;
+package com.github.ompc.greys.core.advisor.listener;
 
 /**
  * 监听适配器

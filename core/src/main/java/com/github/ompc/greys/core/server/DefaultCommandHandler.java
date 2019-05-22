@@ -1,9 +1,9 @@
 package com.github.ompc.greys.core.server;
 
-import com.github.ompc.greys.core.advisor.AdviceListener;
+import com.github.ompc.greys.core.advisor.listener.AdviceListener;
 import com.github.ompc.greys.core.advisor.AdviceWeaver;
-import com.github.ompc.greys.core.advisor.Enhancer;
-import com.github.ompc.greys.core.advisor.InvokeTraceable;
+import com.github.ompc.greys.core.advisor.asm.AsmClassFileTransformer;
+import com.github.ompc.greys.core.advisor.listener.InvokeTraceable;
 import com.github.ompc.greys.core.command.Command;
 import com.github.ompc.greys.core.command.Command.Action;
 import com.github.ompc.greys.core.command.Command.GetEnhancerAction;
@@ -212,7 +212,7 @@ public class DefaultCommandHandler implements CommandHandler {
                 final Command.GetEnhancer getEnhancer = ((GetEnhancerAction) action).action(session, inst, printer);
                 final int lock = session.getLock();
                 final AdviceListener listener = getEnhancer.getAdviceListener();
-                final EnhancerAffect enhancerAffect = Enhancer.enhance(
+                final EnhancerAffect enhancerAffect = AsmClassFileTransformer.enhance(
                         inst,
                         lock,
                         listener instanceof InvokeTraceable,

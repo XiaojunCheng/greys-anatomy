@@ -2,6 +2,8 @@ package com.github.ompc.greys.core.advisor;
 
 import com.github.ompc.greys.core.advisor.asm.AsmMethod;
 import com.github.ompc.greys.core.advisor.asm.AsmMethodAdviceAdapter;
+import com.github.ompc.greys.core.advisor.listener.AdviceListener;
+import com.github.ompc.greys.core.advisor.listener.InvokeTraceable;
 import com.github.ompc.greys.core.util.GaCheckUtils;
 import com.github.ompc.greys.core.util.GaStringUtils;
 import com.github.ompc.greys.core.util.LogUtil;
@@ -141,7 +143,6 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
             isSelfCallRef.set(true);
             //弹射线程帧栈,恢复Begin所保护的执行帧栈
             final GaStack<Object> frameStack = threadFrameStackPop();
-
             // 用于保护reg和before执行并发的情况
             // 如果before没有注入,则不对end做任何处理
             if (null == frameStack) {
@@ -157,19 +158,15 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
             final String className = (String) frameStack.pop();
             final ClassLoader loader = (ClassLoader) frameStack.pop();
 
-            // 异常通知
             if (isThrowing) {
                 notifyAfterThrowing(listener, loader, className, methodName, methodDesc, target, args, (Throwable) returnOrThrowable);
-            }
-
-            // 返回通知
-            else {
+            } else {
+                //返回通知
                 notifyAfterReturning(listener, loader, className, methodName, methodDesc, target, args, returnOrThrowable);
             }
         } finally {
             isSelfCallRef.set(false);
         }
-
     }
 
     /**
@@ -246,7 +243,6 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
     private static void notifyBefore(AdviceListener listener,
                                      ClassLoader loader, String className, String methodName, String methodDesc,
                                      Object target, Object[] args) {
-
         if (null != listener) {
             try {
                 listener.before(loader, className, methodName, methodDesc, target, args);
@@ -254,7 +250,6 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
                 logger.warn("advice notify before failed.", t);
             }
         }
-
     }
 
     private static void notifyAfterReturning(AdviceListener listener,
@@ -368,8 +363,7 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
 
     private static GaStack<Object> threadFrameStackPop() {
         final GaStack<GaStack<Object>> stackGaStack = threadBoundContexts.get(Thread.currentThread());
-
-        // 用于保护reg和before并发导致before/end乱序的场景
+        //用于保护reg和before并发导致before/end乱序的场景
         if (null == stackGaStack || stackGaStack.isEmpty()) {
             return null;
         }

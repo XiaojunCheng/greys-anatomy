@@ -1,12 +1,9 @@
 package com.github.ompc.greys.core.command;
 
-import com.github.ompc.greys.core.advisor.Enhancer;
+import com.github.ompc.greys.core.advisor.asm.AsmClassFileTransformer;
 import com.github.ompc.greys.core.command.annotation.Cmd;
-import com.github.ompc.greys.core.server.Session;
 import com.github.ompc.greys.core.util.affect.EnhancerAffect;
 import com.github.ompc.greys.core.util.affect.RowAffect;
-
-import java.lang.instrument.Instrumentation;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
@@ -29,7 +26,7 @@ public class ResetCommand implements Command {
 
         return (RowAction) (session, inst, printer) -> {
 
-            final EnhancerAffect enhancerAffect = Enhancer.reset(inst);
+            final EnhancerAffect enhancerAffect = AsmClassFileTransformer.reset(inst);
             printer.print(EMPTY).finish();
             return new RowAffect(enhancerAffect.cCnt());
         };

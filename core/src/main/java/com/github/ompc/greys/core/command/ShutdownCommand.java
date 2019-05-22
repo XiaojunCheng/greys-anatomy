@@ -1,9 +1,8 @@
 package com.github.ompc.greys.core.command;
 
-import com.github.ompc.greys.core.advisor.Enhancer;
+import com.github.ompc.greys.core.advisor.asm.AsmClassFileTransformer;
 import com.github.ompc.greys.core.command.annotation.Cmd;
 import com.github.ompc.greys.core.manager.ReflectManager;
-import com.github.ompc.greys.core.server.Session;
 import com.github.ompc.greys.core.util.LogUtil;
 import com.github.ompc.greys.core.util.affect.EnhancerAffect;
 import com.github.ompc.greys.core.util.affect.RowAffect;
@@ -11,7 +10,6 @@ import com.github.ompc.greys.core.util.matcher.ClassMatcher;
 import com.github.ompc.greys.core.util.matcher.PatternMatcher;
 import org.slf4j.Logger;
 
-import java.lang.instrument.Instrumentation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -80,7 +78,7 @@ public class ShutdownCommand implements Command {
 
             // 退出之前需要重置所有的增强类
             // 重置之前增强的类
-            final EnhancerAffect enhancerAffect = Enhancer.reset(inst);
+            final EnhancerAffect enhancerAffect = AsmClassFileTransformer.reset(inst);
 
             // reset for agent ClassLoader
             reset();

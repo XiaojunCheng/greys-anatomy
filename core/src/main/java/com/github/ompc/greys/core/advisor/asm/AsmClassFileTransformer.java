@@ -1,8 +1,7 @@
-package com.github.ompc.greys.core.advisor;
+package com.github.ompc.greys.core.advisor.asm;
 
 import com.github.ompc.greys.core.GlobalOptions;
-import com.github.ompc.greys.core.advisor.asm.AsmMethod;
-import com.github.ompc.greys.core.advisor.asm.AsmMethodMatcher;
+import com.github.ompc.greys.core.advisor.AdviceWeaver;
 import com.github.ompc.greys.core.manager.ReflectManager;
 import com.github.ompc.greys.core.util.GaMethod;
 import com.github.ompc.greys.core.util.GaStringUtils;
@@ -48,7 +47,7 @@ import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
  * @author oldmanpushcart@gmail.com
  * @date 15/5/17
  */
-public class Enhancer implements ClassFileTransformer {
+public class AsmClassFileTransformer implements ClassFileTransformer {
 
     private static final Logger logger = LogUtil.getLogger();
 
@@ -71,10 +70,10 @@ public class Enhancer implements ClassFileTransformer {
      * @param enhanceMap 增强点集合
      * @param affect     影响统计
      */
-    private Enhancer(int adviceId,
-                     boolean isTracing,
-                     Map<Class<?>, Matcher<AsmMethod>> enhanceMap,
-                     EnhancerAffect affect) {
+    private AsmClassFileTransformer(int adviceId,
+                                    boolean isTracing,
+                                    Map<Class<?>, Matcher<AsmMethod>> enhanceMap,
+                                    EnhancerAffect affect) {
         this.adviceId = adviceId;
         this.isTracing = isTracing;
         this.enhanceMap = enhanceMap;
@@ -106,7 +105,7 @@ public class Enhancer implements ClassFileTransformer {
 
         // Enhancer类只可能从greysClassLoader中加载
         // 所以找他要ClassLoader是靠谱的
-        final ClassLoader greysClassLoader = Enhancer.class.getClassLoader();
+        final ClassLoader greysClassLoader = AsmClassFileTransformer.class.getClassLoader();
 
         final String spyClassName = GaStringUtils.SPY_CLASSNAME;
 
@@ -134,7 +133,7 @@ public class Enhancer implements ClassFileTransformer {
                 spyClassFromTargetClassLoader = defineClass(
                         targetClassLoader,
                         spyClassName,
-                        toByteArray(Enhancer.class.getResourceAsStream("/" + spyClassName.replace('.', '/') + ".class"))
+                        toByteArray(AsmClassFileTransformer.class.getResourceAsStream("/" + spyClassName.replace('.', '/') + ".class"))
                 );
             } catch (InvocationTargetException ite) {
                 if (ite.getCause() instanceof java.lang.LinkageError) {
@@ -313,7 +312,7 @@ public class Enhancer implements ClassFileTransformer {
      */
     private static boolean isSelf(Class<?> clazz) {
         return null != clazz
-                && isEquals(clazz.getClassLoader(), Enhancer.class.getClassLoader());
+                && isEquals(clazz.getClassLoader(), AsmClassFileTransformer.class.getClassLoader());
     }
 
     /**
@@ -404,9 +403,9 @@ public class Enhancer implements ClassFileTransformer {
         final Map<Class<?>, Matcher<AsmMethod>> enhanceMap = toEnhanceMap(pointCut);
 
         // 构建增强器
-        final Enhancer enhancer = new Enhancer(adviceId, isTracing, enhanceMap, affect);
+        final AsmClassFileTransformer transformer = new AsmClassFileTransformer(adviceId, isTracing, enhanceMap, affect);
         try {
-            inst.addTransformer(enhancer, true);
+            inst.addTransformer(transformer, true);
 
             // 批量增强
             if (GlobalOptions.isBatchReTransform) {
@@ -417,7 +416,6 @@ public class Enhancer implements ClassFileTransformer {
                     inst.retransformClasses(classArray);
                 }
             }
-
 
             // for each 增强
             else {
@@ -439,7 +437,7 @@ public class Enhancer implements ClassFileTransformer {
 
 
         } finally {
-            inst.removeTransformer(enhancer);
+            inst.removeTransformer(transformer);
         }
 
         return affect;

@@ -1,4 +1,4 @@
-package com.github.ompc.greys.core.advisor;
+package com.github.ompc.greys.core.advisor.listener;
 
 import com.github.ompc.greys.core.util.collection.GaStack;
 import com.github.ompc.greys.core.util.collection.ThreadUnsafeGaStack;

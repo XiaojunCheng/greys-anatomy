@@ -1,8 +1,8 @@
 package com.github.ompc.greys.core.command;
 
 
-import com.github.ompc.greys.core.advisor.AdviceListener;
-import com.github.ompc.greys.core.advisor.AdviceListenerAdapter;
+import com.github.ompc.greys.core.advisor.listener.AdviceListener;
+import com.github.ompc.greys.core.advisor.listener.AdviceListenerAdapter;
 import com.github.ompc.greys.core.command.annotation.Cmd;
 import com.github.ompc.greys.core.command.annotation.IndexArg;
 import com.github.ompc.greys.core.command.annotation.NamedArg;

@@ -2,8 +2,8 @@ package com.github.ompc.greys.core.command;
 
 import com.github.ompc.greys.core.Advice;
 import com.github.ompc.greys.core.TimeFragment;
-import com.github.ompc.greys.core.advisor.AdviceListener;
-import com.github.ompc.greys.core.advisor.ReflectAdviceListenerAdapter;
+import com.github.ompc.greys.core.advisor.listener.AdviceListener;
+import com.github.ompc.greys.core.advisor.listener.ReflectAdviceListenerAdapter;
 import com.github.ompc.greys.core.command.annotation.Cmd;
 import com.github.ompc.greys.core.command.annotation.IndexArg;
 import com.github.ompc.greys.core.command.annotation.NamedArg;

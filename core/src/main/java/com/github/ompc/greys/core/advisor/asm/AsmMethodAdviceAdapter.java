@@ -1,7 +1,9 @@
 package com.github.ompc.greys.core.advisor.asm;
 
+import com.github.ompc.greys.core.GlobalOptions;
 import com.github.ompc.greys.core.advisor.lock.Block;
 import com.github.ompc.greys.core.advisor.lock.CodeLock;
+import com.github.ompc.greys.core.util.GaStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
@@ -12,9 +14,6 @@ import org.objectweb.asm.commons.Method;
 
 import java.util.ArrayList;
 import java.util.Collection;
-
-import static com.github.ompc.greys.core.GlobalOptions.isDebugForAsm;
-import static com.github.ompc.greys.core.util.GaStringUtils.tranClassName;
 
 /**
  * @author chengxiaojun
@@ -75,8 +74,7 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
     }
 
     private void _debug(final StringBuilder append, final String msg) {
-
-        if (!isDebugForAsm) {
+        if (!GlobalOptions.isDebugForAsm) {
             return;
         }
 
@@ -192,7 +190,7 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
 
         dup();
         push(2);
-        push(tranClassName(javaClassName));
+        push(GaStringUtils.tranClassName(javaClassName));
         arrayStore(ASM_TYPE_STRING);
 
         dup();
@@ -218,31 +216,25 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
 
     @Override
     protected void onMethodEnter() {
+        codeLockForTracing.lock(() -> {
+            final StringBuilder append = new StringBuilder();
+            _debug(append, "debug:onMethodEnter()");
 
-        codeLockForTracing.lock(new Block() {
-            @Override
-            public void code() {
+            // 加载before方法
+            loadAdviceMethod(KEY_GREYS_ADVICE_BEFORE_METHOD);
+            _debug(append, "loadAdviceMethod()");
 
-                final StringBuilder append = new StringBuilder();
-                _debug(append, "debug:onMethodEnter()");
+            // 推入Method.invoke()的第一个参数
+            pushNull();
 
-                // 加载before方法
-                loadAdviceMethod(KEY_GREYS_ADVICE_BEFORE_METHOD);
-                _debug(append, "loadAdviceMethod()");
+            // 方法参数
+            loadArrayForBefore();
+            _debug(append, "loadArrayForBefore()");
 
-                // 推入Method.invoke()的第一个参数
-                pushNull();
-
-                // 方法参数
-                loadArrayForBefore();
-                _debug(append, "loadArrayForBefore()");
-
-                // 调用方法
-                invokeVirtual(ASM_TYPE_METHOD, ASM_METHOD_METHOD_INVOKE);
-                pop();
-                _debug(append, "invokeVirtual()");
-
-            }
+            // 调用方法
+            invokeVirtual(ASM_TYPE_METHOD, ASM_METHOD_METHOD_INVOKE);
+            pop();
+            _debug(append, "invokeVirtual()");
         });
 
         mark(beginLabel);
@@ -541,7 +533,7 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
         codeLockForTracing.code(opcode);
     }
 
-    /*
+    /**
      * 跟踪代码
      */
     private void tracing(final int tracingType, final String owner, final String name, final String desc) {
@@ -640,11 +632,11 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
         // {
         mark(finallyLabel);
         // }
-
-
     }
 
-    // 用于try-catch的重排序,目的是让tracing的try...catch能在exceptions tables排在前边
+    /**
+     * 用于try-catch的重排序,目的是让tracing的try...catch能在exceptions tables排在前边
+     */
     private final Collection<AsmTryCatchBlock> asmTryCatchBlocks = new ArrayList<>();
 
     @Override

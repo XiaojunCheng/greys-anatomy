@@ -1,6 +1,6 @@
 package com.github.ompc.greys.core.command;
 
-import com.github.ompc.greys.core.advisor.Enhancer;
+import com.github.ompc.greys.core.advisor.asm.AsmClassFileTransformer;
 import com.github.ompc.greys.core.command.annotation.Cmd;
 import com.github.ompc.greys.core.command.annotation.IndexArg;
 import com.github.ompc.greys.core.command.annotation.NamedArg;
@@ -183,7 +183,7 @@ public class AsmCommand implements Command {
                 }
 
                 final Collection<Class<?>> matchedClassSet = reflectManager.searchClass(new ClassMatcher(classNameMatcher));
-                final AsmAffect asmAffect = Enhancer.getClassByteArray(matchedClassSet, inst);
+                final AsmAffect asmAffect = AsmClassFileTransformer.getClassByteArray(matchedClassSet, inst);
 
                 for (AsmAffect.ClassInfo classInfo : asmAffect.getClassInfos()) {
 

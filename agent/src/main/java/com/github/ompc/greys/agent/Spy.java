@@ -5,7 +5,9 @@ import java.lang.reflect.Method;
 /**
  * 间谍类<br/>
  * 藏匿在各个ClassLoader中
- * Created by oldmanpushcart@gmail.com on 15/8/23.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/8/23
  */
 public class Spy {
 
@@ -44,22 +46,6 @@ public class Spy {
         set(onBeforeMethod, onReturnMethod, onThrowsMethod, beforeInvokingMethod, afterInvokingMethod, throwInvokingMethod, AGENT_RESET_METHOD);
     }
 
-    public static void set(
-            Method onBeforeMethod,
-            Method onReturnMethod,
-            Method onThrowsMethod,
-            Method beforeInvokingMethod,
-            Method afterInvokingMethod,
-            Method throwInvokingMethod,
-            Method agentResetMethod) {
-        ON_BEFORE_METHOD = onBeforeMethod;
-        ON_RETURN_METHOD = onReturnMethod;
-        ON_THROWS_METHOD = onThrowsMethod;
-        BEFORE_INVOKING_METHOD = beforeInvokingMethod;
-        AFTER_INVOKING_METHOD = afterInvokingMethod;
-        THROW_INVOKING_METHOD = throwInvokingMethod;
-        AGENT_RESET_METHOD = agentResetMethod;
-    }
 
     /**
      * 用于启动线程初始化
@@ -79,4 +65,20 @@ public class Spy {
         set(null, null, null, null, null, null, null);
     }
 
+    private static void set(
+            Method onBeforeMethod,
+            Method onReturnMethod,
+            Method onThrowsMethod,
+            Method beforeInvokingMethod,
+            Method afterInvokingMethod,
+            Method throwInvokingMethod,
+            Method agentResetMethod) {
+        ON_BEFORE_METHOD = onBeforeMethod;
+        ON_RETURN_METHOD = onReturnMethod;
+        ON_THROWS_METHOD = onThrowsMethod;
+        BEFORE_INVOKING_METHOD = beforeInvokingMethod;
+        AFTER_INVOKING_METHOD = afterInvokingMethod;
+        THROW_INVOKING_METHOD = throwInvokingMethod;
+        AGENT_RESET_METHOD = agentResetMethod;
+    }
 }

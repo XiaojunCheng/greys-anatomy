@@ -1,5 +1,6 @@
 package com.github.ompc.greys.core.advisor.asm;
 
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.Method;
 
@@ -10,7 +11,7 @@ import java.util.Map;
  * @author chengxiaojun
  * @date 2019-05-22
  */
-public final class AsmSpyHelper {
+public final class AsmSpyHelper implements Opcodes {
 
     /**
      * -- KEY of advice --
@@ -50,11 +51,48 @@ public final class AsmSpyHelper {
         apyMethod2FieldNameMap.put(KEY_GREYS_ADVICE_THROW_INVOKING_METHOD, "AFTER_INVOKING_METHOD");
     }
 
+    /**
+     * index -> spy tracing method field name
+     */
+    private static final Map<Integer, String> apyTracingMethod2FieldNameMap = new HashMap<>(8);
+
+    {
+        apyTracingMethod2FieldNameMap.put(KEY_GREYS_ADVICE_BEFORE_INVOKING_METHOD, "beforeInvoking");
+        apyTracingMethod2FieldNameMap.put(KEY_GREYS_ADVICE_AFTER_INVOKING_METHOD, "afterInvoking");
+        apyTracingMethod2FieldNameMap.put(KEY_GREYS_ADVICE_THROW_INVOKING_METHOD, "throwInvoking");
+    }
+
     public static String getSpyMethodField(int keyOfMethod) {
         if (!apyMethod2FieldNameMap.containsKey(keyOfMethod)) {
             throw new IllegalArgumentException("illegal keyOfMethod=" + keyOfMethod);
         }
         return apyMethod2FieldNameMap.get(keyOfMethod);
+    }
+
+    public static String getSpyTracingMethodField(int keyOfTracingMethod) {
+        if (!apyTracingMethod2FieldNameMap.containsKey(keyOfTracingMethod)) {
+            throw new IllegalArgumentException("illegal keyOfTracingMethod=" + keyOfTracingMethod);
+        }
+        return apyTracingMethod2FieldNameMap.get(keyOfTracingMethod);
+    }
+
+    /**
+     * 是否静态方法
+     *
+     * @return true:静态方法 / false:非静态方法
+     */
+    public static boolean isStaticMethod(int methodAccess) {
+        return (methodAccess & ACC_STATIC) != 0;
+    }
+
+    /**
+     * 是否抛出异常返回(通过字节码判断)
+     *
+     * @param opcode 操作码
+     * @return true:以抛异常形式返回 / false:非抛异常形式返回(return)
+     */
+    public static boolean isThrow(int opcode) {
+        return opcode == ATHROW;
     }
 
 }

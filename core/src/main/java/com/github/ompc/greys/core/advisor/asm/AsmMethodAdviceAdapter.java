@@ -65,15 +65,13 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
         visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
     }
 
-
     /**
      * 加载ClassLoader<br/>
      * 这里分开静态方法中ClassLoader的获取以及普通方法中ClassLoader的获取
      * 主要是性能上的考虑
      */
     private void loadClassLoader() {
-
-        if (this.isStaticMethod()) {
+        if (AsmSpyHelper.isStaticMethod(methodAccess)) {
 
 //                    // fast enhance
 //                    if (GlobalOptions.isEnableFastEnhance) {
@@ -97,7 +95,6 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
             invokeVirtual(AsmSpyHelper.ASM_TYPE_OBJECT, Method.getMethod("Class getClass()"));
             invokeVirtual(AsmSpyHelper.ASM_TYPE_CLASS, Method.getMethod("ClassLoader getClassLoader()"));
         }
-
     }
 
     /**
@@ -196,7 +193,7 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
     @Override
     protected void onMethodExit(final int opcode) {
 
-        if (!isThrow(opcode)) {
+        if (!AsmSpyHelper.isThrow(opcode)) {
             codeLockForTracing.lock(new Block() {
                 @Override
                 public void code() {
@@ -226,7 +223,6 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
                 }
             });
         }
-
     }
 
     /**
@@ -293,24 +289,6 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
         super.visitMaxs(maxStack, maxLocals);
     }
 
-    /**
-     * 是否静态方法
-     *
-     * @return true:静态方法 / false:非静态方法
-     */
-    private boolean isStaticMethod() {
-        return (methodAccess & ACC_STATIC) != 0;
-    }
-
-    /**
-     * 是否抛出异常返回(通过字节码判断)
-     *
-     * @param opcode 操作码
-     * @return true:以抛异常形式返回 / false:非抛异常形式返回(return)
-     */
-    private boolean isThrow(int opcode) {
-        return opcode == ATHROW;
-    }
 
     /**
      * 将NULL推入堆栈
@@ -323,7 +301,7 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
      * 加载this/null
      */
     private void loadThisOrPushNullIfIsStatic() {
-        if (isStaticMethod()) {
+        if (AsmSpyHelper.isStaticMethod(methodAccess)) {
             pushNull();
         } else {
             loadThis();
@@ -337,24 +315,20 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
      */
     private void loadReturn(int opcode) {
         switch (opcode) {
-
             case RETURN: {
                 pushNull();
                 break;
             }
-
             case ARETURN: {
                 dup();
                 break;
             }
-
             case LRETURN:
             case DRETURN: {
                 dup2();
                 box(Type.getReturnType(methodDesc));
                 break;
             }
-
             default: {
                 dup();
                 box(Type.getReturnType(methodDesc));
@@ -468,25 +442,7 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
      */
     private void tracing(final int tracingType, final String owner, final String name, final String desc) {
 
-        final String label;
-        switch (tracingType) {
-            case AsmSpyHelper.KEY_GREYS_ADVICE_BEFORE_INVOKING_METHOD: {
-                label = "beforeInvoking";
-                break;
-            }
-            case AsmSpyHelper.KEY_GREYS_ADVICE_AFTER_INVOKING_METHOD: {
-                label = "afterInvoking";
-                break;
-            }
-            case AsmSpyHelper.KEY_GREYS_ADVICE_THROW_INVOKING_METHOD: {
-                label = "throwInvoking";
-                break;
-            }
-            default: {
-                throw new IllegalStateException("illegal tracing type: " + tracingType);
-            }
-        }
-
+        final String label = AsmSpyHelper.getSpyTracingMethodField(tracingType);
         codeLockForTracing.lock(() -> {
 
             final StringBuilder append = new StringBuilder();
@@ -509,9 +465,7 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
             invokeVirtual(AsmSpyHelper.ASM_TYPE_METHOD, AsmSpyHelper.ASM_METHOD_METHOD_INVOKE);
             pop();
             _debug(append, "invokeVirtual()");
-
         });
-
     }
 
     private Integer currentLineNumber;
@@ -593,4 +547,5 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
         String spyMethodFieldName = AsmSpyHelper.getSpyMethodField(keyOfMethod);
         getStatic(AsmSpyHelper.ASM_TYPE_SPY, spyMethodFieldName, AsmSpyHelper.ASM_TYPE_METHOD);
     }
+
 }

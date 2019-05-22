@@ -1,5 +1,7 @@
-package com.github.ompc.greys.core.util;
+package com.github.ompc.greys.core.advisor.asm;
 
+import com.github.ompc.greys.core.advisor.lock.Block;
+import com.github.ompc.greys.core.advisor.lock.CodeLock;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.AdviceAdapter;
 
@@ -52,6 +54,7 @@ public class AsmCodeLock implements CodeLock, Opcodes {
 
     /**
      * FIXME 没搞懂啥意思？
+     *
      * @param code
      */
     @Override
@@ -69,7 +72,7 @@ public class AsmCodeLock implements CodeLock, Opcodes {
         }
 
         if (++index == codes.length) {
-            // 翻转锁状态
+            //翻转锁状态
             isLook = !isLook;
             reset();
         }

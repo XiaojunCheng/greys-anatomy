@@ -6,7 +6,6 @@ import com.github.ompc.greys.core.advisor.AdviceListenerAdapter;
 import com.github.ompc.greys.core.command.annotation.Cmd;
 import com.github.ompc.greys.core.command.annotation.IndexArg;
 import com.github.ompc.greys.core.command.annotation.NamedArg;
-import com.github.ompc.greys.core.server.Session;
 import com.github.ompc.greys.core.textui.TTable;
 import com.github.ompc.greys.core.util.InvokeCost;
 import com.github.ompc.greys.core.util.PointCut;
@@ -15,7 +14,6 @@ import com.github.ompc.greys.core.util.matcher.ClassMatcher;
 import com.github.ompc.greys.core.util.matcher.GaMethodMatcher;
 import com.github.ompc.greys.core.util.matcher.PatternMatcher;
 
-import java.lang.instrument.Instrumentation;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.Map;
@@ -166,7 +164,7 @@ public class MonitorCommand implements Command {
                      * 监控数据
                      */
                     private final ConcurrentHashMap<Key, AtomicReference<Data>> monitorData
-                            = new ConcurrentHashMap<Key, AtomicReference<Data>>();
+                            = new ConcurrentHashMap<>();
 
                     private double div(double a, double b) {
                         if (b == 0) {

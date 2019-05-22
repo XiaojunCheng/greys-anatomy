@@ -22,16 +22,14 @@ import static com.github.ompc.greys.core.util.GaStringUtils.tranClassName;
  *
  * @author vlinux
  */
-public abstract class ReflectAdviceListenerAdapter extends AdviceListenerAdapter {
+public abstract class ReflectAdviceListenerAdapter implements AdviceListenerAdapter {
 
     @Override
     public void create() {
-
     }
 
     @Override
     public void destroy() {
-
     }
 
     private ClassLoader toClassLoader(ClassLoader loader) {

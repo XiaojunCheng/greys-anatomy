@@ -9,20 +9,17 @@ import com.github.ompc.greys.core.util.collection.ThreadUnsafeGaStack;
  * @author oldmanpushcart@gmail.com
  * @date 15/7/24
  */
-public abstract class ReflectAdviceTracingListenerAdapter
-        extends ReflectAdviceListenerAdapter implements AdviceTracingListener {
+public abstract class ReflectAdviceTracingListenerAdapter extends ReflectAdviceListenerAdapter implements AdviceTracingListener {
 
-    // 修复问题 #78
-    // 在当前类的<init>调用之前JVM会先调用super.<init>, 这些步骤只能被暂时跳过
-    // 所以这里需要记录下被掉过的信息
-    private final ThreadLocal<GaStack<Tracing>> skipSuperInitStackRef = new ThreadLocal<GaStack<Tracing>>() {
-        @Override
-        protected GaStack<Tracing> initialValue() {
-            return new ThreadUnsafeGaStack<Tracing>();
-        }
-    };
-
-    // before()是否已经被调用,用于修正 #78 问题
+    /**
+     * 修复问题 #78
+     * 在当前类的<init>调用之前JVM会先调用super.<init>, 这些步骤只能被暂时跳过
+     * 所以这里需要记录下被掉过的信息
+     */
+    private final ThreadLocal<GaStack<Tracing>> skipSuperInitStackRef = ThreadLocal.withInitial(() -> new ThreadUnsafeGaStack<>());
+    /**
+     * before()是否已经被调用,用于修正 #78 问题
+     */
     private final ThreadLocal<Boolean> isBeforeCalledRef = new ThreadLocal<Boolean>() {
         @Override
         protected Boolean initialValue() {

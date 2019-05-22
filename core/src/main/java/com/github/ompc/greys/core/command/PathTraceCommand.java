@@ -11,16 +11,14 @@ import com.github.ompc.greys.core.command.annotation.IndexArg;
 import com.github.ompc.greys.core.command.annotation.NamedArg;
 import com.github.ompc.greys.core.exception.ExpressException;
 import com.github.ompc.greys.core.manager.TimeFragmentManager;
-import com.github.ompc.greys.core.server.Session;
 import com.github.ompc.greys.core.textui.TTree;
 import com.github.ompc.greys.core.textui.ext.TTimeFragmentTable;
 import com.github.ompc.greys.core.util.GaMethod;
 import com.github.ompc.greys.core.util.InvokeCost;
 import com.github.ompc.greys.core.util.PointCut;
-import com.github.ompc.greys.core.util.collection.ThreadUnsafeLRUHashMap;
+import com.github.ompc.greys.core.util.collection.ThreadUnsafeLruHashMap;
 import com.github.ompc.greys.core.util.matcher.*;
 
-import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -131,12 +129,12 @@ public class PathTraceCommand implements Command {
 
         final Matcher<String> classNameMatcher = new CachedMatcher<>(
                 new PatternMatcher(isRegEx, classPattern),
-                new ThreadUnsafeLRUHashMap<>(GlobalOptions.ptraceClassMatcherLruCapacity)
+                new ThreadUnsafeLruHashMap<>(GlobalOptions.ptraceClassMatcherLruCapacity)
         );
 
         final Matcher<String> methodNameMatcher = new CachedMatcher<>(
                 new PatternMatcher(isRegEx, methodPattern),
-                new ThreadUnsafeLRUHashMap<>(GlobalOptions.ptraceMethodMatcherLruCapacity)
+                new ThreadUnsafeLruHashMap<>(GlobalOptions.ptraceMethodMatcherLruCapacity)
         );
 
         final Matcher pathTracingMatcher = newPathTracingMatcher();

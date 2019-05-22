@@ -1,4 +1,4 @@
-package com.github.ompc.greys.core.util;
+package com.github.ompc.greys.core.advisor.lock;
 
 /**
  * 代码锁<br/>
@@ -35,11 +35,6 @@ public interface CodeLock {
     /**
      * 代码块
      */
-    interface Block {
-        /**
-         * 代码
-         */
-        void code();
-    }
+
 
 }

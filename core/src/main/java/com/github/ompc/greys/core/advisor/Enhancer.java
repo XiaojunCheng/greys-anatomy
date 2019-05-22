@@ -1,6 +1,8 @@
 package com.github.ompc.greys.core.advisor;
 
 import com.github.ompc.greys.core.GlobalOptions;
+import com.github.ompc.greys.core.advisor.asm.AsmMethod;
+import com.github.ompc.greys.core.advisor.asm.AsmMethodMatcher;
 import com.github.ompc.greys.core.manager.ReflectManager;
 import com.github.ompc.greys.core.util.GaMethod;
 import com.github.ompc.greys.core.util.GaStringUtils;
@@ -350,7 +352,6 @@ public class Enhancer implements ClassFileTransformer {
         final Collection<Class<?>> classes = pointCut.isIncludeSubClass()
                 ? reflectManager.searchClassWithSubClass(pointCut.getClassMatcher())
                 : reflectManager.searchClass(pointCut.getClassMatcher());
-
 
         for (final Class<?> clazz : classes) {
 

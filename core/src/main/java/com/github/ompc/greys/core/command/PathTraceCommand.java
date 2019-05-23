@@ -3,12 +3,15 @@ package com.github.ompc.greys.core.command;
 import com.github.ompc.greys.core.Advice;
 import com.github.ompc.greys.core.GlobalOptions;
 import com.github.ompc.greys.core.TimeFragment;
-import com.github.ompc.greys.core.advisor.listener.AdviceListener;
 import com.github.ompc.greys.core.advisor.InitCallback;
+import com.github.ompc.greys.core.advisor.listener.AdviceListener;
 import com.github.ompc.greys.core.advisor.listener.ReflectAdviceListenerAdapter;
+import com.github.ompc.greys.core.command.action.Action;
+import com.github.ompc.greys.core.command.action.GetEnhancerAction;
 import com.github.ompc.greys.core.command.annotation.Cmd;
 import com.github.ompc.greys.core.command.annotation.IndexArg;
 import com.github.ompc.greys.core.command.annotation.NamedArg;
+import com.github.ompc.greys.core.command.enhancer.GetEnhancer;
 import com.github.ompc.greys.core.exception.ExpressException;
 import com.github.ompc.greys.core.manager.TimeFragmentManager;
 import com.github.ompc.greys.core.textui.TTree;
@@ -147,7 +150,7 @@ public class PathTraceCommand implements Command {
                 public PointCut getPointCut() {
                     return new PointCut(
                             new ClassMatcher(new GroupMatcher.Or<String>(classNameMatcher, pathTracingMatcher)),
-                            new GaMethodMatcher(new TrueMatcher<String>())
+                            new GaMethodMatcher(new TrueMatcher<>())
                     );
                 }
 

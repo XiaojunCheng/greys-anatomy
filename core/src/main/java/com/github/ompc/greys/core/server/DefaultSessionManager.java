@@ -76,8 +76,7 @@ public class DefaultSessionManager implements SessionManager {
         final Thread sessionExpireDaemon = new Thread("ga-session-expire-daemon") {
             @Override
             public void run() {
-                while (!isDestroyRef.get()
-                        && !isInterrupted()) {
+                while (!isDestroyRef.get() && !isInterrupted()) {
 
                     // 间隔200ms检测一次
                     try {
@@ -87,7 +86,6 @@ public class DefaultSessionManager implements SessionManager {
                     }
 
                     for (final Map.Entry<Integer, Session> entry : sessionMap.entrySet()) {
-
                         final int sessionId = entry.getKey();
                         final Session session = entry.getValue();
                         if (null == session || session.isExpired()) {

@@ -1,7 +1,10 @@
 package com.github.ompc.greys.core.command.hacking;
 
 import com.github.ompc.greys.core.command.Command;
+import com.github.ompc.greys.core.command.action.Action;
+import com.github.ompc.greys.core.command.action.SilentAction;
 import com.github.ompc.greys.core.command.annotation.Cmd;
+import com.github.ompc.greys.core.command.printer.Printer;
 import com.github.ompc.greys.core.server.Session;
 import org.apache.commons.io.IOUtils;
 
@@ -10,7 +13,9 @@ import java.lang.instrument.Instrumentation;
 /**
  * 工具介绍<br/>
  * 感谢
- * Created by oldmanpushcart@gmail.com on 15/9/1.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/9/1
  */
 @Cmd(isHacking = true, name = "thanks", summary = "Thanks",
         eg = {
@@ -22,7 +27,6 @@ public class ThanksCommand implements Command {
     @Override
     public Action getAction() {
         return new SilentAction() {
-
             @Override
             public void action(Session session, Instrumentation inst, Printer printer) throws Throwable {
 

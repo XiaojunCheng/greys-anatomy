@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.github.ompc.greys.core.server.LineDecodeState.READ_CHAR;
@@ -212,14 +211,9 @@ public class GaServer {
         final Thread gaServerSelectorDaemon = new Thread("ga-selector-daemon") {
             @Override
             public void run() {
-
-                while (!isInterrupted()
-                        && isBind()) {
-
+                while (!isInterrupted() && isBind()) {
                     try {
-
-                        while (selector.isOpen()
-                                && selector.select() > 0) {
+                        while (selector.isOpen() && selector.select() > 0) {
                             final Iterator<SelectionKey> it = selector.selectedKeys().iterator();
                             while (it.hasNext()) {
                                 final SelectionKey key = it.next();
@@ -234,10 +228,8 @@ public class GaServer {
                                 if (key.isValid() && key.isReadable()) {
                                     doRead(byteBuffer, key);
                                 }
-
                             }
                         }
-
                     } catch (IOException e) {
                         logger.warn("selector failed.", e);
                     } catch (ClosedSelectorException e) {
@@ -260,7 +252,6 @@ public class GaServer {
         socketChannel.configureBlocking(false);
         socketChannel.socket().setSoTimeout(configure.getConnectTimeout());
         socketChannel.socket().setTcpNoDelay(true);
-
 
         final Session session = sessionManager.newSession(javaPid, socketChannel, DEFAULT_CHARSET);
         socketChannel.register(selector, OP_READ, new GaAttachment(BUFFER_SIZE, session));
@@ -285,8 +276,7 @@ public class GaServer {
         final SocketChannel socketChannel = (SocketChannel) key.channel();
         final Session session = attachment.getSession();
         try {
-
-            // 若读到EOF，则说明SocketChannel已经关闭
+            //若读到EOF，则说明SocketChannel已经关闭
             if (EOF == socketChannel.read(byteBuffer)) {
                 logger.info("client={}@session[{}] was closed.", socketChannel, session.getSessionId());
                 // closeSocketChannel(key, socketChannel);
@@ -303,18 +293,14 @@ public class GaServer {
                 switch (attachment.getLineDecodeState()) {
                     case READ_CHAR: {
                         final byte data = byteBuffer.get();
-
                         if ('\n' == data) {
                             attachment.setLineDecodeState(READ_EOL);
                         }
-
                         // 遇到中止命令(CTRL_D)，则标记会话为不可写，让后台任务停下
-                        else if (CTRL_D == data
-                                || CTRL_X == data) {
+                        else if (CTRL_D == data || CTRL_X == data) {
                             session.unLock();
                             break;
                         }
-
                         // 普通byte则持续放入到缓存中
                         else {
                             if ('\r' != data) {
@@ -322,23 +308,17 @@ public class GaServer {
                             }
                             break;
                         }
-
                     }
-
                     case READ_EOL: {
                         final String line = attachment.clearAndGetLine(session.getCharset());
-
                         executorService.execute(() -> {
                             // 会话只有未锁定的时候才能响应命令
                             if (session.tryLock()) {
                                 try {
-
                                     // 命令执行
                                     commandHandler.executeCommand(line, session);
-
                                     // 命令结束之后需要传输EOT告诉client命令传输已经完结，可以展示提示符
                                     socketChannel.write(ByteBuffer.wrap(new byte[]{EOT}));
-
                                 } catch (IOException e) {
                                     logger.info("network communicate failed, session[{}] will be close.",
                                             session.getSessionId());
@@ -357,9 +337,7 @@ public class GaServer {
                     }
                 }
             }//while for line decode
-
             byteBuffer.clear();
-
         }
         // 处理
         catch (IOException e) {

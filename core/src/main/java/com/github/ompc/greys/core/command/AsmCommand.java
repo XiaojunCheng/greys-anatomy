@@ -1,6 +1,8 @@
 package com.github.ompc.greys.core.command;
 
 import com.github.ompc.greys.core.advisor.asm.AsmClassFileTransformer;
+import com.github.ompc.greys.core.command.action.Action;
+import com.github.ompc.greys.core.command.action.RowAction;
 import com.github.ompc.greys.core.command.annotation.Cmd;
 import com.github.ompc.greys.core.command.annotation.IndexArg;
 import com.github.ompc.greys.core.command.annotation.NamedArg;
@@ -167,7 +169,7 @@ public class AsmCommand implements Command {
         return new RowAction() {
 
             @Override
-            public RowAffect action(Session session, Instrumentation inst, Printer printer) throws Throwable {
+            public RowAffect action(Session session, Instrumentation inst, com.github.ompc.greys.core.command.printer.Printer printer) throws Throwable {
 
                 final RowAffect affect = new RowAffect();
                 final StringBuilder outputSB = new StringBuilder();
@@ -177,7 +179,7 @@ public class AsmCommand implements Command {
 
                 final Matcher<String> methodNameMatcher;
                 if (StringUtils.isBlank(methodPattern)) {
-                    methodNameMatcher = new TrueMatcher<String>();
+                    methodNameMatcher = new TrueMatcher<>();
                 } else {
                     methodNameMatcher = new PatternMatcher(isRegEx, methodPattern);
                 }

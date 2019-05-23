@@ -5,12 +5,15 @@ import com.github.ompc.greys.core.advisor.AdviceWeaver;
 import com.github.ompc.greys.core.advisor.asm.AsmClassFileTransformer;
 import com.github.ompc.greys.core.advisor.listener.InvokeTraceable;
 import com.github.ompc.greys.core.command.Command;
-import com.github.ompc.greys.core.command.Command.Action;
-import com.github.ompc.greys.core.command.Command.GetEnhancerAction;
-import com.github.ompc.greys.core.command.Command.Printer;
 import com.github.ompc.greys.core.command.Commands;
 import com.github.ompc.greys.core.command.QuitCommand;
 import com.github.ompc.greys.core.command.ShutdownCommand;
+import com.github.ompc.greys.core.command.action.Action;
+import com.github.ompc.greys.core.command.action.GetEnhancerAction;
+import com.github.ompc.greys.core.command.action.RowAction;
+import com.github.ompc.greys.core.command.action.SilentAction;
+import com.github.ompc.greys.core.command.enhancer.GetEnhancer;
+import com.github.ompc.greys.core.command.printer.Printer;
 import com.github.ompc.greys.core.exception.CommandException;
 import com.github.ompc.greys.core.exception.CommandInitializationException;
 import com.github.ompc.greys.core.exception.CommandNotFoundException;
@@ -158,7 +161,6 @@ public class DefaultCommandHandler implements CommandHandler {
                 }
 
                 return this;
-
             }
 
             @Override
@@ -183,7 +185,6 @@ public class DefaultCommandHandler implements CommandHandler {
 
         };
 
-
         try {
 
             // 影响反馈
@@ -191,15 +192,15 @@ public class DefaultCommandHandler implements CommandHandler {
             final Action action = command.getAction();
 
             // 无任何后续动作的动作
-            if (action instanceof Command.SilentAction) {
+            if (action instanceof SilentAction) {
                 affect = new Affect();
-                ((Command.SilentAction) action).action(session, inst, printer);
+                ((SilentAction) action).action(session, inst, printer);
             }
 
             // 需要反馈行影响范围的动作
-            else if (action instanceof Command.RowAction) {
+            else if (action instanceof RowAction) {
                 affect = new RowAffect();
-                final RowAffect rowAffect = ((Command.RowAction) action).action(session, inst, printer);
+                final RowAffect rowAffect = ((RowAction) action).action(session, inst, printer);
                 ((RowAffect) affect).rCnt(rowAffect.rCnt());
             }
 
@@ -209,7 +210,7 @@ public class DefaultCommandHandler implements CommandHandler {
                 affect = new EnhancerAffect();
 
                 // 执行命令动作 & 获取增强器
-                final Command.GetEnhancer getEnhancer = ((GetEnhancerAction) action).action(session, inst, printer);
+                final GetEnhancer getEnhancer = ((GetEnhancerAction) action).action(session, inst, printer);
                 final int lock = session.getLock();
                 final AdviceListener listener = getEnhancer.getAdviceListener();
                 final EnhancerAffect enhancerAffect = AsmClassFileTransformer.enhance(

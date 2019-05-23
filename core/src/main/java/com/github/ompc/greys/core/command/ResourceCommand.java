@@ -1,6 +1,9 @@
 package com.github.ompc.greys.core.command;
 
+import com.github.ompc.greys.core.command.action.Action;
+import com.github.ompc.greys.core.command.action.RowAction;
 import com.github.ompc.greys.core.command.annotation.IndexArg;
+import com.github.ompc.greys.core.command.printer.Printer;
 import com.github.ompc.greys.core.server.Session;
 import com.github.ompc.greys.core.util.affect.RowAffect;
 
@@ -28,8 +31,8 @@ public class ResourceCommand implements Command {
     private String resourceName;
 
     @Override
-    public Command.Action getAction() {
-        return new Command.RowAction() {
+    public Action getAction() {
+        return new RowAction() {
 
             // 列出所有已经被加载的ClassLoader
             private Set<ClassLoader> listLoadedClassLoader(Instrumentation inst) {

@@ -543,7 +543,7 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
      *
      * @param keyOfMethod 通知方法KEY
      */
-    public void loadAdviceMethod(int keyOfMethod) {
+    private void loadAdviceMethod(int keyOfMethod) {
         String spyMethodFieldName = AsmSpyHelper.getSpyMethodField(keyOfMethod);
         getStatic(AsmSpyHelper.ASM_TYPE_SPY, spyMethodFieldName, AsmSpyHelper.ASM_TYPE_METHOD);
     }

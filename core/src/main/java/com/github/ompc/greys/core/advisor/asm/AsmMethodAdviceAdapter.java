@@ -1,7 +1,6 @@
 package com.github.ompc.greys.core.advisor.asm;
 
 import com.github.ompc.greys.core.GlobalOptions;
-import com.github.ompc.greys.core.advisor.lock.Block;
 import com.github.ompc.greys.core.advisor.lock.CodeLock;
 import com.github.ompc.greys.core.util.GaStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -54,8 +53,7 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
             return;
         }
 
-        //java.lang.System.out.println
-        // println msg
+        //java.lang.System.out.println(msg)
         visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
         if (StringUtils.isBlank(append.toString())) {
             visitLdcInsn(append.append(msg).toString());
@@ -102,15 +100,21 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
      * 加载before通知参数数组
      */
     private void loadArrayForBefore() {
+        //void methodOnBegin(int adviceId, ClassLoader loader, String className, String methodName,
+        //                   String methodDesc, Object target, Object[] args)
+        //methodOnBegin方法有7个参数，分配数组用
         push(7);
+        //执行完成后栈顶元素：Object[7]
         newArray(AsmSpyHelper.ASM_TYPE_OBJECT);
 
+        //赋值Object[0]=adviceId
         dup();
         push(0);
         push(adviceId);
         box(AsmSpyHelper.ASM_TYPE_INT);
         arrayStore(AsmSpyHelper.ASM_TYPE_INTEGER);
 
+        //赋值Object[1]=loader
         dup();
         push(1);
         loadClassLoader();
@@ -146,22 +150,31 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
     protected void onMethodEnter() {
         codeLockForTracing.lock(() -> {
             final StringBuilder append = new StringBuilder();
+
+            /*System.out.println("debug:onMethodEnter()");*/
             _debug(append, "debug:onMethodEnter()");
 
-            // 加载before方法
+            //加载before方法
+            //把方法放到栈顶
             loadAdviceMethod(AsmSpyHelper.KEY_GREYS_ADVICE_BEFORE_METHOD);
+            /*System.out.println("debug:onMethodEnter() -> loadAdviceMethod()");*/
             _debug(append, "loadAdviceMethod()");
 
-            // 推入Method.invoke()的第一个参数
+            //推入Method.invoke()的第一个参数
+            //由于是静态方法，所以第一个参数为null
             pushNull();
 
-            // 方法参数
+            //方法参数
+            //void methodOnBegin(int adviceId, ClassLoader loader, String className, String methodName,
+            //                                     String methodDesc, Object target, Object[] args
             loadArrayForBefore();
             _debug(append, "loadArrayForBefore()");
 
-            // 调用方法
+            //调用方法
             invokeVirtual(AsmSpyHelper.ASM_TYPE_METHOD, AsmSpyHelper.ASM_METHOD_METHOD_INVOKE);
+            //结果出队
             pop();
+            /*System.out.println("debug:onMethodEnter() -> loadAdviceMethod() -> invokeVirtual()");*/
             _debug(append, "invokeVirtual()");
         });
 
@@ -192,33 +205,34 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
 
     @Override
     protected void onMethodExit(final int opcode) {
-
-        if (!AsmSpyHelper.isThrow(opcode)) {
-            codeLockForTracing.lock(() -> {
-                final StringBuilder append = new StringBuilder();
-                _debug(append, "debug:onMethodExit()");
-
-                // 加载返回对象
-                loadReturn(opcode);
-                _debug(append, "loadReturn()");
-
-                // 加载returning方法
-                loadAdviceMethod(AsmSpyHelper.KEY_GREYS_ADVICE_RETURN_METHOD);
-                _debug(append, "loadAdviceMethod()");
-
-                // 推入Method.invoke()的第一个参数
-                pushNull();
-
-                // 加载return通知参数数组
-                loadReturnArgs();
-                _debug(append, "loadReturnArgs()");
-
-                invokeVirtual(AsmSpyHelper.ASM_TYPE_METHOD, AsmSpyHelper.ASM_METHOD_METHOD_INVOKE);
-                pop();
-                _debug(append, "invokeVirtual()");
-
-            });
+        //为什么异常要进行特殊处理
+        if (AsmSpyHelper.isThrow(opcode)) {
+            return;
         }
+
+        codeLockForTracing.lock(() -> {
+            final StringBuilder append = new StringBuilder();
+            _debug(append, "debug:onMethodExit()");
+
+            //加载返回对象
+            loadReturn(opcode);
+            _debug(append, "loadReturn()");
+
+            // 加载returning方法
+            loadAdviceMethod(AsmSpyHelper.KEY_GREYS_ADVICE_RETURN_METHOD);
+            _debug(append, "loadAdviceMethod()");
+
+            // 推入Method.invoke()的第一个参数
+            pushNull();
+
+            // 加载return通知参数数组
+            loadReturnArgs();
+            _debug(append, "loadReturnArgs()");
+
+            invokeVirtual(AsmSpyHelper.ASM_TYPE_METHOD, AsmSpyHelper.ASM_METHOD_METHOD_INVOKE);
+            pop();
+            _debug(append, "invokeVirtual()");
+        });
     }
 
     /**
@@ -251,7 +265,6 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
         // catchException(beginLabel, endLabel, ASM_TYPE_THROWABLE);
 
         codeLockForTracing.lock(() -> {
-
             final StringBuilder append = new StringBuilder();
             _debug(append, "debug:catchException()");
 
@@ -274,7 +287,6 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
             invokeVirtual(AsmSpyHelper.ASM_TYPE_METHOD, AsmSpyHelper.ASM_METHOD_METHOD_INVOKE);
             pop();
             _debug(append, "invokeVirtual()");
-
         });
 
         throwException();
@@ -326,7 +338,6 @@ public class AsmMethodAdviceAdapter extends AdviceAdapter {
                 box(Type.getReturnType(methodDesc));
                 break;
             }
-
         }
     }
 

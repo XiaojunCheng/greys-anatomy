@@ -119,6 +119,7 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
      * 用于编织通知器,外部不会直接调用
      *
      * @param throwable 抛出异常
+     * @param adviceId
      */
     public static void methodOnThrowingEnd(Throwable throwable, int adviceId) {
         methodOnEnd(adviceId, true, throwable);
@@ -127,6 +128,7 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
     /**
      * 所有的返回都统一处理
      *
+     * @param adviceId
      * @param isThrowing        标记正常返回结束还是抛出异常结束
      * @param returnOrThrowable 正常返回或者抛出异常对象
      */
@@ -407,7 +409,6 @@ public class AdviceWeaver extends ClassVisitor implements Opcodes {
         }
 
         logger.info("unReg adviceId={};listener={}", adviceId, listener);
-
     }
 
 }

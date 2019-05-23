@@ -211,19 +211,19 @@ public class DefaultCommandHandler implements CommandHandler {
 
                 // 执行命令动作 & 获取增强器
                 final GetEnhancer getEnhancer = ((GetEnhancerAction) action).action(session, inst, printer);
-                final int lock = session.getLock();
+                final int lockId = session.getLock();
                 final AdviceListener listener = getEnhancer.getAdviceListener();
                 final EnhancerAffect enhancerAffect = AsmClassFileTransformer.enhance(
                         inst,
-                        lock,
+                        lockId,
                         listener instanceof InvokeTraceable,
                         getEnhancer.getPointCut()
                 );
 
                 // 这里做个补偿,如果在enhance期间,unLock被调用了,则补偿性放弃
-                if (session.getLock() == lock) {
+                if (session.getLock() == lockId) {
                     // 注册通知监听器
-                    AdviceWeaver.reg(lock, listener);
+                    AdviceWeaver.reg(lockId, listener);
 
                     if (!session.isSilent()) {
                         printer.println(ABORT_MSG);
@@ -255,7 +255,6 @@ public class DefaultCommandHandler implements CommandHandler {
 
         // 跑任务
         jobRunning(session, isFinishRef);
-
     }
 
     private void jobRunning(Session session, AtomicBoolean isFinishRef) throws IOException, GaExecuteException {
@@ -263,51 +262,38 @@ public class DefaultCommandHandler implements CommandHandler {
         final Thread currentThread = Thread.currentThread();
         final BlockingQueue<String> writeQueue = session.getWriteQueue();
         try {
-
-            while (!session.isDestroy()
-                    && !currentThread.isInterrupted()
-                    && session.isLocked()) {
-
+            while (!session.isDestroy() && !currentThread.isInterrupted() && session.isLocked()) {
                 // touch the session
                 session.touch();
 
                 try {
                     final String segment = writeQueue.poll(200, TimeUnit.MILLISECONDS);
-
                     // 如果返回的片段为null,说明当前没有东西可写
                     if (null == segment) {
-
                         // 当读到EOF的时候，同时Sender标记为isFinished
                         // 说明整个命令结束了，标记整个会话为不可写，结束命令循环
                         if (isFinishRef.get()) {
                             session.unLock();
                             break;
                         }
-
                     }
-
                     // 读出了点东西
                     else {
                         write(session.getSocketChannel(), segment, session.getCharset());
                     }
-
                 } catch (InterruptedException e) {
                     currentThread.interrupt();
                 }
-
             }//while command running
-
         }
-
         // 遇到关闭的链接可以忽略
         catch (ClosedChannelException e) {
             logger.debug("session[{}] write failed, because socket broken.",
                     session.getSessionId(), e);
         }
-
     }
 
-    /*
+    /**
      * 绘制提示符
      */
     private void reDrawPrompt(Session session, SocketChannel socketChannel, Charset charset, String prompt) throws IOException {
@@ -316,7 +302,7 @@ public class DefaultCommandHandler implements CommandHandler {
         }
     }
 
-    /*
+    /**
      * 输出到网络
      */
     private void write(SocketChannel socketChannel, String message, Charset charset) throws IOException {

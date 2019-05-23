@@ -5,8 +5,6 @@ import com.github.ompc.greys.core.manager.ReflectManager;
 import com.github.ompc.greys.core.manager.TimeFragmentManager;
 import com.github.ompc.greys.core.util.GaCheckUtils;
 import com.github.ompc.greys.core.util.LogUtil;
-import lombok.Getter;
-import lombok.Setter;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -29,61 +27,6 @@ import static java.nio.channels.SelectionKey.OP_ACCEPT;
 import static java.nio.channels.SelectionKey.OP_READ;
 import static org.apache.commons.io.IOUtils.closeQuietly;
 
-/**
- * GaServer操作的附件
- *
- * @author oldmanpushcart@gmail.com
- * @date 15/5/3
- */
-class GaAttachment {
-
-    private final int bufferSize;
-    private ByteBuffer lineByteBuffer;
-    @Getter
-    private final Session session;
-    @Getter
-    @Setter
-    private LineDecodeState lineDecodeState;
-
-    GaAttachment(int bufferSize, Session session) {
-        this.lineByteBuffer = ByteBuffer.allocate(bufferSize);
-        this.bufferSize = bufferSize;
-        this.lineDecodeState = READ_CHAR;
-        this.session = session;
-    }
-
-    public void put(byte data) {
-        if (lineByteBuffer.hasRemaining()) {
-            lineByteBuffer.put(data);
-        } else {
-            final ByteBuffer newLineByteBuffer = ByteBuffer.allocate(lineByteBuffer.capacity() + bufferSize);
-            lineByteBuffer.flip();
-            newLineByteBuffer.put(lineByteBuffer);
-            newLineByteBuffer.put(data);
-            this.lineByteBuffer = newLineByteBuffer;
-        }
-    }
-
-    public String clearAndGetLine(Charset charset) {
-        lineByteBuffer.flip();
-        final byte[] dataArray = new byte[lineByteBuffer.limit()];
-        lineByteBuffer.get(dataArray);
-        final String line = new String(dataArray, charset);
-        lineByteBuffer.clear();
-        return line;
-    }
-
-}
-
-/**
- * 行解码
- */
-enum LineDecodeState {
-    // 读字符
-    READ_CHAR,
-    // 读换行
-    READ_EOL
-}
 
 /**
  * Greys 服务端<br/>
@@ -106,9 +49,6 @@ public class GaServer {
     private final AtomicBoolean isBindRef = new AtomicBoolean(false);
     private final SessionManager sessionManager;
     private final CommandHandler commandHandler;
-    /**
-     * FIXME: 在这里有什么作用？
-     */
     private final int javaPid;
     private final Thread jvmShutdownHooker = new Thread("ga-shutdown-hooker") {
         @Override
@@ -202,7 +142,6 @@ public class GaServer {
             return new InetSocketAddress(targetIp, targetPort);
         }
     }
-
 
     private void activeSelectorDaemon(final Selector selector, final Configure configure) {
 
@@ -312,7 +251,7 @@ public class GaServer {
                     case READ_EOL: {
                         final String line = attachment.clearAndGetLine(session.getCharset());
                         executorService.execute(() -> {
-                            // 会话只有未锁定的时候才能响应命令
+                            //会话只有未锁定的时候才能响应命令
                             if (session.tryLock()) {
                                 try {
                                     // 命令执行
@@ -320,15 +259,13 @@ public class GaServer {
                                     // 命令结束之后需要传输EOT告诉client命令传输已经完结，可以展示提示符
                                     socketChannel.write(ByteBuffer.wrap(new byte[]{EOT}));
                                 } catch (IOException e) {
-                                    logger.info("network communicate failed, session[{}] will be close.",
-                                            session.getSessionId());
+                                    logger.info("network communicate failed, session[{}] will be close.", session.getSessionId());
                                     session.destroy();
                                 } finally {
                                     session.unLock();
                                 }
                             } else {
-                                logger.info("session[{}] was locked, ignore this command.",
-                                        session.getSessionId());
+                                logger.info("session[{}] was locked, ignore this command.", session.getSessionId());
                             }
                         });
 
@@ -413,4 +350,14 @@ public class GaServer {
         return gaServer;
     }
 
+}
+
+/**
+ * 行解码
+ */
+enum LineDecodeState {
+    //读字符
+    READ_CHAR,
+    //读换行
+    READ_EOL
 }

@@ -353,11 +353,11 @@ public class AsmClassFileTransformer implements ClassFileTransformer {
                 : reflectManager.searchClass(pointCut.getClassMatcher());
 
         for (final Class<?> clazz : classes) {
-
-            for (final GaMethod gaMethod : reflectManager.searchClassGaMethods(clazz, pointCut.getGaMethodMatcher())) {
-
-                // 如果当前方法所归属的类不支持增强,则华丽的忽略之
-                // 这里不用能上一层循环的clazz,主要的原因在于会找到从父类继承过来的可见方法(照顾到用户习惯)
+            //搜索匹配的方法
+            Collection<GaMethod> gaMethods = reflectManager.searchClassGaMethods(clazz, pointCut.getGaMethodMatcher());
+            for (final GaMethod gaMethod : gaMethods) {
+                //如果当前方法所归属的类不支持增强,则华丽的忽略之
+                //这里不用能上一层循环的clazz,主要的原因在于会找到从父类继承过来的可见方法(照顾到用户习惯)
                 final Class<?> targetClass = gaMethod.getDeclaringClass();
                 if (isIgnore(targetClass)) {
                     continue;
@@ -374,9 +374,7 @@ public class AsmClassFileTransformer implements ClassFileTransformer {
                 if (groupMatcher instanceof GroupMatcher) {
                     ((GroupMatcher<AsmMethod>) groupMatcher).add(new AsmMethodMatcher(gaMethod));
                 }
-
             }
-
         }
 
         return enhanceMap;
@@ -400,9 +398,10 @@ public class AsmClassFileTransformer implements ClassFileTransformer {
 
         final EnhancerAffect affect = new EnhancerAffect();
 
+        //获取需要增强的方法（按照类分组）
         final Map<Class<?>, Matcher<AsmMethod>> enhanceMap = toEnhanceMap(pointCut);
 
-        // 构建增强器
+        //构建增强器
         final AsmClassFileTransformer transformer = new AsmClassFileTransformer(adviceId, isTracing, enhanceMap, affect);
         try {
             inst.addTransformer(transformer, true);
@@ -416,7 +415,6 @@ public class AsmClassFileTransformer implements ClassFileTransformer {
                     inst.retransformClasses(classArray);
                 }
             }
-
             // for each 增强
             else {
                 for (Class<?> clazz : enhanceMap.keySet()) {
@@ -434,8 +432,6 @@ public class AsmClassFileTransformer implements ClassFileTransformer {
                     }
                 }
             }
-
-
         } finally {
             inst.removeTransformer(transformer);
         }

@@ -137,19 +137,17 @@ public class Session {
      * 解锁会话
      */
     public void unLock() {
-
         final int currentLockTx = lockTx.get();
-
         // 如果当前锁已经是LOCK_TX_EMPTY,则没有必要继续执行
         if (LOCK_TX_EMPTY == currentLockTx) {
             return;
         }
         if (!lockTx.compareAndSet(currentLockTx, LOCK_TX_EMPTY)) {
-            // 能到这一步说明是lock()/unLock()编写出错，需要开发排查
+            //能到这一步说明是lock()/unLock()编写出错，需要开发排查
             throw new IllegalStateException();
         }
 
-        // 解锁的时候需要清理输出队列
+        //解锁的时候需要清理输出队列
         writeQueue.clear();
 
         // 取消监听注册
@@ -201,6 +199,5 @@ public class Session {
     public BlockingQueue<String> getWriteQueue() {
         return writeQueue;
     }
-
 
 }

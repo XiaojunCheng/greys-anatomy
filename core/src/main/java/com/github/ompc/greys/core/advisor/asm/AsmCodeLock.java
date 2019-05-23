@@ -53,7 +53,8 @@ public class AsmCodeLock implements CodeLock, Opcodes {
     }
 
     /**
-     * FIXME 没搞懂啥意思？
+     * 明白了，如果连续的指令集不能和 begin或end 指令集匹配，则认为是无效的指令<br/>
+     * 目的就是为了匹配特定的指令集和
      *
      * @param code
      */

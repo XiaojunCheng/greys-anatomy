@@ -74,7 +74,7 @@ public class SessionCommand implements Command {
         };
     }
 
-    /*
+    /**
      * 会话详情
      */
     private String sessionToString(Session session) {

@@ -3,10 +3,7 @@ package com.github.ompc.greys.core.advisor.asm;
 import com.github.ompc.greys.core.GlobalOptions;
 import com.github.ompc.greys.core.advisor.AdviceWeaver;
 import com.github.ompc.greys.core.manager.ReflectManager;
-import com.github.ompc.greys.core.util.GaMethod;
-import com.github.ompc.greys.core.util.GaStringUtils;
-import com.github.ompc.greys.core.util.LogUtil;
-import com.github.ompc.greys.core.util.PointCut;
+import com.github.ompc.greys.core.util.*;
 import com.github.ompc.greys.core.util.affect.AsmAffect;
 import com.github.ompc.greys.core.util.affect.EnhancerAffect;
 import com.github.ompc.greys.core.util.matcher.GroupMatcher;
@@ -30,16 +27,11 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import static com.github.ompc.greys.core.util.GaCheckUtils.isEquals;
-import static com.github.ompc.greys.core.util.GaReflectUtils.defineClass;
 import static java.lang.System.arraycopy;
 import static org.apache.commons.io.FileUtils.writeByteArrayToFile;
 import static org.apache.commons.io.IOUtils.toByteArray;
 import static org.apache.commons.lang3.reflect.FieldUtils.getField;
 import static org.apache.commons.lang3.reflect.MethodUtils.invokeStaticMethod;
-import static org.objectweb.asm.ClassReader.EXPAND_FRAMES;
-import static org.objectweb.asm.ClassWriter.COMPUTE_FRAMES;
-import static org.objectweb.asm.ClassWriter.COMPUTE_MAXS;
-
 
 /**
  * 对类进行通知增强
@@ -118,19 +110,15 @@ public class AsmClassFileTransformer implements ClassFileTransformer {
         // 从目标ClassLoader中尝试加载或定义ClassLoader
         Class<?> spyClassFromTargetClassLoader = null;
         try {
-
-            // 去目标类加载器中找下是否已经存在间谍
-            // 如果间谍已经存在就算了
+            //去目标类加载器中找下是否已经存在间谍
+            //如果间谍已经存在就算了
             spyClassFromTargetClassLoader = targetClassLoader.loadClass(spyClassName);
             logger.info("Spy already in targetClassLoader : " + targetClassLoader);
-
         }
-
         // 看来间谍不存在啊
         catch (ClassNotFoundException cnfe) {
-
-            try {// 在目标类加载器中混入间谍
-                spyClassFromTargetClassLoader = defineClass(
+            try {//在目标类加载器中混入间谍
+                spyClassFromTargetClassLoader = GaReflectUtils.defineClass(
                         targetClassLoader,
                         spyClassName,
                         toByteArray(AsmClassFileTransformer.class.getResourceAsStream("/" + spyClassName.replace('.', '/') + ".class"))
@@ -146,13 +134,10 @@ public class AsmClassFileTransformer implements ClassFileTransformer {
             }
 
         }
-
-
         // 无论从哪里取到spyClass，都需要重新初始化一次
         // 用以兼容重新加载的场景
         // 当然，这样做会给渲染的过程带来一定的性能开销，不过能简化编码复杂度
         finally {
-
             if (null != spyClassFromTargetClassLoader) {
                 // 初始化间谍
                 invokeStaticMethod(
@@ -169,7 +154,6 @@ public class AsmClassFileTransformer implements ClassFileTransformer {
             }
 
         }
-
     }
 
     @Override
@@ -187,6 +171,7 @@ public class AsmClassFileTransformer implements ClassFileTransformer {
 
         //首先先检查是否在缓存中存在Class字节码
         //因为要支持多人协作,存在多人同时增强的情况
+        //FIXME: 多人协作如何控制？
         final byte[] byteOfClassInCache = classBytesCache.get(classBeingRedefined);
         //如果没有命中缓存,则从原始字节码开始增强
         final ClassReader cr = new ClassReader((byteOfClassInCache == null) ? classfileBuffer : byteOfClassInCache);
@@ -195,8 +180,8 @@ public class AsmClassFileTransformer implements ClassFileTransformer {
         final Matcher<AsmMethod> asmMethodMatcher = enhanceMap.get(classBeingRedefined);
 
         // 字节码增强
-        // NOTE by cxj: asm4-guide.pdf page 50 ClassWriter option
-        final ClassWriter cw = new ClassWriter(cr, COMPUTE_FRAMES | COMPUTE_MAXS) {
+        //FIXME: asm4-guide.pdf page 50 ClassWriter option
+        final ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS) {
 
             /*
              * 注意，为了自动计算帧的大小，有时必须计算两个类共同的父类。
@@ -233,11 +218,9 @@ public class AsmClassFileTransformer implements ClassFileTransformer {
             }
 
         };
-
         try {
-
             // 生成增强字节码
-            cr.accept(new AdviceWeaver(adviceId, isTracing, cr.getClassName(), asmMethodMatcher, affect, cw), EXPAND_FRAMES);
+            cr.accept(new AdviceWeaver(adviceId, isTracing, cr.getClassName(), asmMethodMatcher, affect, cw), ClassReader.EXPAND_FRAMES);
             final byte[] enhanceClassByteArray = cw.toByteArray();
 
             // 生成成功,推入缓存
@@ -245,11 +228,9 @@ public class AsmClassFileTransformer implements ClassFileTransformer {
 
             // dump the class
             dumpClassIfNecessary(className, enhanceClassByteArray, affect);
-
-            // 成功计数
+            //成功计数
             affect.cCnt(1);
-
-            // 派遣间谍
+            //派遣间谍
             try {
                 spy(inClassLoader);
             } catch (Throwable t) {

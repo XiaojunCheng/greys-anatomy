@@ -27,10 +27,11 @@ public class PatternMatcher implements Matcher<String> {
          * 字符串全匹配
          */
         EQUALS
-
     }
 
-    // 匹配器
+    /**
+     * 匹配器
+     */
     private final Matcher<String> matcher;
 
     /**
@@ -61,7 +62,7 @@ public class PatternMatcher implements Matcher<String> {
                 break;
             }
             case EQUALS: {
-                this.matcher = new EqualsMatcher<String>(pattern);
+                this.matcher = new EqualsMatcher<>(pattern);
                 break;
             }
             default: {
@@ -189,7 +190,6 @@ public class PatternMatcher implements Matcher<String> {
                 pNdx++;
             }
         }
-
     }
 
 }

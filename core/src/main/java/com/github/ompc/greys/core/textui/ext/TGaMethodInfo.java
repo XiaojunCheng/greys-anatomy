@@ -2,7 +2,7 @@ package com.github.ompc.greys.core.textui.ext;
 
 import com.github.ompc.greys.core.textui.TComponent;
 import com.github.ompc.greys.core.textui.TKv;
-import com.github.ompc.greys.core.util.GaMethod;
+import com.github.ompc.greys.core.advisor.method.GaMethod;
 
 import java.lang.annotation.Annotation;
 

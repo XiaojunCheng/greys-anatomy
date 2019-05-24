@@ -16,7 +16,7 @@ import com.github.ompc.greys.core.exception.ExpressException;
 import com.github.ompc.greys.core.manager.TimeFragmentManager;
 import com.github.ompc.greys.core.textui.TTree;
 import com.github.ompc.greys.core.textui.ext.TTimeFragmentTable;
-import com.github.ompc.greys.core.util.GaMethod;
+import com.github.ompc.greys.core.advisor.method.GaMethod;
 import com.github.ompc.greys.core.util.InvokeCost;
 import com.github.ompc.greys.core.util.PointCut;
 import com.github.ompc.greys.core.util.collection.ThreadUnsafeLruHashMap;
@@ -50,10 +50,13 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
         })
 public class PathTraceCommand implements Command {
 
-    // 时间片段管理
+    /**
+     * 时间片段管理
+     */
     private final TimeFragmentManager timeFragmentManager = TimeFragmentManager.Factory.getInstance();
-
-    // TimeTunnel the method call
+    /**
+     * TimeTunnel the method call
+     */
     @NamedArg(name = "t", summary = "Record the method invocation within time fragments")
     private boolean isTimeTunnel = false;
 
@@ -102,12 +105,12 @@ public class PathTraceCommand implements Command {
     @NamedArg(name = "n", hasValue = true, summary = "Threshold of execution times")
     private Integer threshold;
 
-    /*
+    /**
      * 构造追踪路径匹配
      */
     private Matcher<String> newPathTracingMatcher() {
 
-        final ArrayList<Matcher<String>> matcherList = new ArrayList<Matcher<String>>();
+        final ArrayList<Matcher<String>> matcherList = new ArrayList<>();
 
         // fill path
         if (null != pathTracingPatterns) {
@@ -124,7 +127,6 @@ public class PathTraceCommand implements Command {
         }
 
         return new GroupMatcher.Or<>(matcherList);
-
     }
 
     @Override
@@ -208,12 +210,7 @@ public class PathTraceCommand implements Command {
                                 }
                             }
 
-                            final Entity entity = pathTrace.getEntity(new InitCallback<Entity>() {
-                                @Override
-                                public Entity init() {
-                                    return new Entity(advice, timeFragmentManager.generateProcessId());
-                                }
-                            });
+                            final Entity entity = pathTrace.getEntity(() -> new Entity(advice, timeFragmentManager.generateProcessId()));
 
                             // top invoke
                             if (entity.deep <= 0) {
@@ -227,8 +224,7 @@ public class PathTraceCommand implements Command {
                         @Override
                         public void afterFinishing(Advice advice) throws Throwable {
                             final PathTrace pathTrace = pathTraceRef.get();
-                            if (!isInit
-                                    || !pathTrace.isTracing) {
+                            if (!isInit || !pathTrace.isTracing) {
                                 return;
                             }
 
@@ -302,7 +298,6 @@ public class PathTraceCommand implements Command {
                                 return false;
                             }
                         }
-
                     };
                 }
 
@@ -359,7 +354,6 @@ public class PathTraceCommand implements Command {
         void removeEntity() {
             entity = null;
         }
-
     }
 
 }

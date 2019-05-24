@@ -89,6 +89,7 @@ public class TraceCommand implements Command {
                         new ClassMatcher(new PatternMatcher(isRegEx, classPattern)),
                         new GaMethodMatcher(new PatternMatcher(isRegEx, methodPattern)),
 
+                        //FIXME 什么场景会出现问题？
                         // don't include the sub class when tracing...
                         // fixed for #94
                         // GlobalOptions.isTracingSubClass
@@ -104,7 +105,7 @@ public class TraceCommand implements Command {
 
                     private final AtomicInteger timesRef = new AtomicInteger();
                     private final InvokeCost invokeCost = new InvokeCost();
-                    private final ThreadLocal<Trace> traceRef = new ThreadLocal<Trace>();
+                    private final ThreadLocal<Trace> traceRef = new ThreadLocal<>();
 
                     @Override
                     public void tracingInvokeBefore(
@@ -118,7 +119,6 @@ public class TraceCommand implements Command {
                         } else {
                             trace.tTree.begin(tranClassName(tracingClassName) + ":" + tracingMethodName + "(@" + tracingLineNumber + ")");
                         }
-
                     }
 
                     @Override
@@ -131,7 +131,6 @@ public class TraceCommand implements Command {
                         if (!trace.tTree.isTop()) {
                             trace.tTree.end();
                         }
-
                     }
 
                     @Override
@@ -159,7 +158,6 @@ public class TraceCommand implements Command {
 
                     @Override
                     public void before(Advice advice) throws Throwable {
-
                         invokeCost.begin();
                         traceRef.set(
                                 new Trace(

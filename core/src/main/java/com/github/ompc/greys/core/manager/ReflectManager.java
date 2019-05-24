@@ -2,7 +2,7 @@ package com.github.ompc.greys.core.manager;
 
 import com.github.ompc.greys.core.ClassDataSource;
 import com.github.ompc.greys.core.manager.impl.DefaultReflectManager;
-import com.github.ompc.greys.core.util.GaMethod;
+import com.github.ompc.greys.core.advisor.method.GaMethod;
 import com.github.ompc.greys.core.util.matcher.Matcher;
 
 import java.util.Collection;

@@ -52,10 +52,10 @@ public abstract class ReflectAdviceTracingListenerAdapter extends ReflectAdviceL
         tracingInvokeBefore(tracingLineNumber, tracingClassName, tracingMethodName, tracingMethodDesc);
     }
 
-
-    // 校验之前有多少步骤需要被跳过
+    /**
+     * 校验之前有多少步骤需要被跳过
+     */
     private void popSuperInit() throws Throwable {
-
         final GaStack<Tracing> stack = skipSuperInitStackRef.get();
         if (!stack.isEmpty()) {
             final Tracing tracing = stack.pop();
@@ -66,7 +66,6 @@ public abstract class ReflectAdviceTracingListenerAdapter extends ReflectAdviceL
                     tracing.tracingMethodDesc
             );
         }
-
     }
 
     @Override

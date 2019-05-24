@@ -2,9 +2,11 @@ package com.github.ompc.greys.core.manager.impl;
 
 import com.github.ompc.greys.core.ClassDataSource;
 import com.github.ompc.greys.core.GlobalOptions;
+import com.github.ompc.greys.core.advisor.method.GaConstructorImpl;
+import com.github.ompc.greys.core.advisor.method.GaMethod;
+import com.github.ompc.greys.core.advisor.method.GaMethodImpl;
 import com.github.ompc.greys.core.manager.ReflectManager;
 import com.github.ompc.greys.core.util.GaCheckUtils;
-import com.github.ompc.greys.core.util.GaMethod;
 import com.github.ompc.greys.core.util.matcher.Matcher;
 
 import java.lang.reflect.Constructor;
@@ -150,7 +152,7 @@ public class DefaultReflectManager implements ReflectManager {
         final Set<GaMethod> gaMethodSet = new LinkedHashSet<>();
 
         for (final Method method : listVisualMethod(targetClass)) {
-            final GaMethod gaMethod = new GaMethod.MethodImpl(method);
+            final GaMethod gaMethod = new GaMethodImpl(method);
             if (gaMethodMatcher.matching(gaMethod)) {
                 gaMethodSet.add(gaMethod);
             }
@@ -158,7 +160,7 @@ public class DefaultReflectManager implements ReflectManager {
 
         // 因为构造函数不能继承,所以这里就不用像方法这么复杂的做可视化处理了
         for (final Constructor<?> constructor : targetClass.getDeclaredConstructors()) {
-            final GaMethod gaMethod = new GaMethod.ConstructorImpl(constructor);
+            final GaMethod gaMethod = new GaConstructorImpl(constructor);
             if (gaMethodMatcher.matching(gaMethod)) {
                 gaMethodSet.add(gaMethod);
             }

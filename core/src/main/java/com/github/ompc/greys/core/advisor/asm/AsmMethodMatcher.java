@@ -1,6 +1,6 @@
 package com.github.ompc.greys.core.advisor.asm;
 
-import com.github.ompc.greys.core.util.GaMethod;
+import com.github.ompc.greys.core.advisor.method.GaMethod;
 import com.github.ompc.greys.core.util.matcher.Matcher;
 import org.apache.commons.lang3.StringUtils;
 

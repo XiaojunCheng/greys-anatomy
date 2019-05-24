@@ -9,7 +9,7 @@ import com.github.ompc.greys.core.manager.ReflectManager;
 import com.github.ompc.greys.core.textui.TLadder;
 import com.github.ompc.greys.core.textui.TTable;
 import com.github.ompc.greys.core.textui.ext.TGaMethodInfo;
-import com.github.ompc.greys.core.util.GaMethod;
+import com.github.ompc.greys.core.advisor.method.GaMethod;
 import com.github.ompc.greys.core.util.affect.RowAffect;
 import com.github.ompc.greys.core.util.matcher.ClassMatcher;
 import com.github.ompc.greys.core.util.matcher.GaMethodMatcher;

@@ -12,7 +12,7 @@ import com.github.ompc.greys.core.command.annotation.NamedArg;
 import com.github.ompc.greys.core.command.enhancer.GetEnhancer;
 import com.github.ompc.greys.core.command.printer.Printer;
 import com.github.ompc.greys.core.server.Session;
-import com.github.ompc.greys.core.util.GaMethod;
+import com.github.ompc.greys.core.advisor.method.GaMethod;
 import com.github.ompc.greys.core.util.GaStringUtils;
 import com.github.ompc.greys.core.util.LogUtil;
 import com.github.ompc.greys.core.util.PointCut;

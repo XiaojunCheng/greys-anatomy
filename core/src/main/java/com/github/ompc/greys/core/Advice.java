@@ -1,7 +1,7 @@
 package com.github.ompc.greys.core;
 
 import com.github.ompc.greys.core.util.AliEagleEyeUtils;
-import com.github.ompc.greys.core.util.GaMethod;
+import com.github.ompc.greys.core.advisor.method.GaMethod;
 import com.github.ompc.greys.core.util.LazyGet;
 
 /**

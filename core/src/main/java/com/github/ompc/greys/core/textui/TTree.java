@@ -13,7 +13,9 @@ import static org.apache.commons.lang3.StringUtils.repeat;
 
 /**
  * 树形控件
- * Created by oldmanpushcart@gmail.com on 15/5/26.
+ *
+ * @author oldmanpushcart@gmail.com
+ * @date 15/5/26
  */
 public class TTree implements TComponent {
 
@@ -22,15 +24,18 @@ public class TTree implements TComponent {
     private static final String STEP_HAS_BOARD = "|   ";
     private static final String STEP_EMPTY_BOARD = "    ";
 
-    // 是否输出耗时
+    /**
+     * 是否输出耗时
+     */
     private final boolean isPrintCost;
-
-    // 根节点
+    /**
+     * 根节点
+     */
     private final Node root;
-
-    // 当前节点
+    /**
+     * 当前节点
+     */
     private Node current;
-
 
     public TTree(boolean isPrintCost, String title) {
         this.root = new Node(title).markBegin().markEnd();
@@ -181,7 +186,7 @@ public class TTree implements TComponent {
         /**
          * 子节点
          */
-        final List<Node> children = new ArrayList<Node>();
+        final List<Node> children = new ArrayList<>();
 
         /**
          * 开始时间戳
@@ -243,12 +248,19 @@ public class TTree implements TComponent {
 
     }
 
-
     /**
      * 遍历回调接口
      */
     private interface Callback {
 
+        /**
+         * 回调函数
+         *
+         * @param deep
+         * @param isLast
+         * @param prefix
+         * @param node
+         */
         void callback(int deep, boolean isLast, String prefix, Node node);
 
     }

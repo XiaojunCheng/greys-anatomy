@@ -1,6 +1,6 @@
 package com.github.ompc.greys.core.util.matcher;
 
-import com.github.ompc.greys.core.util.GaMethod;
+import com.github.ompc.greys.core.advisor.method.GaMethod;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;

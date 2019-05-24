@@ -2,6 +2,7 @@ package com.github.ompc.greys.core.advisor.asm;
 
 import com.github.ompc.greys.core.GlobalOptions;
 import com.github.ompc.greys.core.advisor.AdviceWeaver;
+import com.github.ompc.greys.core.advisor.method.GaMethod;
 import com.github.ompc.greys.core.manager.ReflectManager;
 import com.github.ompc.greys.core.util.*;
 import com.github.ompc.greys.core.util.affect.AsmAffect;
@@ -139,7 +140,7 @@ public class AsmClassFileTransformer implements ClassFileTransformer {
         // 当然，这样做会给渲染的过程带来一定的性能开销，不过能简化编码复杂度
         finally {
             if (null != spyClassFromTargetClassLoader) {
-                // 初始化间谍
+                //初始化间谍
                 invokeStaticMethod(
                         spyClassFromTargetClassLoader,
                         "init",
